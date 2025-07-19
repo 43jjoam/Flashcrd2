@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -283,6 +284,17 @@
             box-sizing: border-box;
         }
 
+        .landing-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            min-height: 100dvh;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
         .collection-modal {
             position: fixed;
             top: 0;
@@ -438,7 +450,106 @@
             { id: 12, front: "来\nlái", back: "to come\nมา", emoji: "➡️" }, 
             { id: 13, front: "大\ndà", back: "big\nใหญ่", emoji: "📏" }, 
             { id: 14, front: "得\ndé", back: "to get\nได้รับ", emoji: "🏆" }, 
-            { id: 15, front: "跳\ntiào", back: "to jump\nกระโดด", emoji: "🤸" }
+            { id: 15, front: "跳\ntiào", back: "to jump\nกระโดด", emoji: "🤸" },
+            { id: 16, front: "调\ntiáo", back: "to adjust\nปรับ", emoji: "⚙️" }, 
+            { id: 17, front: "猪\nzhū", back: "pig\nหมู", emoji: "🐷" }, 
+            { id: 18, front: "住\nzhù", back: "to live\nอาศัย", emoji: "🏠" }, 
+            { id: 19, front: "吃\nchī", back: "to eat\nกิน", emoji: "🍽️" }, 
+            { id: 20, front: "出\nchū", back: "to go out\nออกไป", emoji: "🚪" }, 
+            { id: 21, front: "高\ngāo", back: "high\nสูง", emoji: "📏" }, 
+            { id: 22, front: "个\ngè", back: "measure word\nลักษณนาม", emoji: "📊" }, 
+            { id: 23, front: "裤\nkù", back: "trousers\nกางเกง", emoji: "👖" }, 
+            { id: 24, front: "可以\nkě yǐ", back: "can\nสามารถ", emoji: "✅" }, 
+            { id: 25, front: "虎\nhǔ", back: "tiger\nเสือ", emoji: "🐅" }, 
+            { id: 26, front: "好\nhǎo", back: "good\nดี", emoji: "👍" }, 
+            { id: 27, front: "家\njiā", back: "home\nบ้าน", emoji: "🏡" }, 
+            { id: 28, front: "就\njiù", back: "then\nแล้ว", emoji: "⏭️" }, 
+            { id: 29, front: "小\nxiǎo", back: "small\nเล็ก", emoji: "🐭" }, 
+            { id: 30, front: "喜欢\nxǐ huān", back: "to like\nชอบ", emoji: "❤️" }, 
+            { id: 31, front: "起\nqǐ", back: "to rise\nลุกขึ้น", emoji: "⬆️" }, 
+            { id: 32, front: "气\nqì", back: "air\nอากาศ", emoji: "💨" }, 
+            { id: 33, front: "瘦\nshòu", back: "thin\nผอม", emoji: "🩲" }, 
+            { id: 34, front: "上\nshàng", back: "up\nขึ้น", emoji: "⬆️" }, 
+            { id: 35, front: "热\nrè", back: "hot\nร้อน", emoji: "🌡️" }, 
+            { id: 36, front: "让\nràng", back: "to let\nให้", emoji: "🤲" }, 
+            { id: 37, front: "菜\ncài", back: "dish\nจาน", emoji: "🥗" }, 
+            { id: 38, front: "才\ncái", back: "just now\nเพิ่ง", emoji: "⏰" }, 
+            { id: 39, front: "要\nyào", back: "to want\nอยาก", emoji: "💭" }, 
+            { id: 40, front: "有\nyǒu", back: "to have\nมี", emoji: "📦" }, 
+            { id: 41, front: "在\nzài", back: "at\nอยู่", emoji: "📍" }, 
+            { id: 42, front: "走\nzǒu", back: "to walk\nเดิน", emoji: "🚶" }, 
+            { id: 43, front: "三\nsān", back: "three\nสาม", emoji: "3️⃣" }, 
+            { id: 44, front: "四\nsì", back: "four\nสี่", emoji: "4️⃣" }, 
+            { id: 45, front: "问\nwèn", back: "to ask\nถาม", emoji: "❓" }, 
+            { id: 46, front: "舞\nwǔ", back: "dance\nเต้นรำ", emoji: "💃" }, 
+            { id: 47, front: "女\nnǚ", back: "woman\nผู้หญิง", emoji: "♀️" }, 
+            { id: 48, front: "去\nqù", back: "to go\nไป", emoji: "➡️" }, 
+            { id: 49, front: "矮\nǎi", back: "short\nเตี้ย", emoji: "📏" }, 
+            { id: 50, front: "爱\nài", back: "to love\nรัก", emoji: "❤️" }, 
+            { id: 51, front: "没\nméi", back: "not\nไม่มี", emoji: "❌" }, 
+            { id: 52, front: "为什么\nwèi shén me", back: "why\nทำไม", emoji: "❓" }, 
+            { id: 53, front: "打\ndǎ", back: "to hit\nตี", emoji: "👊" }, 
+            { id: 54, front: "他\ntā", back: "he/she/it\nเขา", emoji: "👤" }, 
+            { id: 55, front: "我\nwǒ", back: "I\nฉัน", emoji: "👆" }, 
+            { id: 56, front: "摸\nmō", back: "to touch\nแตะ", emoji: "👋" }, 
+            { id: 57, front: "喝\nhē", back: "to drink\nดื่ม", emoji: "🥤" }, 
+            { id: 58, front: "了\nle", back: "particle\nคำลงท้าย", emoji: "✓" }, 
+            { id: 59, front: "鸡\njī", back: "chicken\nไก่", emoji: "🐔" }, 
+            { id: 60, front: "是\nshì", back: "to be/yes\nเป็น/ใช่", emoji: "✓" }, 
+            { id: 61, front: "不\nbù", back: "no\nไม่", emoji: "❌" }, 
+            { id: 62, front: "书\nshū", back: "book\nหนังสือ", emoji: "📖" }, 
+            { id: 63, front: "睡\nshuì", back: "to sleep\nนอนหลับ", emoji: "😴" }, 
+            { id: 64, front: "水\nshuǐ", back: "water\nน้ำ", emoji: "💧" }, 
+            { id: 65, front: "到\ndào", back: "to arrive\nถึง", emoji: "📍" }, 
+            { id: 66, front: "药\nyào", back: "medicine\nยา", emoji: "💊" }, 
+            { id: 67, front: "肉\nròu", back: "meat\nเนื้อ", emoji: "🥩" }, 
+            { id: 68, front: "游\nyóu", back: "to swim\nว่ายน้ำ", emoji: "🏊" }, 
+            { id: 69, front: "球\nqiú", back: "ball\nลูกบอล", emoji: "⚽" }, 
+            { id: 70, front: "牛\nniú", back: "cow\nวัว", emoji: "🐄" }, 
+            { id: 71, front: "鞋\nxié", back: "shoe\nรองเท้า", emoji: "👟" }, 
+            { id: 72, front: "谢\nxiè", back: "to thank\nขอบคุณ", emoji: "🙏" }, 
+            { id: 73, front: "学\nxué", back: "to learn\nเรียน", emoji: "📚" }, 
+            { id: 74, front: "觉\njiào", back: "sleep\nนอน", emoji: "😴" }, 
+            { id: 75, front: "看\nkàn", back: "to look\nดู", emoji: "👁️" }, 
+            { id: 76, front: "玩\nwán", back: "to play\nเล่น", emoji: "🎮" }, 
+            { id: 77, front: "很\nhěn", back: "very\nมาก", emoji: "⭐" }, 
+            { id: 78, front: "人\nrén", back: "people\nคน", emoji: "👥" }, 
+            { id: 79, front: "心\nxīn", back: "heart\nหัวใจ", emoji: "💖" }, 
+            { id: 80, front: "新\nxīn", back: "new\nใหม่", emoji: "✨" }, 
+            { id: 81, front: "困\nkùn", back: "sleepy\nง่วง", emoji: "😪" }, 
+            { id: 82, front: "春\nchūn", back: "spring\nฤดูใบไม้ผลิ", emoji: "🌸" }, 
+            { id: 83, front: "云\nyún", back: "cloud\nเมฆ", emoji: "☁️" }, 
+            { id: 84, front: "军\njūn", back: "army\nกองทัพ", emoji: "🪖" }, 
+            { id: 85, front: "胖\npàng", back: "fat\nอ้วน", emoji: "🫃" }, 
+            { id: 86, front: "唱\nchàng", back: "to sing\nร้องเพลง", emoji: "🎤" }, 
+            { id: 87, front: "生\nshēng", back: "to live\nอยู่", emoji: "🌱" }, 
+            { id: 88, front: "冷\nlěng", back: "cold\nหนาว", emoji: "🥶" }, 
+            { id: 89, front: "病\nbìng", back: "illness\nป่วย", emoji: "🤒" }, 
+            { id: 90, front: "明\nmíng", back: "bright\nสว่าง", emoji: "☀️" }, 
+            { id: 91, front: "空\nkōng", back: "empty\nว่าง", emoji: "📦" }, 
+            { id: 92, front: "泳\nyǒng", back: "to swim\nว่ายน้ำ", emoji: "🏊" }, 
+            { id: 93, front: "笑\nxiào", back: "to laugh\nหัวเราะ", emoji: "😄" }, 
+            { id: 94, front: "叫\njiào", back: "to call/scream\nเรียก/ตะโกน", emoji: "📢" }, 
+            { id: 95, front: "夸\nkuā", back: "to praise\nชม", emoji: "👏" }, 
+            { id: 96, front: "花\nhuā", back: "flower\nดอกไม้", emoji: "🌸" }, 
+            { id: 97, front: "活\nhuó", back: "to live\nอยู่", emoji: "❤️" }, 
+            { id: 98, front: "多\nduō", back: "many\nมาก", emoji: "👥" }, 
+            { id: 99, front: "坏\nhuài", back: "bad\nเสีย", emoji: "😈" }, 
+            { id: 100, front: "快\nkuài", back: "fast\nเร็ว", emoji: "⚡" }, 
+            { id: 101, front: "穿\nchuān", back: "to wear\nใส่", emoji: "👕" }, 
+            { id: 102, front: "全\nquán", back: "entire\nทั้งหมด", emoji: "💯" }, 
+            { id: 103, front: "床\nchuáng", back: "bed\nเตียง", emoji: "🛏️" }, 
+            { id: 104, front: "光\nguāng", back: "light\nแสง", emoji: "💡" }, 
+            { id: 105, front: "想\nxiǎng", back: "to want\nคิด", emoji: "💭" }, 
+            { id: 106, front: "亮\nliàng", back: "bright\nสว่าง", emoji: "💡" }, 
+            { id: 107, front: "现\nxiàn", back: "to appear\nปรากฏ", emoji: "👁️" }, 
+            { id: 108, front: "天\ntiān", back: "day\nวัน", emoji: "📅" }, 
+            { id: 109, front: "熊\nxióng", back: "bear\nหมี", emoji: "🐻" }, 
+            { id: 110, front: "穷\nqióng", back: "poor\nจน", emoji: "💸" }, 
+            { id: 111, front: "元\nyuán", back: "unit of currency\nหน่วยเงิน", emoji: "💰" }, 
+            { id: 112, front: "远\nyuǎn", back: "far\nไกล", emoji: "🏃" }, 
+            { id: 113, front: "儿\nér", back: "son\nลูกชาย", emoji: "👦" }, 
+            { id: 114, front: "二\nèr", back: "two\nสอง", emoji: "2️⃣" }
         ];
 
         // --- UTILITY HOOKS & FUNCTIONS ---
@@ -509,112 +620,164 @@
         const LandingPage = ({ onCodeSubmit }) => {
             const [code, setCode] = useState('');
             const [isUnlocking, setIsUnlocking] = useState(false);
-            const [isSliding, setIsSliding] = useState(false);
+            const [sliderPosition, setSliderPosition] = useState(0);
+            const [isDragging, setIsDragging] = useState(false);
             
-            const handleSubmit = (e) => {
-                e.preventDefault();
-                if (code.trim() && !isSliding) {
-                    setIsSliding(true);
-                    // Simulate slide unlock
-                    setTimeout(() => {
-                        setIsUnlocking(true);
-                        // Then load flashcards
-                        setTimeout(() => {
-                            onCodeSubmit(code.trim());
-                        }, 1000);
-                    }, 800);
+            useEffect(() => {
+                const handleMouseMove = (e) => {
+                    if (isDragging) {
+                        handleSliderDrag(e);
+                    }
+                };
+
+                const handleMouseUp = () => {
+                    setIsDragging(false);
+                    if (sliderPosition < 85) {
+                        setSliderPosition(0);
+                    }
+                };
+
+                const handleTouchMove = (e) => {
+                    if (isDragging) {
+                        handleSliderDrag(e);
+                    }
+                };
+
+                const handleTouchEnd = () => {
+                    setIsDragging(false);
+                    if (sliderPosition < 85) {
+                        setSliderPosition(0);
+                    }
+                };
+
+                if (isDragging) {
+                    document.addEventListener('mousemove', handleMouseMove);
+                    document.addEventListener('mouseup', handleMouseUp);
+                    document.addEventListener('touchmove', handleTouchMove);
+                    document.addEventListener('touchend', handleTouchEnd);
+                }
+
+                return () => {
+                    document.removeEventListener('mousemove', handleMouseMove);
+                    document.removeEventListener('mouseup', handleMouseUp);
+                    document.removeEventListener('touchmove', handleTouchMove);
+                    document.removeEventListener('touchend', handleTouchEnd);
+                };
+            }, [isDragging, sliderPosition, code]);
+
+            const handleSliderDrag = (e) => {
+                if (!code.trim() || !isDragging) return;
+                
+                const slider = e.currentTarget.parentElement;
+                const rect = slider.getBoundingClientRect();
+                const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+                const percentage = Math.min(Math.max((x / rect.width) * 100, 0), 100);
+                setSliderPosition(percentage);
+
+                if (percentage > 85) {
+                    setIsDragging(false);
+                    setSliderPosition(100);
+                    handleSubmit(e);
                 }
             };
 
             if (isUnlocking) {
                 return (
-                    <div className="mobile-center">
-                        <div className="watercolor-card p-8 text-center max-w-md">
+                    <div className="landing-center">
+                        <div className="text-center">
                             <div className="text-6xl mb-4 animate-pulse">⭐</div>
-                            <h2 className="text-xl font-semibold text-gray-800 mb-2">Loading your flashcard set...</h2>
-                            <p className="text-gray-600">Please wait while we prepare your cards...</p>
+                            <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl px-6 py-4 border border-white border-opacity-30">
+                                <h2 className="text-xl font-semibold text-white mb-2">Loading your flashcard set...</h2>
+                                <p className="text-white text-opacity-90">Please wait while we prepare your cards...</p>
+                            </div>
                         </div>
                     </div>
                 );
             }
 
             return (
-                <div className="mobile-center">
-                    <div className="watercolor-card p-8 text-center max-w-md w-full mx-4">
-                        <div className="mb-6">
-                            <h1 className="text-2xl font-bold text-gray-800 mb-2">Learn Chinese with Flashcards</h1>
+                <div className="landing-center">
+                    <div className="w-full max-w-sm mx-4 text-center">
+                        {/* Main Title */}
+                        <div className="mb-8">
+                            <h1 className="text-4xl font-bold text-white mb-4 leading-tight">
+                                Learn Chinese<br />with Flashcards
+                            </h1>
+                            <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl px-4 py-3 border border-white border-opacity-30">
+                                <p className="text-white text-sm">
+                                    Enter "LearnChinesewithHelen1295" or<br />
+                                    "pinyin" to start.
+                                </p>
+                            </div>
                         </div>
                         
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                            <div>
+                        {/* Input Field */}
+                        <div className="mb-6">
+                            <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-full border border-white border-opacity-30">
                                 <input
                                     type="text"
                                     value={code}
                                     onChange={(e) => setCode(e.target.value)}
                                     placeholder="paste or type your unique code here..."
-                                    className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-400 focus:outline-none transition-colors bg-white text-gray-700 placeholder-gray-400"
+                                    className="w-full px-6 py-4 bg-transparent text-white placeholder-white placeholder-opacity-60 rounded-full focus:outline-none"
                                 />
                             </div>
-                            
-                            <div className="relative overflow-hidden">
-                                <div className="relative">
-                                    <div className="w-full h-16 bg-gray-300 rounded-lg flex items-center relative overflow-hidden">
-                                        <div 
-                                            className={`absolute inset-y-0 left-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg transition-all duration-300 ${
-                                                code.trim() ? 'w-full' : 'w-0'
-                                            }`}
-                                        />
-                                        <div 
-                                            className="relative z-10 w-12 h-12 bg-white rounded-lg ml-2 flex items-center justify-center cursor-grab active:cursor-grabbing shadow-lg"
-                                            draggable={code.trim()}
-                                            onDragStart={(e) => {
-                                                if (!code.trim()) {
-                                                    e.preventDefault();
-                                                    return;
-                                                }
-                                                setIsSliding(true);
-                                            }}
-                                            onDragEnd={(e) => {
-                                                if (isSliding && code.trim()) {
-                                                    const rect = e.currentTarget.parentElement.getBoundingClientRect();
-                                                    const dragDistance = e.clientX - rect.left;
-                                                    if (dragDistance > rect.width * 0.7) {
-                                                        handleSubmit(e);
-                                                    } else {
-                                                        setIsSliding(false);
-                                                    }
-                                                }
-                                            }}
-                                            onClick={handleSubmit}
-                                        >
-                                            <span className="text-lg">→</span>
-                                        </div>
-                                        <span className={`absolute inset-0 flex items-center justify-center font-medium transition-colors ${
-                                            code.trim() ? 'text-white' : 'text-gray-500'
-                                        }`}>
-                                            slide to unlock
-                                        </span>
-                                        {isSliding && (
-                                            <div className="absolute inset-0 bg-green-500 flex items-center justify-center">
-                                                <span className="text-white font-medium">unlocked! ✓</span>
-                                            </div>
-                                        )}
-                                    </div>
+                        </div>
+                        
+                        {/* Slide to Unlock */}
+                        <div className="relative">
+                            <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-full h-16 border border-white border-opacity-30 relative overflow-hidden">
+                                {/* Background fill */}
+                                <div 
+                                    className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full transition-all duration-200"
+                                    style={{ width: `${sliderPosition}%` }}
+                                />
+                                
+                                {/* Slider circle */}
+                                <div 
+                                    className="absolute top-2 left-2 w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center cursor-grab active:cursor-grabbing shadow-lg transition-all duration-200 z-10"
+                                    style={{ 
+                                        left: `${2 + (sliderPosition * 0.8)}%`,
+                                        opacity: code.trim() ? 1 : 0.5
+                                    }}
+                                    onMouseDown={(e) => {
+                                        if (code.trim()) {
+                                            setIsDragging(true);
+                                            e.preventDefault();
+                                        }
+                                    }}
+                                    onTouchStart={(e) => {
+                                        if (code.trim()) {
+                                            setIsDragging(true);
+                                        }
+                                    }}
+                                >
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                                        <path d="M9 18l6-6-6-6"/>
+                                    </svg>
+                                </div>
+                                
+                                {/* Text */}
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <span className="text-white font-medium">slide to unlock</span>
                                 </div>
                             </div>
-                        </form>
+                        </div>
                         
-                        <div className="mt-6 pt-4 border-t border-gray-200">
-                            <a 
-                                href="#" 
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    // Could add functionality here for creating new flashcards
-                                }}
-                                className="text-blue-500 hover:text-blue-600 text-sm transition-colors"
-                            >
-                                Enter new code
-                            </a>
+                        {/* Bottom Link */}
+                        <div className="mt-8">
+                            <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-full px-4 py-2 border border-white border-opacity-30 inline-block">
+                                <a 
+                                    href="#" 
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        // Could add functionality here
+                                    }}
+                                    className="text-white text-sm hover:text-opacity-80 transition-colors"
+                                >
+                                    Enter new code
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
