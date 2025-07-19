@@ -389,7 +389,80 @@
             justify-content: center;
             margin-left: 4px;
         }
-        
+
+        /* Fixed Slide Button Styles */
+        .slide-container {
+            position: relative;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .slide-track {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            right: 4px;
+            bottom: 4px;
+            border-radius: 28px;
+            overflow: hidden;
+        }
+
+        .slide-progress {
+            height: 100%;
+            background: linear-gradient(to right, #3b82f6, #8b5cf6);
+            border-radius: 28px;
+            transition: width 0.1s ease-out;
+            width: 0%;
+        }
+
+        .slide-thumb {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            cursor: grab;
+            touch-action: none;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+
+        .slide-thumb.dragging {
+            cursor: grabbing;
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .slide-thumb.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .slide-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: 500;
+            font-size: 16px;
+            pointer-events: none;
+            z-index: 5;
+        }
+
         @media (max-width: 480px) {
             .card-scene {
                 width: min(300px, 90vw);
@@ -409,6 +482,16 @@
                 padding: 6px 10px;
                 font-size: 11px;
                 gap: 4px;
+            }
+            .slide-container {
+                height: 56px;
+            }
+            .slide-thumb {
+                width: 48px;
+                height: 48px;
+            }
+            .slide-text {
+                font-size: 14px;
             }
         }
     </style>
@@ -454,7 +537,7 @@
             { id: 17, front: "猪\nzhū", back: "pig\nหมู", emoji: "🐷" }, 
             { id: 18, front: "住\nzhù", back: "to live\nอาศัย", emoji: "🏠" }, 
             { id: 19, front: "吃\nchī", back: "to eat\nกิน", emoji: "🍽️" }, 
-            { id: 20, front: "出\nchū", back: "to go out\nออกไป", emoji: "🚪" }, 
+            { id: 20, front: "出\nchū", back: "to go out\nออกไป", emoji: "🚪" }
             { id: 21, front: "高\ngāo", back: "high\nสูง", emoji: "📏" }, 
             { id: 22, front: "个\ngè", back: "measure word\nลักษณนาม", emoji: "📊" }, 
             { id: 23, front: "裤\nkù", back: "trousers\nกางเกง", emoji: "👖" }, 
@@ -621,65 +704,103 @@
             const [isUnlocking, setIsUnlocking] = useState(false);
             const [sliderPosition, setSliderPosition] = useState(0);
             const [isDragging, setIsDragging] = useState(false);
+            const sliderRef = useRef(null);
+            const thumbRef = useRef(null);
             
+            const handleSubmit = useCallback((e) => {
+                e?.preventDefault();
+                if (!code.trim()) return;
+                
+                const validCodes = ['LearnChinesewithHelen1295', 'pinyin'];
+                if (validCodes.includes(code.trim())) {
+                    setIsUnlocking(true);
+                    setTimeout(() => {
+                        onCodeSubmit(code.trim());
+                    }, 1500);
+                } else {
+                    alert('Invalid code. Please try again.');
+                    setSliderPosition(0);
+                }
+            }, [code, onCodeSubmit]);
+
+            const getPointerPosition = (e) => {
+                if (e.touches && e.touches[0]) {
+                    return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                }
+                return { x: e.clientX, y: e.clientY };
+            };
+
+            const handleSliderStart = (e) => {
+                if (!code.trim()) return;
+                
+                e.preventDefault();
+                setIsDragging(true);
+                
+                if (thumbRef.current) {
+                    thumbRef.current.classList.add('dragging');
+                }
+            };
+
+            const handleSliderMove = useCallback((e) => {
+                if (!isDragging || !sliderRef.current || !code.trim()) return;
+                
+                e.preventDefault();
+                
+                const slider = sliderRef.current;
+                const rect = slider.getBoundingClientRect();
+                const pointer = getPointerPosition(e);
+                
+                // Calculate position relative to slider
+                const x = pointer.x - rect.left;
+                const thumbWidth = 56; // Width of thumb
+                const maxDistance = rect.width - thumbWidth - 8; // Account for padding
+                
+                // Calculate percentage, clamped between 0 and 100
+                const percentage = Math.min(Math.max((x - thumbWidth/2) / maxDistance * 100, 0), 100);
+                
+                setSliderPosition(percentage);
+                
+                // Auto-submit when dragged far enough
+                if (percentage >= 90) {
+                    setIsDragging(false);
+                    setSliderPosition(100);
+                    handleSubmit();
+                }
+            }, [isDragging, code, handleSubmit]);
+
+            const handleSliderEnd = useCallback(() => {
+                if (!isDragging) return;
+                
+                setIsDragging(false);
+                
+                if (thumbRef.current) {
+                    thumbRef.current.classList.remove('dragging');
+                }
+                
+                // Reset if not dragged far enough
+                if (sliderPosition < 90) {
+                    setSliderPosition(0);
+                }
+            }, [isDragging, sliderPosition]);
+
+            // Add global event listeners for mouse/touch events
             useEffect(() => {
-                const handleMouseMove = (e) => {
-                    if (isDragging) {
-                        handleSliderDrag(e);
-                    }
-                };
-
-                const handleMouseUp = () => {
-                    setIsDragging(false);
-                    if (sliderPosition < 85) {
-                        setSliderPosition(0);
-                    }
-                };
-
-                const handleTouchMove = (e) => {
-                    if (isDragging) {
-                        handleSliderDrag(e);
-                    }
-                };
-
-                const handleTouchEnd = () => {
-                    setIsDragging(false);
-                    if (sliderPosition < 85) {
-                        setSliderPosition(0);
-                    }
-                };
-
                 if (isDragging) {
-                    document.addEventListener('mousemove', handleMouseMove);
-                    document.addEventListener('mouseup', handleMouseUp);
-                    document.addEventListener('touchmove', handleTouchMove);
-                    document.addEventListener('touchend', handleTouchEnd);
+                    document.addEventListener('mousemove', handleSliderMove, { passive: false });
+                    document.addEventListener('mouseup', handleSliderEnd);
+                    document.addEventListener('touchmove', handleSliderMove, { passive: false });
+                    document.addEventListener('touchend', handleSliderEnd);
+                    document.addEventListener('touchcancel', handleSliderEnd);
                 }
 
                 return () => {
-                    document.removeEventListener('mousemove', handleMouseMove);
-                    document.removeEventListener('mouseup', handleMouseUp);
-                    document.removeEventListener('touchmove', handleTouchMove);
-                    document.removeEventListener('touchend', handleTouchEnd);
+                    document.removeEventListener('mousemove', handleSliderMove);
+                    document.removeEventListener('mouseup', handleSliderEnd);
+                    document.removeEventListener('touchmove', handleSliderMove);
+                    document.removeEventListener('touchend', handleSliderEnd);
+                    document.removeEventListener('touchcancel', handleSliderEnd);
                 };
-            }, [isDragging, sliderPosition, code]);
-
-            const handleSliderDrag = (e) => {
-                if (!code.trim() || !isDragging) return;
-                
-                const slider = e.currentTarget.closest('.relative');
-                const rect = slider.getBoundingClientRect();
-                const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left - 24; // Account for circle size
-                const maxDistance = rect.width - 56; // Account for circle width and padding
-                const percentage = Math.min(Math.max((x / maxDistance) * 100, 0), 100);
-                setSliderPosition(percentage);
-
-                if (percentage > 85) {
-                    setIsDragging(false);
-                    setSliderPosition(100);
-                    handleSubmit(e);
-                }
-            };
+            }, [isDragging, handleSliderMove, handleSliderEnd]);
 
             if (isUnlocking) {
                 return (
@@ -722,42 +843,39 @@
                             </div>
                         </div>
                         
-                        {/* Slide to Unlock */}
+                        {/* Fixed Slide to Unlock */}
                         <div className="relative">
-                            <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-full h-16 border border-white border-opacity-30 relative overflow-hidden">
-                                {/* Background fill */}
-                                <div 
-                                    className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full transition-all duration-200"
-                                    style={{ width: `${sliderPosition}%` }}
-                                />
+                            <div 
+                                ref={sliderRef}
+                                className={`slide-container ${!code.trim() ? 'opacity-50' : ''}`}
+                            >
+                                {/* Progress bar */}
+                                <div className="slide-track">
+                                    <div 
+                                        className="slide-progress"
+                                        style={{ width: `${sliderPosition}%` }}
+                                    />
+                                </div>
                                 
-                                {/* Slider circle */}
+                                {/* Draggable thumb */}
                                 <div 
-                                    className="absolute top-2 left-2 w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center cursor-grab active:cursor-grabbing shadow-lg transition-all duration-200 z-10"
+                                    ref={thumbRef}
+                                    className={`slide-thumb ${!code.trim() ? 'disabled' : ''}`}
                                     style={{ 
-                                        left: `${2 + (sliderPosition * 0.8)}%`,
-                                        opacity: code.trim() ? 1 : 0.5
+                                        left: `${4 + (sliderPosition * 0.85)}%`,
+                                        transition: isDragging ? 'none' : 'left 0.3s ease'
                                     }}
-                                    onMouseDown={(e) => {
-                                        if (code.trim()) {
-                                            setIsDragging(true);
-                                            e.preventDefault();
-                                        }
-                                    }}
-                                    onTouchStart={(e) => {
-                                        if (code.trim()) {
-                                            setIsDragging(true);
-                                        }
-                                    }}
+                                    onMouseDown={handleSliderStart}
+                                    onTouchStart={handleSliderStart}
                                 >
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
                                         <path d="M9 18l6-6-6-6"/>
                                     </svg>
                                 </div>
                                 
-                                {/* Text */}
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <span className="text-white font-medium">slide to unlock</span>
+                                {/* Text overlay */}
+                                <div className="slide-text">
+                                    {sliderPosition > 50 ? 'Release to unlock!' : 'Slide to unlock'}
                                 </div>
                             </div>
                         </div>
@@ -769,7 +887,8 @@
                                     href="#" 
                                     onClick={(e) => {
                                         e.preventDefault();
-                                        // Could add functionality here
+                                        setCode('');
+                                        setSliderPosition(0);
                                     }}
                                     className="text-white text-sm hover:text-opacity-80 transition-colors"
                                 >
@@ -779,422 +898,3 @@
                         </div>
                     </div>
                 </div>
-            );
-        };
-
-        const FlashcardApp = ({ onBackToLanding }) => {
-            const [deck, setDeck] = useState([...CHINESE_VOCABULARY]);
-            const [currentCardIndex, setCurrentCardIndex] = useState(0);
-            const [isFlipped, setIsFlipped] = useState(false);
-            const [forgotCards, setForgotCards] = useState([]);
-            const [rememberedCards, setRememberedCards] = useState([]);
-            const [swipeState, setSwipeState] = useState('');
-            const [showForgotModal, setShowForgotModal] = useState(false);
-            const [showRememberedModal, setShowRememberedModal] = useState(false);
-            
-            const pronounceText = useSpeech();
-            const swipeTimeoutRef = useRef(null);
-
-            const currentCard = deck[currentCardIndex];
-
-            const handleCardFlip = () => {
-                setIsFlipped(!isFlipped);
-            };
-
-            const handleSwipeLeft = useCallback(() => {
-                if (!currentCard || swipeState) return;
-
-                setSwipeState('swiping-left');
-                
-                // Add to forgot collection
-                setForgotCards(prev => {
-                    const exists = prev.find(card => card.id === currentCard.id);
-                    return exists ? prev : [...prev, currentCard];
-                });
-
-                // Handle deck management
-                swipeTimeoutRef.current = setTimeout(() => {
-                    const remainingCards = deck.filter((_, index) => index !== currentCardIndex);
-                    
-                    // Re-add the card to deck (+5 cards away or at the end)
-                    let newDeck;
-                    if (remainingCards.length > 5) {
-                        // Insert at position 5 (6th card from current position)
-                        newDeck = [
-                            ...remainingCards.slice(0, 5),
-                            currentCard,
-                            ...remainingCards.slice(5)
-                        ];
-                    } else {
-                        // Add to end if less than 5 cards remaining
-                        newDeck = [...remainingCards, currentCard];
-                    }
-
-                    setDeck(newDeck);
-                    setCurrentCardIndex(0);
-                    setIsFlipped(false);
-                    setSwipeState('');
-                }, 400);
-            }, [currentCard, deck, currentCardIndex, swipeState]);
-
-            const handleSwipeRight = useCallback(() => {
-                if (!currentCard || swipeState) return;
-
-                setSwipeState('swiping-right');
-                
-                // Add to remembered collection
-                setRememberedCards(prev => {
-                    const exists = prev.find(card => card.id === currentCard.id);
-                    return exists ? prev : [...prev, currentCard];
-                });
-
-                // Remove from deck permanently
-                swipeTimeoutRef.current = setTimeout(() => {
-                    const newDeck = deck.filter((_, index) => index !== currentCardIndex);
-                    
-                    if (newDeck.length === 0) {
-                        // Reset deck if all cards are remembered
-                        setDeck([...CHINESE_VOCABULARY]);
-                        setCurrentCardIndex(0);
-                    } else {
-                        setDeck(newDeck);
-                        setCurrentCardIndex(currentCardIndex >= newDeck.length ? 0 : currentCardIndex);
-                    }
-                    
-                    setIsFlipped(false);
-                    setSwipeState('');
-                }, 400);
-            }, [currentCard, deck, currentCardIndex, swipeState]);
-
-            // Keyboard controls
-            useEffect(() => {
-                const handleKeyPress = (e) => {
-                    if (e.key === 'ArrowLeft') {
-                        handleSwipeLeft();
-                    } else if (e.key === 'ArrowRight') {
-                        handleSwipeRight();
-                    } else if (e.key === ' ') {
-                        e.preventDefault();
-                        handleCardFlip();
-                    }
-                };
-
-                window.addEventListener('keydown', handleKeyPress);
-                return () => {
-                    window.removeEventListener('keydown', handleKeyPress);
-                    if (swipeTimeoutRef.current) {
-                        clearTimeout(swipeTimeoutRef.current);
-                    }
-                };
-            }, [handleSwipeLeft, handleSwipeRight]);
-
-            // Touch/Mouse swipe detection
-            const [touchStart, setTouchStart] = useState({ x: 0, y: 0 });
-            const [touchEnd, setTouchEnd] = useState({ x: 0, y: 0 });
-
-            const handleTouchStart = (e) => {
-                const touch = e.touches ? e.touches[0] : e;
-                setTouchStart({ x: touch.clientX, y: touch.clientY });
-            };
-
-            const handleTouchMove = (e) => {
-                const touch = e.touches ? e.touches[0] : e;
-                setTouchEnd({ x: touch.clientX, y: touch.clientY });
-            };
-
-            const handleTouchEnd = () => {
-                if (!touchStart.x || !touchEnd.x) return;
-
-                const deltaX = touchStart.x - touchEnd.x;
-                const deltaY = Math.abs(touchStart.y - touchEnd.y);
-                const minSwipeDistance = 50;
-
-                if (Math.abs(deltaX) > minSwipeDistance && deltaY < 100) {
-                    if (deltaX > 0) {
-                        handleSwipeLeft();
-                    } else {
-                        handleSwipeRight();
-                    }
-                }
-
-                setTouchStart({ x: 0, y: 0 });
-                setTouchEnd({ x: 0, y: 0 });
-            };
-
-            if (!currentCard) {
-                return (
-                    <div className="mobile-center">
-                        <div className="watercolor-card p-8 text-center">
-                            <div className="text-6xl mb-4">🎉</div>
-                            <h2 className="text-2xl font-bold text-gray-800 mb-2">Congratulations!</h2>
-                            <p className="text-gray-600 mb-4">You've completed all flashcards!</p>
-                            <button 
-                                onClick={() => {
-                                    setDeck([...CHINESE_VOCABULARY]);
-                                    setCurrentCardIndex(0);
-                                    setForgotCards([]);
-                                    setRememberedCards([]);
-                                }}
-                                className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors"
-                            >
-                                Start Over
-                            </button>
-                        </div>
-                    </div>
-                );
-            }
-
-            return (
-                <>
-                    {/* Top Navigation */}
-                    <div className="top-nav">
-                        <div className="nav-button" onClick={() => setShowForgotModal(true)}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <circle cx="12" cy="12" r="10"/>
-                                <path d="M8 12h8"/>
-                                <path d="m12 8-4 4 4 4"/>
-                            </svg>
-                            <span>Forgot</span>
-                            {forgotCards.length > 0 && (
-                                <div className="badge">{forgotCards.length}</div>
-                            )}
-                        </div>
-
-                        <div className="nav-button" onClick={() => window.open('https://bestling.net', '_blank')}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
-                            </svg>
-                            <span>Bestling</span>
-                        </div>
-
-                        <div className="nav-button" onClick={() => setShowRememberedModal(true)}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <polyline points="20,6 9,17 4,12"/>
-                            </svg>
-                            <span>Remembered</span>
-                            {rememberedCards.length > 0 && (
-                                <div className="badge">{rememberedCards.length}</div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Main Flashcard */}
-                    <div className="mobile-center">
-                        <div className="card-scene">
-                            <div 
-                                className={`card-3d ${isFlipped ? 'flipped' : ''} ${swipeState}`}
-                                onClick={handleCardFlip}
-                                onTouchStart={handleTouchStart}
-                                onTouchMove={handleTouchMove}
-                                onTouchEnd={handleTouchEnd}
-                                onMouseDown={handleTouchStart}
-                                onMouseMove={handleTouchMove}
-                                onMouseUp={handleTouchEnd}
-                            >
-                                {/* Front of card */}
-                                <div className="card-face">
-                                    <div className="card-content">
-                                        <div 
-                                            className="chinese-character"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                pronounceText(currentCard.front);
-                                            }}
-                                        >
-                                            {currentCard.front.split('\n')[0]}
-                                        </div>
-                                        <div 
-                                            className="pinyin"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                pronounceText(currentCard.front.split('\n')[1]);
-                                            }}
-                                        >
-                                            {currentCard.front.split('\n')[1]}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Back of card */}
-                                <div className="card-face card-back">
-                                    <div className="card-content">
-                                        <div className="translation-content">
-                                            <div className="emoji-display">{currentCard.emoji}</div>
-                                            <div 
-                                                className="english-translation"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    pronounceText(currentCard.back.split('\n')[0]);
-                                                }}
-                                            >
-                                                {currentCard.back.split('\n')[0]}
-                                            </div>
-                                            <div 
-                                                className="thai-translation"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    pronounceText(currentCard.back.split('\n')[1]);
-                                                }}
-                                            >
-                                                {currentCard.back.split('\n')[1]}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Swipe Instructions */}
-                        <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 text-center">
-                            <div className="bg-white bg-opacity-90 backdrop-blur-sm rounded-lg px-4 py-2 text-sm text-gray-600 mb-3">
-                                ← Swipe left to review later | Swipe right to mark as remembered →
-                            </div>
-                            <button
-                                onClick={onBackToLanding}
-                                className="text-white bg-gray-600 bg-opacity-80 backdrop-blur-sm rounded-lg px-3 py-1 text-xs hover:bg-opacity-90 transition-all"
-                            >
-                                enter new code
-                            </button>
-                        </div>
-
-                        {/* Action Buttons for mobile */}
-                        <div className="fixed bottom-16 left-1/2 transform -translate-x-1/2 flex gap-4">
-                            <button
-                                onClick={handleSwipeLeft}
-                                className="mobile-button bg-red-500 text-white p-4 rounded-full shadow-lg hover:bg-red-600 transition-colors flex items-center justify-center"
-                                disabled={!!swipeState}
-                            >
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <circle cx="12" cy="12" r="10"/>
-                                    <path d="M8 12h8"/>
-                                    <path d="m12 8-4 4 4 4"/>
-                                </svg>
-                            </button>
-                            <button
-                                onClick={handleSwipeRight}
-                                className="mobile-button bg-green-500 text-white p-4 rounded-full shadow-lg hover:bg-green-600 transition-colors flex items-center justify-center"
-                                disabled={!!swipeState}
-                            >
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <polyline points="20,6 9,17 4,12"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Collection Modals */}
-                    {showForgotModal && (
-                        <div className="collection-modal" onClick={() => setShowForgotModal(false)}>
-                            <div className="collection-content" onClick={(e) => e.stopPropagation()}>
-                                <div className="flex justify-between items-center mb-4">
-                                    <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <circle cx="12" cy="12" r="10"/>
-                                            <path d="M8 12h8"/>
-                                            <path d="m12 8-4 4 4 4"/>
-                                        </svg>
-                                        Cards to Review
-                                    </h2>
-                                    <button
-                                        onClick={() => setShowForgotModal(false)}
-                                        className="text-gray-500 hover:text-gray-700 text-2xl"
-                                    >
-                                        ×
-                                    </button>
-                                </div>
-                                
-                                {forgotCards.length === 0 ? (
-                                    <p className="text-gray-600 text-center py-8">No cards to review yet!</p>
-                                ) : (
-                                    <div className="collection-grid">
-                                        {forgotCards.map((card) => (
-                                            <div key={card.id} className="mini-card">
-                                                <div className="text-2xl mb-2">{card.emoji}</div>
-                                                <div className="text-lg font-medium text-gray-800">
-                                                    {card.front.split('\n')[0]}
-                                                </div>
-                                                <div className="text-sm text-gray-600">
-                                                    {card.front.split('\n')[1]}
-                                                </div>
-                                                <div className="text-sm text-gray-500 mt-2">
-                                                    {card.back.split('\n')[0]}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )}
-
-                    {showRememberedModal && (
-                        <div className="collection-modal" onClick={() => setShowRememberedModal(false)}>
-                            <div className="collection-content" onClick={(e) => e.stopPropagation()}>
-                                <div className="flex justify-between items-center mb-4">
-                                    <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <polyline points="20,6 9,17 4,12"/>
-                                        </svg>
-                                        Remembered Cards
-                                    </h2>
-                                    <button
-                                        onClick={() => setShowRememberedModal(false)}
-                                        className="text-gray-500 hover:text-gray-700 text-2xl"
-                                    >
-                                        ×
-                                    </button>
-                                </div>
-                                
-                                {rememberedCards.length === 0 ? (
-                                    <p className="text-gray-600 text-center py-8">No cards remembered yet!</p>
-                                ) : (
-                                    <div className="collection-grid">
-                                        {rememberedCards.map((card) => (
-                                            <div key={card.id} className="mini-card">
-                                                <div className="text-2xl mb-2">{card.emoji}</div>
-                                                <div className="text-lg font-medium text-gray-800">
-                                                    {card.front.split('\n')[0]}
-                                                </div>
-                                                <div className="text-sm text-gray-600">
-                                                    {card.front.split('\n')[1]}
-                                                </div>
-                                                <div className="text-sm text-gray-500 mt-2">
-                                                    {card.back.split('\n')[0]}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )}
-                </>
-            );
-        };
-
-        // --- MAIN APP ---
-        const App = () => {
-            const [currentPage, setCurrentPage] = useState('landing');
-            const [enteredCode, setEnteredCode] = useState('');
-
-            const handleCodeSubmit = (code) => {
-                setEnteredCode(code);
-                setCurrentPage('flashcards');
-            };
-
-            const handleBackToLanding = () => {
-                setCurrentPage('landing');
-                setEnteredCode('');
-            };
-
-            if (currentPage === 'landing') {
-                return <LandingPage onCodeSubmit={handleCodeSubmit} />;
-            }
-
-            return <FlashcardApp onBackToLanding={handleBackToLanding} />;
-        };
-
-        ReactDOM.render(<App />, document.getElementById('root'));
-    </script>
-</body>
-</html>
