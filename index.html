@@ -55,14 +55,14 @@
             width: 100%;
             height: 100%;
             backface-visibility: hidden;
-            -webkit-backface-visibility: hidden; /* <- add this */
+            -webkit-backface-visibility: hidden;
             border-radius: 20px;
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15), 0 10px 20px rgba(0, 0, 0, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.6);
-            display: flex; /* Add this */
-            align-items: center; /* Add this */
-            justify-content: center; /* Add this */
+            display: flex;
+            align-items: center;
+            justify-content: center;
             touch-action: manipulation;
         }
 
@@ -78,9 +78,7 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: clamp(16px, 4vw, 24px);
         }
-
 
         .chinese-character {
             font-size: clamp(2rem, 6vw, 3.5rem);
@@ -88,6 +86,20 @@
             color: #1f2937;
             margin-bottom: 8px;
             line-height: 1;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .chinese-character:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+            transform: scale(1.05);
+        }
+
+        .chinese-character:active {
+            transform: scale(0.95);
         }
 
         .pinyin {
@@ -95,6 +107,15 @@
             color: #6b7280;
             font-weight: 400;
             margin-bottom: 16px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .pinyin:hover {
+            background-color: rgba(59, 130, 246, 0.1);
         }
 
         .translation-content {
@@ -114,6 +135,15 @@
             font-weight: 500;
             color: #374151;
             margin-bottom: 4px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .english-translation:hover {
+            background-color: rgba(59, 130, 246, 0.1);
         }
 
         .thai-translation {
@@ -219,7 +249,7 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            min-height: 100dvh; /* Dynamic viewport height for mobile */
+            min-height: 100dvh;
             width: 100%;
             padding: 16px;
             box-sizing: border-box;
@@ -360,31 +390,42 @@
             </>
         );
 
-        const CardFace = ({ content, type }) => {
+        const CardFace = ({ content, type, onFlip }) => {
             const pronounceText = useSpeech();
             const [char, pinyin] = type === 'front' ? content.split('\n') : [null, null];
             const [english, thai] = type === 'back' ? content.split('\n') : [null, null];
 
+            const handlePronounceClick = (e, text) => {
+                e.stopPropagation(); // Prevent card flip
+                pronounceText(text);
+            };
+
             return (
-                <div className={`card-face ${type === 'back' ? 'card-back' : ''}`} onClick={() => pronounceText(char || english)}>
+                <div className={`card-face ${type === 'back' ? 'card-back' : ''}`} onClick={onFlip}>
                     <div className="card-content">
                         {type === 'front' ? (
                             <>
                                 <div
-                                  className="chinese-character text-to-pronounce"
-                                  onClick={(e) => {
-                                       e.stopPropagation(); // prevent card flip
-                                       pronounceText(char);
-                                     }}
+                                    className="chinese-character"
+                                    onClick={(e) => handlePronounceClick(e, char)}
                                 >
-                                  {char}
+                                    {char}
                                 </div> 
-                                <div className="pinyin">{pinyin}</div>
-                                  
+                                <div 
+                                    className="pinyin"
+                                    onClick={(e) => handlePronounceClick(e, char)}
+                                >
+                                    {pinyin}
+                                </div>
                             </>
                         ) : (
                             <div className="translation-content">
-                                <div className="english-translation">{english}</div>
+                                <div 
+                                    className="english-translation"
+                                    onClick={(e) => handlePronounceClick(e, english)}
+                                >
+                                    {english}
+                                </div>
                                 <div className="thai-translation">{thai}</div>
                             </div>
                         )}
@@ -424,24 +465,14 @@
                 handleAnimation(() => setCurrentIndex((prev) => (prev - 1 + flashcards.length) % flashcards.length));
             }, [flashcards.length]);
 
-            /*const handleFlip = useCallback(() => {
+            const handleFlip = useCallback(() => {
                 setFlipped(f => !f);
                 // Pronounce after flip
-                 setTimeout(() => {
+                setTimeout(() => {
                     const textToSpeak = !flipped ? currentCard.back : currentCard.front;
                     pronounceText(textToSpeak.split('\n')[0]);
                 }, 300);
-            }, [flipped, currentCard, pronounceText]); */
-            const handleFlip = useCallback((event) => {
-               // Prevent flip if click comes from a pronunciation element 
-                if (event?.target?.closest('.text-to-pronounce')) return;
-               setFlipped(f => !f);
-            // Pronounce after flip
-                setTimeout(() => {
-                const textToSpeak = flipped ? currentCard.back : currentCard.front;
-             pronounceText(textToSpeak.split('\n')[0]);
-                }, 300);
-          }, [flipped, currentCard, pronounceText]);  
+            }, [flipped, currentCard, pronounceText]);
             
             const toggleCollected = () => {
                 setCollected(c => isCollected ? c.filter(i => i !== currentIndex) : [...c, currentIndex]);
@@ -456,11 +487,6 @@
                 window.addEventListener('keydown', handleKeyDown);
                 return () => window.removeEventListener('keydown', handleKeyDown);
             }, [handleNext, handlePrevious, handleFlip]);
-            
-            /* useEffect(() => {
-                // Auto-pronounce the front of the card when it changes
-                pronounceText(currentCard.front.split('\n')[0]);
-            }, [currentIndex, currentCard, pronounceText]); */
 
             const handleTouchStart = (e) => {
                 touchStartX.current = e.touches[0].clientX;
@@ -478,8 +504,12 @@
                 } else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > swipeThreshold) {
                     handleFlip();
                 } else {
-                    // It's a tap, not a swipe
-                    handleFlip();
+                    // It's a tap, not a swipe - only flip if not clicking on pronunciation elements
+                    if (!e.target.closest('.chinese-character') && 
+                        !e.target.closest('.pinyin') && 
+                        !e.target.closest('.english-translation')) {
+                        handleFlip();
+                    }
                 }
             };
 
@@ -489,8 +519,8 @@
                     <div className="w-full flex flex-col items-center justify-center relative">
                         <div className="card-scene" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
                             <div className={`card-3d ${flipped ? 'flipped' : ''} ${animating ? 'animating' : ''}`}>
-                                <CardFace content={currentCard.front} type="front" />
-                                <CardFace content={`${currentCard.back.split('\n')[0]}\n${currentCard.back.split('\n')[1]}`} type="back" />
+                                <CardFace content={currentCard.front} type="front" onFlip={handleFlip} />
+                                <CardFace content={`${currentCard.back.split('\n')[0]}\n${currentCard.back.split('\n')[1]}`} type="back" onFlip={handleFlip} />
                             </div>
                         </div>
 
