@@ -370,8 +370,17 @@
                     <div className="card-content">
                         {type === 'front' ? (
                             <>
-                                <div className="chinese-character">{char}</div>
+                                <div
+                                  className="chinese-character text-to-pronounce"
+                                  onClick={(e) => {
+                                       e.stopPropagation(); // prevent card flip
+                                       pronounceText(char);
+                                     }}
+                                >
+                                  {char}
+                                </div> 
                                 <div className="pinyin">{pinyin}</div>
+                                  
                             </>
                         ) : (
                             <div className="translation-content">
@@ -415,14 +424,24 @@
                 handleAnimation(() => setCurrentIndex((prev) => (prev - 1 + flashcards.length) % flashcards.length));
             }, [flashcards.length]);
 
-            const handleFlip = useCallback(() => {
+            /*const handleFlip = useCallback(() => {
                 setFlipped(f => !f);
                 // Pronounce after flip
                  setTimeout(() => {
                     const textToSpeak = !flipped ? currentCard.back : currentCard.front;
                     pronounceText(textToSpeak.split('\n')[0]);
                 }, 300);
-            }, [flipped, currentCard, pronounceText]);
+            }, [flipped, currentCard, pronounceText]); */
+            const handleFlip = useCallback((event) => {
+               // Prevent flip if click comes from a pronunciation element 
+                if (event?.target?.closest('.text-to-pronounce')) return;
+               setFlipped(f => !f);
+            // Pronounce after flip
+                setTimeout(() => {
+                const textToSpeak = flipped ? currentCard.back : currentCard.front;
+             pronounceText(textToSpeak.split('\n')[0]);
+                }, 300);
+          }, [flipped, currentCard, pronounceText]);  
             
             const toggleCollected = () => {
                 setCollected(c => isCollected ? c.filter(i => i !== currentIndex) : [...c, currentIndex]);
