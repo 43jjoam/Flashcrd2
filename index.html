@@ -9,6 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500&family=Noto+Sans+Thai:wght@300;400;500&display=swap" rel="stylesheet">
     
     <style>
         /* --- CORE LAYOUT & APPEARANCE --- */
@@ -116,11 +117,30 @@
             text-align: center;
             gap: 1rem;
         }
-        .chinese-character { font-size: clamp(2.5rem, 8vw, 4rem); font-weight: 400; color: #1f2937; cursor: pointer; user-select: none; }
+        .chinese-character { 
+            font-size: clamp(2.5rem, 8vw, 4rem); 
+            font-weight: 400; 
+            color: #1f2937; 
+            cursor: pointer; 
+            user-select: none; 
+            font-family: 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', 'SimSun', '宋体', sans-serif;
+        }
         .pinyin { font-size: clamp(1.2rem, 4vw, 1.6rem); color: #6b7280; cursor: pointer; user-select: none; }
         .emoji-display { font-size: clamp(2.5rem, 7vw, 3.5rem); }
-        .english-translation { font-size: clamp(1.2rem, 4vw, 1.5rem); font-weight: 500; color: #374151; cursor: pointer; user-select: none; }
-        .thai-translation { font-size: clamp(1.1rem, 3.5vw, 1.3rem); color: #6b7280; cursor: pointer; user-select: none; }
+        .english-translation { 
+            font-size: clamp(1.4rem, 4.5vw, 1.8rem); 
+            font-weight: 500; 
+            color: #374151; 
+            cursor: pointer; 
+            user-select: none; 
+        }
+        .thai-translation { 
+            font-size: clamp(1.3rem, 4vw, 1.6rem); 
+            color: #6b7280; 
+            cursor: pointer; 
+            user-select: none;
+            font-family: 'Noto Sans Thai', 'Tahoma', 'Arial', sans-serif;
+        }
         .mobile-button { background: none; border: none; padding: 8px; color: white; opacity: 0.8; transition: all 0.2s ease; }
         .mobile-button:active { transform: scale(0.9); opacity: 1; }
         
@@ -191,35 +211,59 @@
 
         // --- UTILITY HOOKS & FUNCTIONS ---
         const useSpeech = () => {
-            // FIX: Smart language detection based on content and context
+            // FIX: Enhanced language detection with better pinyin recognition
             const detectLanguage = (text) => {
                 if (!text) return 'en-US';
                 
                 // Check for Thai characters (Unicode range: 0E00-0E7F)
                 const thaiRegex = /[\u0E00-\u0E7F]/;
                 if (thaiRegex.test(text)) {
+                    console.log(`🇹🇭 Thai detected: "${text}"`);
                     return 'th-TH';
                 }
                 
                 // Check for Chinese characters (Unicode ranges: 4E00-9FFF, 3400-4DBF, F900-FAFF)
                 const chineseRegex = /[\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF]/;
                 if (chineseRegex.test(text)) {
+                    console.log(`🇨🇳 Chinese characters detected: "${text}"`);
                     return 'zh-CN';
                 }
                 
-                // Check for pinyin patterns (common pinyin syllables)
-                const pinyinPatterns = [
-                    /\b(zh|ch|sh|ng|ao|ou|ai|ei|an|en|ang|eng|ong|iang|iong|uang|uo|ie|üe)\b/i,
-                    /\b[aeiouü]+[ng]?\b/i,
-                    /\b[bpmfdtnlgkhjqxzcsrwy][aeiouü]/i
+                // Enhanced pinyin detection - more comprehensive patterns
+                const commonPinyinSyllables = [
+                    'ba', 'pa', 'ma', 'fa', 'da', 'ta', 'na', 'la', 'ga', 'ka', 'ha',
+                    'ji', 'qi', 'xi', 'zhi', 'chi', 'shi', 'ri', 'zi', 'ci', 'si',
+                    'ya', 'wa', 'yuan', 'ying', 'yang', 'yong', 'you', 'yan', 'yin',
+                    'ai', 'ei', 'ao', 'ou', 'an', 'en', 'ang', 'eng', 'ong',
+                    'ia', 'ie', 'iao', 'iou', 'ian', 'in', 'iang', 'ing', 'iong',
+                    'ua', 'uo', 'uai', 'ui', 'uan', 'un', 'uang', 'ueng',
+                    'ue', 'uan', 'un'
                 ];
                 
-                const isPinyin = pinyinPatterns.some(pattern => pattern.test(text));
-                if (isPinyin) {
+                // Check if text contains tone marks or pinyin patterns
+                const hasToneMarks = /[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/i.test(text);
+                const textLower = text.toLowerCase().trim();
+                const isPinyinSyllable = commonPinyinSyllables.some(syllable => 
+                    textLower === syllable || textLower.includes(syllable)
+                );
+                
+                if (hasToneMarks || isPinyinSyllable) {
+                    console.log(`🎵 Pinyin detected: "${text}"`);
                     return 'zh-CN';
                 }
                 
-                // Default to English
+                // Check for space-separated pinyin (like "bà ba")
+                const words = textLower.split(/\s+/);
+                const allWordsPinyin = words.length > 1 && words.every(word => 
+                    commonPinyinSyllables.includes(word) || /[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/.test(word)
+                );
+                
+                if (allWordsPinyin) {
+                    console.log(`🎵 Multi-syllable pinyin detected: "${text}"`);
+                    return 'zh-CN';
+                }
+                
+                console.log(`🇺🇸 English/default detected: "${text}"`);
                 return 'en-US';
             };
 
@@ -246,15 +290,23 @@
                         console.log('🇨🇳 Using external TTS for Chinese content...');
                         const response = await fetch(backendUrl, {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'Accept': 'audio/mpeg'
+                            },
                             body: JSON.stringify({ text, lang: 'zh-CN' })
                         });
 
                         if (!response.ok) {
-                            throw new Error(`TTS request failed with status ${response.status}`);
+                            const errorText = await response.text();
+                            throw new Error(`TTS request failed with status ${response.status}: ${errorText}`);
                         }
 
                         const audioData = await response.arrayBuffer();
+                        if (audioData.byteLength === 0) {
+                            throw new Error('Received empty audio data');
+                        }
+
                         const audioBuffer = await audioContext.decodeAudioData(audioData);
                         const source = audioContext.createBufferSource();
                         source.buffer = audioBuffer;
@@ -266,6 +318,8 @@
 
                     } catch (error) {
                         console.error("❌ External Chinese TTS failed:", error);
+                        // Don't fallback for Chinese - we want the accurate pronunciation
+                        return;
                     }
                 }
                 
@@ -282,15 +336,23 @@
                         console.log('🇹🇭 Using external TTS for Thai content...');
                         const response = await fetch(backendUrl, {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'Accept': 'audio/mpeg'
+                            },
                             body: JSON.stringify({ text, lang: 'th-TH' })
                         });
 
                         if (!response.ok) {
-                            throw new Error(`TTS request failed with status ${response.status}`);
+                            const errorText = await response.text();
+                            throw new Error(`TTS request failed with status ${response.status}: ${errorText}`);
                         }
 
                         const audioData = await response.arrayBuffer();
+                        if (audioData.byteLength === 0) {
+                            throw new Error('Received empty audio data');
+                        }
+
                         const audioBuffer = await audioContext.decodeAudioData(audioData);
                         const source = audioContext.createBufferSource();
                         source.buffer = audioBuffer;
@@ -301,7 +363,8 @@
                         return;
 
                     } catch (error) {
-                        console.error("❌ External Thai TTS failed, using browser fallback:", error);
+                        console.error("❌ External Thai TTS failed:", error);
+                        // Fallback to browser for Thai if external fails
                     }
                 }
                 
