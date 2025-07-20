@@ -191,16 +191,50 @@
 
         // --- UTILITY HOOKS & FUNCTIONS ---
         const useSpeech = () => {
-            const pronounceText = useCallback(async (text, lang) => {
+            // FIX: Smart language detection based on content and context
+            const detectLanguage = (text) => {
+                if (!text) return 'en-US';
+                
+                // Check for Thai characters (Unicode range: 0E00-0E7F)
+                const thaiRegex = /[\u0E00-\u0E7F]/;
+                if (thaiRegex.test(text)) {
+                    return 'th-TH';
+                }
+                
+                // Check for Chinese characters (Unicode ranges: 4E00-9FFF, 3400-4DBF, F900-FAFF)
+                const chineseRegex = /[\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF]/;
+                if (chineseRegex.test(text)) {
+                    return 'zh-CN';
+                }
+                
+                // Check for pinyin patterns (common pinyin syllables)
+                const pinyinPatterns = [
+                    /\b(zh|ch|sh|ng|ao|ou|ai|ei|an|en|ang|eng|ong|iang|iong|uang|uo|ie|üe)\b/i,
+                    /\b[aeiouü]+[ng]?\b/i,
+                    /\b[bpmfdtnlgkhjqxzcsrwy][aeiouü]/i
+                ];
+                
+                const isPinyin = pinyinPatterns.some(pattern => pattern.test(text));
+                if (isPinyin) {
+                    return 'zh-CN';
+                }
+                
+                // Default to English
+                return 'en-US';
+            };
+
+            const pronounceText = useCallback(async (text, requestedLang) => {
                 if (!text || !text.trim()) {
                     console.error("No text to pronounce.");
                     return;
                 }
                 
-                console.log(`Attempting to pronounce: "${text}" in ${lang}`);
+                // FIX: Use smart language detection instead of relying on requestedLang
+                const detectedLang = detectLanguage(text);
+                console.log(`Text: "${text}" | Requested: ${requestedLang} | Detected: ${detectedLang}`);
                 
-                // FIX: For Chinese, prioritize external TTS service for better pronunciation
-                if (lang === 'zh-CN' || lang.startsWith('zh')) {
+                // FIX: For Chinese content (characters OR pinyin), always use external TTS
+                if (detectedLang === 'zh-CN') {
                     try {
                         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                         if (audioContext.state === 'suspended') {
@@ -209,11 +243,11 @@
 
                         const backendUrl = "https://d682f7a4-5681-429e-9c86-22b8329e4b8e-00-liewh2dfj37m.sisko.replit.dev/tts";
 
-                        console.log('Calling external TTS for Chinese...');
+                        console.log('🇨🇳 Using external TTS for Chinese content...');
                         const response = await fetch(backendUrl, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ text, lang })
+                            body: JSON.stringify({ text, lang: 'zh-CN' })
                         });
 
                         if (!response.ok) {
@@ -227,36 +261,72 @@
                         source.connect(audioContext.destination);
                         source.start(0);
                         
-                        console.log('External TTS played successfully');
+                        console.log('✅ Chinese TTS played successfully');
                         return;
 
                     } catch (error) {
-                        console.error("External TTS failed for Chinese, falling back to browser:", error);
+                        console.error("❌ External Chinese TTS failed:", error);
                     }
                 }
                 
-                // Use browser speech synthesis for non-Chinese or as fallback
+                // FIX: For Thai content, use external TTS too for better quality
+                if (detectedLang === 'th-TH') {
+                    try {
+                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        if (audioContext.state === 'suspended') {
+                            await audioContext.resume();
+                        }
+
+                        const backendUrl = "https://d682f7a4-5681-429e-9c86-22b8329e4b8e-00-liewh2dfj37m.sisko.replit.dev/tts";
+
+                        console.log('🇹🇭 Using external TTS for Thai content...');
+                        const response = await fetch(backendUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ text, lang: 'th-TH' })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`TTS request failed with status ${response.status}`);
+                        }
+
+                        const audioData = await response.arrayBuffer();
+                        const audioBuffer = await audioContext.decodeAudioData(audioData);
+                        const source = audioContext.createBufferSource();
+                        source.buffer = audioBuffer;
+                        source.connect(audioContext.destination);
+                        source.start(0);
+                        
+                        console.log('✅ Thai TTS played successfully');
+                        return;
+
+                    } catch (error) {
+                        console.error("❌ External Thai TTS failed, using browser fallback:", error);
+                    }
+                }
+                
+                // Use browser speech synthesis for English or as fallback
                 if ('speechSynthesis' in window) {
                     try {
                         speechSynthesis.cancel();
                         
                         const utterance = new SpeechSynthesisUtterance(text);
-                        utterance.lang = lang;
+                        utterance.lang = detectedLang;
                         utterance.rate = 0.8;
                         utterance.volume = 1.0;
                         
-                        utterance.onstart = () => console.log('Browser speech started');
-                        utterance.onend = () => console.log('Browser speech ended');
-                        utterance.onerror = (e) => console.error('Browser speech error:', e);
+                        utterance.onstart = () => console.log(`🔊 Browser speech started (${detectedLang})`);
+                        utterance.onend = () => console.log('✅ Browser speech ended');
+                        utterance.onerror = (e) => console.error('❌ Browser speech error:', e);
                         
                         speechSynthesis.speak(utterance);
                         return;
                     } catch (error) {
-                        console.error("Browser speech synthesis failed:", error);
+                        console.error("❌ Browser speech synthesis failed:", error);
                     }
                 }
                 
-                console.error("No speech synthesis method available");
+                console.error("❌ No speech synthesis method available");
             }, []);
 
             return { pronounceText };
@@ -363,15 +433,20 @@
                 e.target.releasePointerCapture(e.pointerId);
                 const touchDuration = Date.now() - touchState.startTime;
 
-                if (touchDuration < 250 && Math.abs(touchState.deltaX) < 15) {
+                // FIX: More reliable flip detection - check if it's a quick tap without much movement
+                if (touchDuration < 300 && Math.abs(touchState.deltaX) < 20) {
                     const isTextArea = e.target.closest('.chinese-character, .pinyin, .english-translation, .thai-translation');
                     if (!isTextArea) {
+                        console.log('🔄 Card flip triggered');
                         setIsFlipped(prev => !prev);
+                    } else {
+                        console.log('🔊 Text click detected, no flip');
                     }
                 } else {
                     const swipeThreshold = window.innerWidth * 0.35;
                     if (Math.abs(touchState.deltaX) > swipeThreshold) {
                         const direction = touchState.deltaX > 0 ? 'right' : 'left';
+                        console.log(`🏃 Swipe ${direction} detected`);
                         cardRef.current.style.transition = 'transform 0.4s';
                         cardRef.current.style.transform = `translateX(${direction === 'right' ? '200%' : '-200%'}) rotate(${direction === 'right' ? 45 : -45}deg)`;
                         setTimeout(() => onSwipe(direction), 100);
@@ -382,11 +457,11 @@
                 }
             };
             
-            // FIX: Simplify pronunciation handling and ensure it works
-            const handlePronounce = (e, text, lang) => {
+            // FIX: Remove language parameter since we'll detect it automatically
+            const handlePronounce = (e, text) => {
                 e.stopPropagation(); // Prevent card flip
-                console.log(`Click detected for pronunciation: "${text}" in ${lang}`);
-                pronounceText(text, lang);
+                console.log(`🎯 Pronunciation requested for: "${text}"`);
+                pronounceText(text); // No lang parameter needed
             };
 
             const frontParts = (card.front || '').split('\n').map(s => s.trim());
@@ -402,15 +477,15 @@
                     <div className={`card-container ${isFlipped ? 'flipped' : ''}`}>
                         <div className="card-face">
                             <div className="card-content">
-                                {chineseChar && <div className="chinese-character" onClick={(e) => handlePronounce(e, chineseChar, 'zh-CN')}>{chineseChar}</div>}
-                                {pinyin && <div className="pinyin" onClick={(e) => handlePronounce(e, pinyin, 'zh-CN')}>{pinyin}</div>}
+                                {chineseChar && <div className="chinese-character" onClick={(e) => handlePronounce(e, chineseChar)}>{chineseChar}</div>}
+                                {pinyin && <div className="pinyin" onClick={(e) => handlePronounce(e, pinyin)}>{pinyin}</div>}
                                 {card.emoji && <div className="emoji-display">{card.emoji}</div>}
                             </div>
                         </div>
                         <div className="card-face card-back">
                             <div className="card-content">
-                                {englishTranslation && <div className="english-translation" onClick={(e) => handlePronounce(e, englishTranslation, 'en-US')}>{englishTranslation}</div>}
-                                {thaiTranslation && <div className="thai-translation" onClick={(e) => handlePronounce(e, thaiTranslation, 'th-TH')}>{thaiTranslation}</div>}
+                                {englishTranslation && <div className="english-translation" onClick={(e) => handlePronounce(e, englishTranslation)}>{englishTranslation}</div>}
+                                {thaiTranslation && <div className="thai-translation" onClick={(e) => handlePronounce(e, thaiTranslation)}>{thaiTranslation}</div>}
                                 {card.emoji && <div className="emoji-display">{card.emoji}</div>}
                             </div>
                         </div>
