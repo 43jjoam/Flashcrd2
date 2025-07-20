@@ -52,13 +52,15 @@
 
         /* Swipe animations - more dramatic rotation and translation */
         .card-3d.swiping-left {
-            transform: translateX(-150vw) rotateZ(-30deg) scale(0.5); /* Thrown out left with rotation */
+            /* Thrown out left with rotation on Z-axis for a more natural throw */
+            transform: translateX(-150vw) rotateZ(-30deg) scale(0.5); 
             opacity: 0;
             transition: all 0.6s cubic-bezier(0.6, -0.28, 0.735, 0.045); /* Faster, more impactful */
         }
 
         .card-3d.swiping-right {
-            transform: translateX(150vw) rotateZ(30deg) scale(0.5); /* Thrown out right with rotation */
+            /* Thrown out right with rotation on Z-axis for a more natural throw */
+            transform: translateX(150vw) rotateZ(30deg) scale(0.5); 
             opacity: 0;
             transition: all 0.6s cubic-bezier(0.6, -0.28, 0.735, 0.045); /* Faster, more impactful */
         }
@@ -493,8 +495,7 @@
                 "rememberedCards": "Remembered Cards",
                 "forgottenCards": "Forgotten Cards",
                 "totalCards": "Total Cards",
-                "landingPageSubtitle": "Enter \"LearnChinesewithHelen1295\" or \"PinyinPractice\" to start.",
-                "deckSampleCard": "Sample Card"
+                "landingPageSubtitle": "Enter \"LearnChinesewithHelen1295\" or \"PinyinPractice\" to start."
             }
         };
 
@@ -512,13 +513,15 @@
         const ACCESS_CODES = {
             "LearnChinesewithHelen1295": {
                 title: "Chinese Vocabulary",
-                cards: CHINESE_VOCABULARY,
-                sampleCard: CHINESE_VOCABULARY[0] // First card as sample
+                // Map cards to add an initial status
+                cards: CHINESE_VOCABULARY.map(card => ({ ...card, status: 'new' })),
+                sampleCard: { ...CHINESE_VOCABULARY[0], status: 'new' } // Ensure sample also has status
             },
             "PinyinPractice": {
                 title: "Pinyin Practice",
-                cards: PINYIN_CARDS,
-                sampleCard: PINYIN_CARDS[0] // First card as sample
+                // Map cards to add an initial status
+                cards: PINYIN_CARDS.map(card => ({ ...card, status: 'new' })),
+                sampleCard: { ...PINYIN_CARDS[0], status: 'new' } // Ensure sample also has status
             },
             // Add more codes and decks here
         };
@@ -704,15 +707,11 @@
 
         // SmallCard component for collection views
         const SmallCard = ({ card }) => {
-            const [chineseChar, pinyin] = card.front.split('\n').map(s => s.trim());
-            const [englishTranslation, thaiTranslation] = card.back.split('\n').map(s => s.trim());
+            const [chineseChar, pinyin] = card.front.split('\n')[0].trim(); // Only Chinese char for small card
             return (
                 <div className="small-card">
                     <div className="chinese-character">{chineseChar}</div>
-                    <div className="pinyin">{pinyin}</div>
                     <div className="emoji-display">{card.emoji}</div>
-                    <div className="english-translation">{englishTranslation}</div>
-                    <div className="thai-translation">{thaiTranslation}</div>
                 </div>
             );
         };
@@ -843,25 +842,27 @@
 
         // Main App component
         const App = () => {
-            const [currentPage, setCurrentPage] = useState('landing'); // 'landing', 'flashcards', 'collection', 'remembered', 'forgotten'
+            const [currentPage, setCurrentPage] = useState('landing'); // 'landing', 'flashcards', 'remembered', 'forgotten', 'allDecks'
             const [flashcards, setFlashcards] = useState([]);
             const [currentCardIndex, setCurrentCardIndex] = useState(0);
             const [rememberedCards, setRememberedCards] = useState([]);
             const [forgottenCards, setForgottenCards] = useState([]);
-            const [showModal, setShowModal] = useState(false); // Unified modal state
-            const [modalContent, setModalContent] = useState({ title: '', message: '', children: null });
-            const [code, setCode] = useState('');
             const [showErrorModal, setShowErrorModal] = useState(false);
             const [errorMessage, setErrorMessage] = useState('');
+            const [code, setCode] = useState(''); // Define code state here
+            const [activeDeckTitle, setActiveDeckTitle] = useState(''); // To display current deck title
 
             // Function to handle code submission and deck loading
             const handleCodeUnlock = () => {
                 const deckData = ACCESS_CODES[code];
                 if (deckData) {
-                    setFlashcards([...deckData.cards].sort(() => Math.random() - 0.5)); // Shuffle the deck
+                    // Ensure all cards start with 'new' status when a new deck is loaded
+                    const initialCards = deckData.cards.map(card => ({ ...card, status: 'new' }));
+                    setFlashcards([...initialCards].sort(() => Math.random() - 0.5)); // Shuffle the deck
                     setCurrentCardIndex(0);
                     setRememberedCards([]);
                     setForgottenCards([]);
+                    setActiveDeckTitle(deckData.title); // Set active deck title
                     setCurrentPage('flashcards');
                 } else {
                     setErrorMessage("Invalid code. Please try again.");
@@ -869,28 +870,87 @@
                 }
             };
 
+            // Helper function to remove a card from a list by its 'front' content
+            // This ensures uniqueness in remembered/forgotten lists
+            const removeCardFromList = useCallback((list, cardToRemove) => {
+                return list.filter(card => card.front !== cardToRemove.front);
+            }, []);
+
             // Handle swipe actions
             const handleSwipe = useCallback((direction) => {
                 if (flashcards.length === 0) return;
 
-                const swipedCard = flashcards[currentCardIndex];
-                
-                if (direction === 'right') { // Remembered
-                    setRememberedCards(prev => [...prev, swipedCard]);
-                } else { // Forgot
-                    setForgottenCards(prev => [...prev, swipedCard]);
-                    // Add forgotten card back into the deck, 5 cards later or at the end
-                    const newFlashcards = [...flashcards];
-                    const reinsertIndex = Math.min(currentCardIndex + 5, newFlashcards.length - 1);
-                    newFlashcards.splice(reinsertIndex, 0, swipedCard);
-                    setFlashcards(newFlashcards);
+                // Create a mutable copy of the card to update its status
+                const swipedCard = { ...flashcards[currentCardIndex] }; 
+                let newFlashcards = [...flashcards];
+
+                // 1. Remove the swiped card from its current position in the active study deck
+                newFlashcards.splice(currentCardIndex, 1);
+
+                // 2. Manage rememberedCards and forgottenCards for mutual exclusivity and uniqueness
+                let updatedRemembered = removeCardFromList(rememberedCards, swipedCard);
+                let updatedForgotten = removeCardFromList(forgottenCards, swipedCard);
+
+                if (direction === 'left') { // User swiped left (Forgot)
+                    if (swipedCard.status === 'remembered_level1') { // remembered_level1 swiped left -> forgotten_level1
+                        swipedCard.status = 'forgotten_level1';
+                        // Re-insert 5 cards later
+                        const reinsertIndex = Math.min(currentCardIndex + 5, newFlashcards.length);
+                        newFlashcards.splice(reinsertIndex, 0, swipedCard);
+                        updatedForgotten = [...updatedForgotten, swipedCard]; // Add to forgotten list
+                    }
+                    else if (swipedCard.status === 'new' || swipedCard.status === 'forgotten_level1') {
+                        swipedCard.status = 'forgotten_level1';
+                        // Re-insert 5 cards later
+                        const reinsertIndex = Math.min(currentCardIndex + 5, newFlashcards.length);
+                        newFlashcards.splice(reinsertIndex, 0, swipedCard);
+                        updatedForgotten = [...updatedForgotten, swipedCard]; // Add to forgotten list
+                    } else if (swipedCard.status === 'forgotten_level2') {
+                        // If already level2, and forgotten again, keep it at level2 and re-insert 5 cards later
+                        swipedCard.status = 'forgotten_level2'; 
+                        const reinsertIndex = Math.min(currentCardIndex + 5, newFlashcards.length);
+                        newFlashcards.splice(reinsertIndex, 0, swipedCard);
+                        updatedForgotten = [...updatedForgotten, swipedCard]; // Add to forgotten list
+                    }
+                } else { // User swiped right (Remembered / Progressing)
+                    if (swipedCard.status === 'new') { // NEW LOGIC: New card swiped right is remembered_level1
+                        swipedCard.status = 'remembered_level1';
+                        updatedRemembered = [...updatedRemembered, swipedCard]; // Add to remembered list
+                        // Re-insert to the bottom of the deck
+                        newFlashcards.push(swipedCard); 
+                    } else if (swipedCard.status === 'remembered_level1') { // NEW LOGIC: remembered_level1 swiped right -> remembered_level2
+                        swipedCard.status = 'remembered_level2';
+                        updatedRemembered = [...updatedRemembered, swipedCard]; // Update in remembered list
+                        // Do NOT re-insert into newFlashcards (permanently remembered)
+                    } else if (swipedCard.status === 'forgotten_level1') {
+                        swipedCard.status = 'forgotten_level2';
+                        // Re-insert 10 cards later (for 11th position)
+                        const reinsertIndex = Math.min(currentCardIndex + 10, newFlashcards.length);
+                        newFlashcards.splice(reinsertIndex, 0, swipedCard);
+                        updatedForgotten = [...updatedForgotten, swipedCard]; // Still considered forgotten, just deeper
+                    } else if (swipedCard.status === 'forgotten_level2') {
+                        swipedCard.status = 'remembered'; // Fully remembered
+                        updatedRemembered = [...updatedRemembered, swipedCard]; // Add to remembered list
+                        // Do NOT re-insert into newFlashcards
+                    }
                 }
 
-                // Move to the next card
+                // Update state arrays
+                setRememberedCards(updatedRemembered);
+                setForgottenCards(updatedForgotten);
+                setFlashcards(newFlashcards);
+
+                // Adjust currentCardIndex for the next card after animation
                 setTimeout(() => {
-                    setCurrentCardIndex(prevIndex => prevIndex + 1);
-                }, 600); // Delay to match swipe animation
-            }, [flashcards, currentCardIndex]);
+                    // If the deck is now empty, or if currentCardIndex is out of bounds, reset to 0
+                    if (newFlashcards.length === 0) {
+                        setCurrentCardIndex(0); // Deck is truly completed
+                    } else if (currentCardIndex >= newFlashcards.length) {
+                        setCurrentCardIndex(0); // Loop back to start of remaining cards
+                    }
+                    // Otherwise, currentCardIndex naturally points to the next card due to splice shifting.
+                }, 600); 
+            }, [flashcards, currentCardIndex, rememberedCards, forgottenCards, removeCardFromList]); // Add dependencies
 
             // Reset app state to landing page
             const resetApp = () => {
@@ -900,72 +960,11 @@
                 setCurrentCardIndex(0);
                 setRememberedCards([]);
                 setForgottenCards([]);
+                setActiveDeckTitle('');
             };
-
-            // Function to open the remembered cards modal
-            const openRememberedCards = () => {
-                setModalContent({
-                    title: TRANSLATIONS["en-US"].rememberedCards,
-                    children: rememberedCards.length > 0 ? (
-                        <div className="small-card-grid">
-                            {rememberedCards.map((card, index) => (
-                                <SmallCard key={`remembered-${index}`} card={card} />
-                            ))}
-                        </div>
-                    ) : (
-                        <p className="text-gray-700">{TRANSLATIONS["en-US"].noCollectedCards}</p>
-                    )
-                });
-                setShowModal(true);
-            };
-
-            // Function to open the forgotten cards modal
-            const openForgottenCards = () => {
-                setModalContent({
-                    title: TRANSLATIONS["en-US"].forgottenCards,
-                    children: forgottenCards.length > 0 ? (
-                        <div className="small-card-grid">
-                            {forgottenCards.map((card, index) => (
-                                <SmallCard key={`forgotten-${index}`} card={card} />
-                            ))}
-                        </div>
-                    ) : (
-                        <p className="text-gray-700">{TRANSLATIONS["en-US"].noCollectedCards}</p>
-                    )
-                });
-                setShowModal(true);
-            };
-
-            // Function to open the all decks modal
-            const openAllDecks = () => {
-                const deckList = Object.keys(ACCESS_CODES).map(codeKey => {
-                    const deck = ACCESS_CODES[codeKey];
-                    return (
-                        <div key={codeKey} className="small-card flex-col items-center justify-center p-2">
-                            <h4 className="font-bold text-base mb-2">{deck.title}</h4>
-                            {deck.sampleCard ? (
-                                <SmallCard card={deck.sampleCard} />
-                            ) : (
-                                <p className="text-sm text-gray-500">No sample card</p>
-                            )}
-                        </div>
-                    );
-                });
-
-                setModalContent({
-                    title: TRANSLATIONS["en-US"].collection,
-                    children: (
-                        <div className="small-card-grid">
-                            {deckList}
-                        </div>
-                    )
-                });
-                setShowModal(true);
-            };
-
 
             // Render content based on current page
-            const renderContent = () => {
+            const renderContent = () => { 
                 switch (currentPage) {
                     case 'landing':
                         return (
@@ -991,9 +990,17 @@
                         );
                     case 'flashcards':
                         const currentCard = flashcards[currentCardIndex];
-                        const nextCard = flashcards[currentCardIndex + 1];
+                        const nextCard = flashcards[currentCardIndex + 1]; // Still useful for pre-rendering next card
 
-                        if (!currentCard) {
+                        if (!currentCard && flashcards.length > 0) {
+                            // This case handles when currentCardIndex has gone past the last card
+                            // but there are still cards in the deck (e.g., forgotten cards re-added later)
+                            // We should loop back to the beginning of the remaining cards.
+                            setCurrentCardIndex(0);
+                            return null; // Render nothing for a moment while state updates
+                        }
+                        
+                        if (flashcards.length === 0) {
                             return (
                                 <div className="mobile-center flex-col p-4">
                                     <div className="watercolor-card p-8 flex flex-col items-center gap-6 max-w-md w-full text-center">
@@ -1006,7 +1013,7 @@
                                             {TRANSLATIONS["en-US"].createNewFlashcardsLink}
                                         </button>
                                         <button
-                                            onClick={openAllDecks}
+                                            onClick={() => setCurrentPage('allDecks')}
                                             className="px-6 py-3 bg-purple-500 text-white rounded-full shadow-lg hover:bg-purple-600 transition duration-300 mobile-button"
                                         >
                                             View All Decks
@@ -1019,23 +1026,23 @@
                         return (
                             <div className="flex flex-col items-center justify-between min-h-screen min-h-dvh p-4 relative">
                                 {/* Top Navigation Icons */}
-                                <div className="w-full flex justify-between items-center p-4 z-10">
+                                <div className="w-full flex justify-between items-center p-4 z-10 space-x-4"> {/* Added space-x-4 for spacing */}
                                     <button 
-                                        onClick={openRememberedCards}
+                                        onClick={() => setCurrentPage('remembered')}
                                         className="mobile-button bg-white bg-opacity-30 p-3 rounded-full shadow-md text-gray-800 hover:bg-opacity-50 transition"
                                         title={TRANSLATIONS["en-US"].rememberedCards}
                                     >
                                         <i className="fas fa-heart text-xl text-gray-600"></i>
                                     </button>
                                     <button 
-                                        onClick={openForgottenCards}
+                                        onClick={() => setCurrentPage('forgotten')}
                                         className="mobile-button bg-white bg-opacity-30 p-3 rounded-full shadow-md text-gray-800 hover:bg-opacity-50 transition"
                                         title={TRANSLATIONS["en-US"].forgottenCards}
                                     >
                                         <i className="fas fa-question text-xl text-gray-600"></i>
                                     </button>
                                     <button 
-                                        onClick={openAllDecks}
+                                        onClick={() => setCurrentPage('allDecks')}
                                         className="mobile-button bg-white bg-opacity-30 p-3 rounded-full shadow-md text-gray-800 hover:bg-opacity-50 transition"
                                         title={TRANSLATIONS["en-US"].collection}
                                     >
@@ -1046,8 +1053,9 @@
                                         target="_blank" 
                                         rel="noopener noreferrer"
                                         className="mobile-button bg-white bg-opacity-30 p-3 rounded-full shadow-md text-gray-800 hover:bg-opacity-50 transition flex items-center gap-2"
+                                        title="Bestling.net"
                                     >
-                                        <i className="fas fa-external-link-alt text-xl"></i>
+                                        <i className="fas fa-book text-xl"></i> {/* Changed to book icon */}
                                         <span className="hidden sm:inline">Bestling.net</span>
                                     </a>
                                     <button 
@@ -1061,25 +1069,58 @@
 
                                 {/* Card Display Area */}
                                 <div className="card-scene relative w-full flex-grow flex items-center justify-center mb-8">
-                                    {/* Render next card slightly behind current for smooth transition */}
-                                    {nextCard && (
+                                    {/* Only render current card if it exists */}
+                                    {currentCard && (
+                                        <Flashcard 
+                                            card={currentCard} 
+                                            onSwipe={handleSwipe} 
+                                            isCurrent={true} 
+                                            className="show" 
+                                        />
+                                    )}
+                                    {/* Render next card if it exists and current card is not null */}
+                                    {currentCard && nextCard && (
                                         <Flashcard 
                                             card={nextCard} 
                                             isCurrent={false} 
-                                            className="new-card" // Class for initial hidden state
+                                            className="new-card" 
                                         />
                                     )}
-                                    {/* Current Card */}
-                                    <Flashcard 
-                                        card={currentCard} 
-                                        onSwipe={handleSwipe} 
-                                        isCurrent={true} 
-                                        className="show" // Class to show the current card
-                                    />
                                 </div>
-
-                                {/* Removed progress tracking icons from bottom */}
                             </div>
+                        );
+                    case 'remembered':
+                        return (
+                            <CollectionPage 
+                                title={TRANSLATIONS["en-US"].rememberedCards} 
+                                cards={rememberedCards} 
+                                onBack={() => setCurrentPage('flashcards')} 
+                                fallbackMessage={TRANSLATIONS["en-US"].noCollectedCards}
+                            />
+                        );
+                    case 'forgotten':
+                        return (
+                            <CollectionPage 
+                                title={TRANSLATIONS["en-US"].forgottenCards} 
+                                cards={forgottenCards} 
+                                onBack={() => setCurrentPage('flashcards')}
+                                fallbackMessage={TRANSLATIONS["en-US"].noCollectedCards}
+                            />
+                        );
+                    case 'allDecks':
+                        const allDeckItems = Object.keys(ACCESS_CODES).map(codeKey => {
+                            const deck = ACCESS_CODES[codeKey];
+                            return {
+                                title: deck.title,
+                                card: deck.sampleCard // Pass the sample card
+                            };
+                        });
+                        return (
+                            <AllDecksPage 
+                                title={TRANSLATIONS["en-US"].collection} 
+                                decks={allDeckItems} 
+                                onBack={() => setCurrentPage('flashcards')}
+                            />
                         );
                     default:
                         return null;
@@ -1089,18 +1130,84 @@
             return (
                 <div className="min-h-screen min-h-dvh flex flex-col items-center justify-center">
                     {renderContent()}
-                    {/* Unified Modal for collection views and errors */}
+                    {/* Error Modal */}
                     <Modal
-                        isOpen={showModal || showErrorModal}
-                        onClose={() => { setShowModal(false); setShowErrorModal(false); }}
-                        title={showErrorModal ? "Error" : modalContent.title}
-                        message={showErrorModal ? errorMessage : modalContent.message}
-                    >
-                        {modalContent.children}
-                    </Modal>
+                        isOpen={showErrorModal}
+                        onClose={() => setShowErrorModal(false)}
+                        title="Error"
+                        message={errorMessage}
+                    />
                 </div>
             );
         };
+
+        // Component for displaying remembered/forgotten cards in a grid
+        const CollectionPage = ({ title, cards, onBack, fallbackMessage }) => {
+            return (
+                <div className="flex flex-col items-center justify-start min-h-screen min-h-dvh p-4 relative w-full">
+                    {/* Top Navigation for Collection Pages */}
+                    <div className="w-full flex justify-between items-center p-4 z-10 bg-white bg-opacity-30 rounded-b-xl shadow-md">
+                        <button 
+                            onClick={onBack}
+                            className="mobile-button bg-white bg-opacity-50 p-3 rounded-full shadow-md text-gray-800 hover:bg-opacity-70 transition"
+                            title={TRANSLATIONS["en-US"].backToStudy}
+                        >
+                            <i className="fas fa-arrow-left text-xl"></i>
+                        </button>
+                        <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
+                        <div className="w-12 h-12"></div> {/* Spacer for alignment */}
+                    </div>
+
+                    <div className="flex-grow w-full p-4">
+                        {cards.length > 0 ? (
+                            <div className="small-card-grid">
+                                {cards.map((card, index) => (
+                                    <SmallCard key={index} card={card} />
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-white text-center text-lg mt-8">{fallbackMessage}</p>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // Component for displaying all decks
+        const AllDecksPage = ({ title, decks, onBack }) => {
+            return (
+                <div className="flex flex-col items-center justify-start min-h-screen min-h-dvh p-4 relative w-full">
+                    {/* Top Navigation for All Decks Page */}
+                    <div className="w-full flex justify-between items-center p-4 z-10 bg-white bg-opacity-30 rounded-b-xl shadow-md">
+                        <button 
+                            onClick={onBack}
+                            className="mobile-button bg-white bg-opacity-50 p-3 rounded-full shadow-md text-gray-800 hover:bg-opacity-70 transition"
+                            title={TRANSLATIONS["en-US"].backToStudy}
+                        >
+                            <i className="fas fa-arrow-left text-xl"></i>
+                        </button>
+                        <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
+                        <div className="w-12 h-12"></div> {/* Spacer for alignment */}
+                    </div>
+
+                    <div className="flex-grow w-full p-4">
+                        <div className="small-card-grid">
+                            {decks.map((deck, index) => (
+                                <div key={index} className="small-card flex-col items-center justify-center p-2">
+                                    <h4 className="font-bold text-base mb-2">{deck.title}</h4>
+                                    {deck.card ? (
+                                        <SmallCard card={deck.card} />
+                                    ) : (
+                                        <p className="text-sm text-gray-500">No sample card</p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
 
         ReactDOM.render(<App />, document.getElementById('root'));
     </script>
