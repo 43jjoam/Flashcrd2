@@ -42,7 +42,7 @@
             transform-style: preserve-3d; /* Preserves 3D transformations for children */
             transition: transform 1.2s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.5s ease-out; /* Smooth flip and opacity transitions */
             cursor: pointer;
-            touch-action: manipulation;
+            touch-action: pan-y; /* Allow vertical scrolling but handle horizontal panning */
             -webkit-tap-highlight-color: transparent; /* Removes tap highlight on mobile */
         }
 
@@ -499,370 +499,28 @@
             }
         };
 
-        // Sample Chinese vocabulary data
-        const CHINESE_VOCABULARY = [
-            { front: "爸爸\nbà ba", back: "dad\nพ่อ", emoji: "👨‍👧‍👦" }, { front: "别\nbié", back: "don't\nอย่า", emoji: "🚫" }, { front: "朋友\npéng yǒu", back: "friend\nเพื่อน", emoji: "👫" }, { front: "怕\npà", back: "to fear\nกลัว", emoji: "😨" }, { front: "妈妈\nmā ma", back: "mom\nแม่", emoji: "👩‍👧‍👦" }, { front: "买\nmǎi", back: "to buy\nซื้อ", emoji: "🛒" }, { front: "饭\nfàn", back: "meal\nข้าว", emoji: "🍽️" }, { front: "富\nfù", back: "rich\nรวย", emoji: "💰" }, { front: "奶奶\nnǎi nai", back: "grandmother\nยาย", emoji: "👵" }, { front: "你\nnǐ", back: "you\nคุณ", emoji: "👤" }, { front: "老\nlǎo", back: "old\nแก่", emoji: "🧓" }, { front: "来\nlái", back: "to come\nมา", emoji: "➡️" }, { front: "大\ndà", back: "big\nใหญ่", emoji: "📏" }, { front: "得\ndé", back: "to get\nได้รับ", emoji: "🏆" }, { front: "跳\ntiào", back: "to jump\nกระโดด", emoji: "🤸" }, { front: "调\ntiáo", back: "to adjust\nปรับ", emoji: "⚙️" }, { front: "猪\nzhū", back: "pig\nหมู", emoji: "🐷" }, { front: "住\nzhù", back: "to live\nอาศัย", emoji: "🏠" }, { front: "吃\nchī", back: "to eat\nกิน", emoji: "🍽️" }, { front: "出\nchū", back: "to go out\nออกไป", emoji: "🚪" }, { front: "高\ngāo", back: "high\nสูง", emoji: "📏" }, { front: "个\ngè", back: "measure word\nลักษณนาม", emoji: "📊" }, { front: "裤\nkù", back: "trousers\nกางเกง", emoji: "👖" }, { front: "可以\nkě yǐ", back: "can\nสามารถ", emoji: "✅" }, { front: "虎\nhǔ", back: "tiger\nเสือ", emoji: "🐅" }, { front: "好\nhǎo", back: "good\nดี", emoji: "👍" }, { front: "家\njiā", back: "home\nบ้าน", emoji: "🏡" }, { front: "就\njiù", back: "then\nแล้ว", emoji: "⏭️" }, { front: "小\nxiǎo", back: "small\nเล็ก", emoji: "🐭" }, { front: "喜欢\nxǐ huān", back: "to like\nชอบ", emoji: "❤️" }, { front: "起\nqǐ", back: "to rise\nลุกขึ้น", emoji: "⬆️" }, { front: "气\nqì", back: "air\nอากาศ", emoji: "💨" }, { front: "瘦\nshòu", back: "thin\nผอม", emoji: "🩲" }, { front: "上\nshàng", back: "up\nขึ้น", emoji: "⬆️" }, { front: "热\nrè", back: "hot\nร้อน", emoji: "🌡️" }, { front: "让\nràng", back: "to let\nให้", emoji: "🤲" }, { front: "菜\ncài", back: "dish\nจาน", emoji: "🥗" }, { front: "才\ncái", back: "just now\nเพิ่ง", emoji: "⏰" }, { front: "要\nyào", back: "to want\nอยาก", emoji: "💭" }, { front: "有\nyǒu", back: "to have\nมี", emoji: "📦" }, { front: "在\nzài", back: "at\nอยู่", emoji: "📍" }, { front: "走\nzǒu", back: "to walk\nเดิน", emoji: "🚶" }, { front: "三\nsān", back: "three\nสาม", emoji: "3️⃣" }, { front: "四\nsì", back: "four\nสี่", emoji: "4️⃣" }, { front: "问\nwèn", back: "to ask\nถาม", emoji: "❓" }, { front: "舞\nwǔ", back: "dance\nเต้นรำ", emoji: "💃" }, { front: "女\nnǚ", back: "woman\nผู้หญิง", emoji: "♀️" }, { front: "去\nqù", back: "to go\nไป", emoji: "➡️" }, { front: "矮\nǎi", back: "short\nเตี้ย", emoji: "📏" }, { front: "爱\nài", back: "to love\nรัก", emoji: "❤️" }, { front: "没\nméi", back: "not\nไม่มี", emoji: "❌" }, { front: "为什么\nwèi shén me", back: "why\nทำไม", emoji: "❓" }, { front: "打\ndǎ", back: "to hit\nตี", emoji: "👊" }, { front: "他\ntā", back: "he/she/it\nเขา", emoji: "👤" }, { front: "我\nwǒ", back: "I\nฉัน", emoji: "👆" }, { front: "摸\nmō", back: "to touch\nแตะ", emoji: "👋" }, { front: "喝\nhē", back: "to drink\nดื่ม", emoji: "🥤" }, { front: "了\nle", back: "particle\nคำลงท้าย", emoji: "✓" }, { front: "鸡\njī", back: "chicken\nไก่", emoji: "🐔" }, { front: "是\nshì", back: "to be/yes\nเป็น/ใช่", emoji: "✓" }, { front: "不\nbù", back: "no\nไม่", emoji: "❌" }, { front: "书\nshū", back: "book\nหนังสือ", emoji: "📖" }, { front: "睡\nshuì", back: "to sleep\nนอนหลับ", emoji: "😴" }, { front: "水\nshuǐ", back: "water\nน้ำ", emoji: "💧" }, { front: "到\ndào", back: "to arrive\nถึง", emoji: "📍" }, { front: "药\nyào", back: "medicine\nยา", emoji: "💊" }, { front: "肉\nròu", back: "meat\nเนื้อ", emoji: "🥩" }, { front: "游\nyóu", back: "to swim\nว่ายน้ำ", emoji: "🏊" }, { front: "球\nqiú", back: "ball\nลูกบอล", emoji: "⚽" }, { front: "牛\nniú", back: "cow\nวัว", emoji: "🐄" }, { front: "鞋\nxié", back: "shoe\nรองเท้า", emoji: "👟" }, { front: "谢\nxiè", back: "to thank\nขอบคุณ", emoji: "🙏" }, { front: "学\nxué", back: "to learn\nเรียน", emoji: "📚" }, { front: "觉\njiào", back: "sleep\nนอน", emoji: "😴" }, { front: "看\nkàn", back: "to look\nดู", emoji: "👁️" }, { front: "玩\nwán", back: "to play\nเล่น", emoji: "🎮" }, { front: "很\nhěn", back: "very\nมาก", emoji: "⭐" }, { front: "人\nrén", back: "people\nคน", emoji: "👥" }, { front: "心\nxīn", back: "heart\nหัวใจ", emoji: "💖" }, { front: "新\nxīn", back: "new\nใหม่", emoji: "✨" }, { front: "困\nkùn", back: "sleepy\nง่วง", emoji: "😪" }, { front: "春\nchūn", back: "spring\nฤดูใบไม้ผลิ", emoji: "🌸" }, { front: "云\nyún", back: "cloud\nเมฆ", emoji: "☁️" }, { front: "军\njūn", back: "army\nกองทัพ", emoji: "🪖" }, { front: "胖\npàng", back: "fat\nอ้วน", emoji: "🫃" }, { front: "唱\nchàng", back: "to sing\nร้องเพลง", emoji: "🎤" }, { front: "生\nshēng", back: "to live\nอยู่", emoji: "🌱" }, { front: "冷\nlěng", back: "cold\nหนาว", emoji: "🥶" }, { front: "病\nbìng", back: "illness\nป่วย", emoji: "🤒" }, { front: "明\nmíng", back: "bright\nสว่าง", emoji: "☀️" }, { front: "空\nkōng", back: "empty\nว่าง", emoji: "📦" }, { front: "泳\nyǒng", back: "to swim\nว่ายน้ำ", emoji: "🏊" }, { front: "笑\nxiào", back: "to laugh\nหัวเราะ", emoji: "😄" }, { front: "叫\njiào", back: "to call/scream\nเรียก/ตะโกน", emoji: "📢" }, { front: "夸\nkuā", back: "to praise\nชม", emoji: "👏" }, { front: "花\nhuā", back: "flower\nดอกไม้", emoji: "🌸" }, { front: "活\nhuó", back: "to live\nอยู่", emoji: "❤️" }, { front: "多\nduō", back: "many\nมาก", emoji: "👥" }, { front: "坏\nhuài", back: "bad\nเสีย", emoji: "😈" }, { front: "快\nkuài", back: "fast\nเร็ว", emoji: "⚡" }, { front: "穿\nchuān", back: "to wear\nใส่", emoji: "👕" }, { front: "全\nquán", back: "entire\nทั้งหมด", emoji: "💯" }, { front: "床\nchuáng", back: "bed\nเตียง", emoji: "🛏️" }, { front: "光\nguāng", back: "light\nแสง", emoji: "💡" }, { front: "想\nxiǎng", back: "to want\nคิด", emoji: "💭" }, { front: "亮\nliàng", back: "bright\nสว่าง", emoji: "💡" }, { front: "现\nxiàn", back: "to appear\nปรากฏ", emoji: "👁️" }, { front: "天\ntiān", back: "day\nวัน", emoji: "📅" }, { front: "熊\nxióng", back: "bear\nหมี", emoji: "🐻" }, { front: "穷\nqióng", back: "poor\nจน", emoji: "💸" }, { front: "元\nyuán", back: "unit of currency\nหน่วยเงิน", emoji: "💰" }, { front: "远\nyuǎn", back: "far\nไกล", emoji: "🏃" }, { front: "儿\nér", back: "son\nลูกชาย", emoji: "👦" }, { front: "二\nèr", back: "two\nสอง", emoji: "2️⃣" }
-        ];
-
-        // Sample Pinyin cards (can be expanded)
-        const PINYIN_CARDS = [
-            { front: "ang", back: "ang\nFinal compound: 'ahng' sound\nเสียงสระผสม: 'อาง'", emoji: "🗣️" }, { front: "ing", back: "ing\nFinal compound: 'eeng' sound\nเสียงสระผสม: 'อิง'", emoji: "🗣️" }, { front: "en", back: "en\nFinal compound: 'uhn' sound\nเสียงสระผสม: 'เอิน'", emoji: "🗣️" }, { front: "ai", back: "ai\nFinal compound: 'eye' sound\nเสียงสระผสม: 'ไอ'", emoji: "🗣️" }, { front: "ao", back: "ao\nFinal compound: 'aow' sound\nเสียงสระผสม: 'เอา'", emoji: "🗣️" }
-        ];
-
-        // Valid access codes and their corresponding deck data
-        const ACCESS_CODES = {
-            "LearnChinesewithHelen1295": {
-                title: "Chinese Vocabulary",
-                // Map cards to add an initial status
-                cards: CHINESE_VOCABULARY.map(card => ({ ...card, status: 'new' })),
-                sampleCard: { ...CHINESE_VOCABULARY[0], status: 'new' } // Ensure sample also has status
-            },
-            "PinyinPractice": {
-                title: "Pinyin Practice",
-                // Map cards to add an initial status
-                cards: PINYIN_CARDS.map(card => ({ ...card, status: 'new' })),
-                sampleCard: { ...PINYIN_CARDS[0], status: 'new' } // Ensure sample also has status
-            },
-            // Add more codes and decks here
-        };
-
-        // --- UTILITY HOOKS & FUNCTIONS ---
-
-        // Custom hook for speech synthesis
-        const useSpeech = () => {
-            const [voices, setVoices] = useState([]);
-
-            // Effect to load available voices when component mounts or voices change
-            useEffect(() => {
-                const loadVoices = () => {
-                    const availableVoices = window.speechSynthesis.getVoices();
-                    if (availableVoices.length > 0) {
-                        setVoices(availableVoices);
-                    }
-                };
-                
-                loadVoices(); // Initial load
-                window.speechSynthesis.onvoiceschanged = loadVoices; // Listen for voice changes
-
-                // Cleanup function
-                return () => {
-                    window.speechSynthesis.onvoiceschanged = null;
-                };
-            }, []);
-            
-            // Function to detect language based on text content
-            const detectLanguage = (text) => {
-                if (!text) return 'en-US';
-                // Check for Chinese characters
-                if (/[\u4e00-\u9fff]/.test(text)) return 'zh-CN';
-                // Check for Thai characters
-                if (/[\u0e00-\u0e7f]/.test(text)) return 'th-TH';
-                // Simple check for Pinyin (latin characters, no spaces, short)
-                if (/^[a-zA-Z\u0300-\u036f]+$/.test(text) && text.length <= 10) return 'zh-CN'; 
-                return 'en-US'; // Default to English
-            };
-
-            // Function to pronounce text
-            const pronounceText = useCallback((text, specificLang = null) => {
-                if (!text || !text.trim() || !window.speechSynthesis || voices.length === 0) {
-                    console.warn("Speech synthesis not ready or text is empty.");
-                    return;
-                }
-
-                window.speechSynthesis.cancel(); // Stop any ongoing speech
-
-                // Small delay to ensure cancel works reliably before speaking new text
-                setTimeout(() => {
-                    const utterance = new SpeechSynthesisUtterance(text);
-                    const lang = specificLang || detectLanguage(text); // Use specificLang if provided, else detect
-
-                    utterance.lang = lang;
-                    let voice;
-
-                    // Select voice based on detected/specified language
-                    if (lang.startsWith('zh')) {
-                        voice = voices.find(v => v.lang.includes('zh-CN') || v.lang.includes('zh-TW') || v.name.toLowerCase().includes('mandarin')) || voices.find(v => v.lang.startsWith('zh'));
-                        utterance.rate = 0.6; // Slower rate for Chinese
-                        utterance.pitch = 1.0;
-                    } else if (lang.startsWith('th')) {
-                        voice = voices.find(v => v.lang.includes('th-TH')) || voices.find(v => v.lang.startsWith('th'));
-                        utterance.rate = 0.7; // Slightly slower for Thai
-                    } else { // Default to English
-                        voice = voices.find(v => v.lang.includes('en-US')) || voices.find(v => v.lang.startsWith('en'));
-                        utterance.rate = 0.8;
-                    }
-                    
-                    utterance.voice = voice || null; // Assign selected voice
-                    
-                    utterance.onerror = (e) => console.error('Speech synthesis error:', e.error);
-                    
-                    window.speechSynthesis.speak(utterance); // Speak the text
-                }, 100); 
-            }, [voices]); // Re-create if voices change
-
-            return { pronounceText };
-        };
-
-        // Custom Modal component for alerts/messages
-        const Modal = ({ isOpen, onClose, title, message, children }) => {
-            if (!isOpen) return null;
-
-            return (
-                <div className={`modal-overlay ${isOpen ? 'open' : ''}`} onClick={onClose}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        {title && <h3 className="text-2xl font-bold mb-4 text-gray-800">{title}</h3>}
-                        {message && <p className="text-gray-700 mb-6">{message}</p>}
-                        {children}
-                        <button
-                            onClick={onClose}
-                            className="mt-4 px-6 py-3 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 transition duration-300 mobile-button"
-                        >
-                            Close
-                        </button>
-                    </div>
-                </div>
-            );
-        };
-
-        // SlideToUnlock component
-        const SlideToUnlock = ({ onUnlock }) => {
-            const sliderRef = useRef(null);
-            const [isDragging, setIsDragging] = useState(false);
-            const [currentX, setCurrentX] = useState(0);
-            const [unlocked, setUnlocked] = useState(false);
-            const [maxTranslateX, setMaxTranslateX] = useState(0); // Make dynamic
-
-            // Calculate maxTranslateX on mount and window resize
-            useEffect(() => {
-                const calculateMaxTranslateX = () => {
-                    if (sliderRef.current) {
-                        // Container width minus button width (50px)
-                        setMaxTranslateX(sliderRef.current.offsetWidth - 50);
-                    }
-                };
-
-                calculateMaxTranslateX();
-                window.addEventListener('resize', calculateMaxTranslateX);
-
-                return () => {
-                    window.removeEventListener('resize', calculateMaxTranslateX);
-                };
-            }, []);
-
-            const handleTouchStart = (e) => {
-                if (unlocked) return;
-                setIsDragging(true);
-                // Store the initial touch X position
-                sliderRef.current.startX = e.touches[0].clientX;
-                sliderRef.current.initialX = currentX;
-            };
-
-            const handleTouchMove = (e) => {
-                if (!isDragging || unlocked) return;
-                const deltaX = e.touches[0].clientX - sliderRef.current.startX;
-                let newX = sliderRef.current.initialX + deltaX;
-
-                // Clamp the newX value between 0 and maxTranslateX
-                newX = Math.max(0, Math.min(newX, maxTranslateX));
-                setCurrentX(newX);
-
-                if (newX >= maxTranslateX - 5) { // Threshold for unlock
-                    setUnlocked(true);
-                    setIsDragging(false);
-                    onUnlock();
-                }
-            };
-
-            const handleTouchEnd = () => {
-                if (!unlocked) {
-                    setIsDragging(false);
-                    setCurrentX(0); // Reset if not unlocked
-                }
-            };
-
-            return (
-                <div 
-                    ref={sliderRef}
-                    className="slide-container relative w-full max-w-xs h-12 bg-white bg-opacity-20 rounded-full overflow-hidden shadow-lg"
-                    onTouchStart={handleTouchStart}
-                    onTouchMove={handleTouchMove}
-                    onTouchEnd={handleTouchEnd}
-                >
-                    <div 
-                        className="slide-fill absolute top-0 left-0 h-full bg-blue-400 bg-opacity-50 rounded-full"
-                        style={{ width: `${(currentX / maxTranslateX) * 100}%` }}
-                    ></div>
-                    <div 
-                        className={`slide-button absolute top-0 left-0 w-12 h-12 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white text-2xl shadow-md ${unlocked ? 'unlocked' : ''}`}
-                        style={{ transform: `translateX(${currentX}px)` }}
-                    >
-                        {unlocked ? <i className="fas fa-check"></i> : <i className="fas fa-chevron-right"></i>}
-                    </div>
-                    <div className={`slide-text absolute w-full h-full flex items-center justify-center text-white text-sm font-semibold pointer-events-none ${unlocked ? 'opacity-0' : 'opacity-100'}`}>
-                        {TRANSLATIONS["en-US"].slideToUnlock}
-                    </div>
-                </div>
-            );
-        };
-
-        // SmallCard component for collection views
-        const SmallCard = ({ card }) => {
-            const [chineseChar, pinyin] = card.front.split('\n')[0].trim(); // Only Chinese char for small card
-            return (
-                <div className="small-card">
-                    <div className="chinese-character">{chineseChar}</div>
-                    <div className="emoji-display">{card.emoji}</div>
-                </div>
-            );
-        };
-
-
-        // Flashcard component
-        const Flashcard = ({ card, onFlip, onSwipe, isCurrent, className = '' }) => {
-            const [isFlipped, setIsFlipped] = useState(false);
-            const cardRef = useRef(null);
-            const startX = useRef(0);
-            const currentTranslateX = useRef(0);
-            const isSwiping = useRef(false);
-            const { pronounceText } = useSpeech();
-
-            // Reset flip state when card changes
-            useEffect(() => {
-                setIsFlipped(false);
-            }, [card]);
-
-            // Handle touch start for swiping
-            const handleTouchStart = (e) => {
-                if (!isCurrent) return; // Only interact with the current card
-                startX.current = e.touches[0].clientX;
-                isSwiping.current = false;
-                cardRef.current.style.transition = 'none'; // Disable transition during drag
-            };
-
-            // Handle touch move for swiping
-            const handleTouchMove = (e) => {
-                if (!isCurrent || !cardRef.current) return;
-                const deltaX = e.touches[0].clientX - startX.current;
-                currentTranslateX.current = deltaX;
-
-                // If movement is significant, consider it a swipe
-                if (Math.abs(deltaX) > 20) {
-                    isSwiping.current = true;
-                    // Apply a more dynamic rotation based on swipe distance
-                    const rotationZ = deltaX / 5; // Adjust sensitivity
-                    const opacity = 1 - (Math.abs(deltaX) / window.innerWidth); // Fade out based on screen width
-                    cardRef.current.style.transform = `translateX(${deltaX}px) rotateZ(${rotationZ}deg)`;
-                    cardRef.current.style.opacity = opacity; 
-                }
-            };
-
-            // Handle touch end for swiping
-            const handleTouchEnd = () => {
-                if (!isCurrent || !cardRef.current) return;
-                cardRef.current.style.transition = 'all 0.6s cubic-bezier(0.6, -0.28, 0.735, 0.045)'; // Re-enable transition with new animation
-
-                if (isSwiping.current) {
-                    if (currentTranslateX.current > 100) { // Swiped right (remembered)
-                        cardRef.current.classList.add('swiping-right');
-                        setTimeout(() => onSwipe('right'), 600); // Call callback after animation
-                    } else if (currentTranslateX.current < -100) { // Swiped left (forgot)
-                        cardRef.current.classList.add('swiping-left');
-                        setTimeout(() => onSwipe('left'), 600); // Call callback after animation
-                    } else {
-                        // Reset card position if not swiped enough
-                        cardRef.current.style.transform = '';
-                        cardRef.current.style.opacity = '';
-                    }
-                } else {
-                    // If not swiping, it's a tap to flip
-                    setIsFlipped(!isFlipped);
-                    onFlip && onFlip();
-                }
-                isSwiping.current = false;
-                currentTranslateX.current = 0;
-            };
-
-            // Function to handle pronunciation for specific text parts
-            const handlePronounce = (text, lang) => {
-                pronounceText(text, lang);
-            };
-
-            // Split front and back content for individual pronunciation
-            const [chineseChar, pinyin] = card.front.split('\n').map(s => s.trim());
-            const [englishTranslation, thaiTranslation] = card.back.split('\n').map(s => s.trim());
-
-            return (
-                <div 
-                    ref={cardRef}
-                    className={`card-3d ${isFlipped ? 'flipped' : ''} ${className}`}
-                    onTouchStart={handleTouchStart}
-                    onTouchMove={handleTouchMove}
-                    onTouchEnd={handleTouchEnd}
-                >
-                    {/* Front Face */}
-                    <div className="card-face flex flex-col items-center justify-center p-6">
-                        <div className="card-content">
-                            <div 
-                                className="chinese-character" 
-                                onClick={(e) => { e.stopPropagation(); handlePronounce(chineseChar, 'zh-CN'); }}
-                            >
-                                {chineseChar}
-                            </div>
-                            <div 
-                                className="pinyin" 
-                                onClick={(e) => { e.stopPropagation(); handlePronounce(pinyin, 'zh-CN'); }}
-                            >
-                                {pinyin}
-                            </div>
-                            <div className="emoji-display">{card.emoji}</div>
-                        </div>
-                    </div>
-
-                    {/* Back Face */}
-                    <div className="card-face card-back flex flex-col items-center justify-center p-6">
-                        <div className="card-content">
-                            <div 
-                                className="english-translation" 
-                                onClick={(e) => { e.stopPropagation(); handlePronounce(englishTranslation, 'en-US'); }}
-                            >
-                                {englishTranslation}
-                            </div>
-                            <div 
-                                className="thai-translation" 
-                                onClick={(e) => { e.stopPropagation(); handlePronounce(thaiTranslation, 'th-TH'); }}
-                            >
-                                {thaiTranslation}
-                            </div>
-                            <div className="emoji-display mt-4">{card.emoji}</div>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
         // Main App component
         const App = () => {
-            const [currentPage, setCurrentPage] = useState('landing'); // 'landing', 'flashcards', 'remembered', 'forgotten', 'allDecks'
+            const [currentPage, setCurrentPage] = useState('landing');
             const [flashcards, setFlashcards] = useState([]);
             const [currentCardIndex, setCurrentCardIndex] = useState(0);
             const [rememberedCards, setRememberedCards] = useState([]);
             const [forgottenCards, setForgottenCards] = useState([]);
             const [showErrorModal, setShowErrorModal] = useState(false);
             const [errorMessage, setErrorMessage] = useState('');
-            const [code, setCode] = useState(''); // Define code state here
-            const [activeDeckTitle, setActiveDeckTitle] = useState(''); // To display current deck title
+            const [code, setCode] = useState('');
+            const [activeDeckTitle, setActiveDeckTitle] = useState('');
 
             // Function to handle code submission and deck loading
             const handleCodeUnlock = () => {
                 const deckData = ACCESS_CODES[code];
                 if (deckData) {
-                    // Ensure all cards start with 'new' status when a new deck is loaded
                     const initialCards = deckData.cards.map(card => ({ ...card, status: 'new' }));
-                    setFlashcards([...initialCards].sort(() => Math.random() - 0.5)); // Shuffle the deck
+                    setFlashcards([...initialCards].sort(() => Math.random() - 0.5));
                     setCurrentCardIndex(0);
                     setRememberedCards([]);
                     setForgottenCards([]);
-                    setActiveDeckTitle(deckData.title); // Set active deck title
+                    setActiveDeckTitle(deckData.title);
                     setCurrentPage('flashcards');
                 } else {
                     setErrorMessage("Invalid code. Please try again.");
@@ -871,7 +529,6 @@
             };
 
             // Helper function to remove a card from a list by its 'front' content
-            // This ensures uniqueness in remembered/forgotten lists
             const removeCardFromList = useCallback((list, cardToRemove) => {
                 return list.filter(card => card.front !== cardToRemove.front);
             }, []);
@@ -880,77 +537,38 @@
             const handleSwipe = useCallback((direction) => {
                 if (flashcards.length === 0) return;
 
-                // Create a mutable copy of the card to update its status
                 const swipedCard = { ...flashcards[currentCardIndex] }; 
                 let newFlashcards = [...flashcards];
 
-                // 1. Remove the swiped card from its current position in the active study deck
                 newFlashcards.splice(currentCardIndex, 1);
 
-                // 2. Manage rememberedCards and forgottenCards for mutual exclusivity and uniqueness
                 let updatedRemembered = removeCardFromList(rememberedCards, swipedCard);
                 let updatedForgotten = removeCardFromList(forgottenCards, swipedCard);
 
-                if (direction === 'left') { // User swiped left (Forgot)
-                    if (swipedCard.status === 'remembered_level1') { // remembered_level1 swiped left -> forgotten_level1
+                if (direction === 'left') {
+                    if (swipedCard.status === 'remembered_level1') {
                         swipedCard.status = 'forgotten_level1';
-                        // Re-insert 5 cards later
-                        const reinsertIndex = Math.min(currentCardIndex + 5, newFlashcards.length);
-                        newFlashcards.splice(reinsertIndex, 0, swipedCard);
-                        updatedForgotten = [...updatedForgotten, swipedCard]; // Add to forgotten list
-                    }
-                    else if (swipedCard.status === 'new' || swipedCard.status === 'forgotten_level1') {
-                        swipedCard.status = 'forgotten_level1';
-                        // Re-insert 5 cards later
-                        const reinsertIndex = Math.min(currentCardIndex + 5, newFlashcards.length);
-                        newFlashcards.splice(reinsertIndex, 0, swipedCard);
-                        updatedForgotten = [...updatedForgotten, swipedCard]; // Add to forgotten list
-                    } else if (swipedCard.status === 'forgotten_level2') {
-                        // If already level2, and forgotten again, keep it at level2 and re-insert 5 cards later
-                        swipedCard.status = 'forgotten_level2'; 
-                        const reinsertIndex = Math.min(currentCardIndex + 5, newFlashcards.length);
-                        newFlashcards.splice(reinsertIndex, 0, swipedCard);
-                        updatedForgotten = [...updatedForgotten, swipedCard]; // Add to forgotten list
-                    }
-                } else { // User swiped right (Remembered / Progressing)
-                    if (swipedCard.status === 'new') { // NEW LOGIC: New card swiped right is remembered_level1
-                        swipedCard.status = 'remembered_level1';
-                        updatedRemembered = [...updatedRemembered, swipedCard]; // Add to remembered list
-                        // Re-insert to the bottom of the deck
-                        newFlashcards.push(swipedCard); 
-                    } else if (swipedCard.status === 'remembered_level1') { // NEW LOGIC: remembered_level1 swiped right -> remembered_level2
-                        swipedCard.status = 'remembered_level2';
-                        updatedRemembered = [...updatedRemembered, swipedCard]; // Update in remembered list
-                        // Do NOT re-insert into newFlashcards (permanently remembered)
-                    } else if (swipedCard.status === 'forgotten_level1') {
-                        swipedCard.status = 'forgotten_level2';
-                        // Re-insert 10 cards later (for 11th position)
                         const reinsertIndex = Math.min(currentCardIndex + 10, newFlashcards.length);
                         newFlashcards.splice(reinsertIndex, 0, swipedCard);
-                        updatedForgotten = [...updatedForgotten, swipedCard]; // Still considered forgotten, just deeper
+                        updatedForgotten = [...updatedForgotten, swipedCard];
                     } else if (swipedCard.status === 'forgotten_level2') {
-                        swipedCard.status = 'remembered'; // Fully remembered
-                        updatedRemembered = [...updatedRemembered, swipedCard]; // Add to remembered list
-                        // Do NOT re-insert into newFlashcards
+                        swipedCard.status = 'remembered';
+                        updatedRemembered = [...updatedRemembered, swipedCard];
                     }
                 }
 
-                // Update state arrays
                 setRememberedCards(updatedRemembered);
                 setForgottenCards(updatedForgotten);
                 setFlashcards(newFlashcards);
 
-                // Adjust currentCardIndex for the next card after animation
                 setTimeout(() => {
-                    // If the deck is now empty, or if currentCardIndex is out of bounds, reset to 0
                     if (newFlashcards.length === 0) {
-                        setCurrentCardIndex(0); // Deck is truly completed
+                        setCurrentCardIndex(0);
                     } else if (currentCardIndex >= newFlashcards.length) {
-                        setCurrentCardIndex(0); // Loop back to start of remaining cards
+                        setCurrentCardIndex(0);
                     }
-                    // Otherwise, currentCardIndex naturally points to the next card due to splice shifting.
-                }, 600); 
-            }, [flashcards, currentCardIndex, rememberedCards, forgottenCards, removeCardFromList]); // Add dependencies
+                }, 300); 
+            }, [flashcards, currentCardIndex, rememberedCards, forgottenCards, removeCardFromList]);
 
             // Reset app state to landing page
             const resetApp = () => {
@@ -969,7 +587,6 @@
                     case 'landing':
                         return (
                             <div className="mobile-center flex-col p-4">
-                                {/* Removed watercolor-card class for transparent background */}
                                 <div className="p-8 flex flex-col items-center gap-8 max-w-md w-full">
                                     <h1 className="text-3xl font-extrabold text-white text-center drop-shadow-lg">
                                         {TRANSLATIONS["en-US"].flashcardsCode}
@@ -990,14 +607,11 @@
                         );
                     case 'flashcards':
                         const currentCard = flashcards[currentCardIndex];
-                        const nextCard = flashcards[currentCardIndex + 1]; // Still useful for pre-rendering next card
+                        const nextCard = flashcards[currentCardIndex + 1];
 
                         if (!currentCard && flashcards.length > 0) {
-                            // This case handles when currentCardIndex has gone past the last card
-                            // but there are still cards in the deck (e.g., forgotten cards re-added later)
-                            // We should loop back to the beginning of the remaining cards.
                             setCurrentCardIndex(0);
-                            return null; // Render nothing for a moment while state updates
+                            return null;
                         }
                         
                         if (flashcards.length === 0) {
@@ -1026,7 +640,7 @@
                         return (
                             <div className="flex flex-col items-center justify-between min-h-screen min-h-dvh p-4 relative">
                                 {/* Top Navigation Icons */}
-                                <div className="w-full flex justify-between items-center p-4 z-10 space-x-4"> {/* Added space-x-4 for spacing */}
+                                <div className="w-full flex justify-between items-center p-4 z-10 space-x-4">
                                     <button 
                                         onClick={() => setCurrentPage('remembered')}
                                         className="mobile-button bg-white bg-opacity-30 p-3 rounded-full shadow-md text-gray-800 hover:bg-opacity-50 transition"
@@ -1055,7 +669,7 @@
                                         className="mobile-button bg-white bg-opacity-30 p-3 rounded-full shadow-md text-gray-800 hover:bg-opacity-50 transition flex items-center gap-2"
                                         title="Bestling.net"
                                     >
-                                        <i className="fas fa-book text-xl"></i> {/* Changed to book icon */}
+                                        <i className="fas fa-book text-xl"></i>
                                         <span className="hidden sm:inline">Bestling.net</span>
                                     </a>
                                     <button 
@@ -1069,7 +683,6 @@
 
                                 {/* Card Display Area */}
                                 <div className="card-scene relative w-full flex-grow flex items-center justify-center mb-8">
-                                    {/* Only render current card if it exists */}
                                     {currentCard && (
                                         <Flashcard 
                                             card={currentCard} 
@@ -1078,7 +691,6 @@
                                             className="show" 
                                         />
                                     )}
-                                    {/* Render next card if it exists and current card is not null */}
                                     {currentCard && nextCard && (
                                         <Flashcard 
                                             card={nextCard} 
@@ -1112,7 +724,7 @@
                             const deck = ACCESS_CODES[codeKey];
                             return {
                                 title: deck.title,
-                                card: deck.sampleCard // Pass the sample card
+                                card: deck.sampleCard
                             };
                         });
                         return (
@@ -1130,7 +742,6 @@
             return (
                 <div className="min-h-screen min-h-dvh flex flex-col items-center justify-center">
                     {renderContent()}
-                    {/* Error Modal */}
                     <Modal
                         isOpen={showErrorModal}
                         onClose={() => setShowErrorModal(false)}
@@ -1145,7 +756,6 @@
         const CollectionPage = ({ title, cards, onBack, fallbackMessage }) => {
             return (
                 <div className="flex flex-col items-center justify-start min-h-screen min-h-dvh p-4 relative w-full">
-                    {/* Top Navigation for Collection Pages */}
                     <div className="w-full flex justify-between items-center p-4 z-10 bg-white bg-opacity-30 rounded-b-xl shadow-md">
                         <button 
                             onClick={onBack}
@@ -1155,7 +765,7 @@
                             <i className="fas fa-arrow-left text-xl"></i>
                         </button>
                         <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
-                        <div className="w-12 h-12"></div> {/* Spacer for alignment */}
+                        <div className="w-12 h-12"></div>
                     </div>
 
                     <div className="flex-grow w-full p-4">
@@ -1177,7 +787,6 @@
         const AllDecksPage = ({ title, decks, onBack }) => {
             return (
                 <div className="flex flex-col items-center justify-start min-h-screen min-h-dvh p-4 relative w-full">
-                    {/* Top Navigation for All Decks Page */}
                     <div className="w-full flex justify-between items-center p-4 z-10 bg-white bg-opacity-30 rounded-b-xl shadow-md">
                         <button 
                             onClick={onBack}
@@ -1187,7 +796,7 @@
                             <i className="fas fa-arrow-left text-xl"></i>
                         </button>
                         <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
-                        <div className="w-12 h-12"></div> {/* Spacer for alignment */}
+                        <div className="w-12 h-12"></div>
                     </div>
 
                     <div className="flex-grow w-full p-4">
@@ -1208,8 +817,534 @@
             );
         };
 
-
         ReactDOM.render(<App />, document.getElementById('root'));
     </script>
 </body>
-</html>
+</html> Math.min(currentCardIndex + 5, newFlashcards.length);
+                        newFlashcards.splice(reinsertIndex, 0, swipedCard);
+                        updatedForgotten = [...updatedForgotten, swipedCard];
+                    }
+                    else if (swipedCard.status === 'new' || swipedCard.status === 'forgotten_level1') {
+                        swipedCard.status = 'forgotten_level1';
+                        const reinsertIndex = Math.min(currentCardIndex + 5, newFlashcards.length);
+                        newFlashcards.splice(reinsertIndex, 0, swipedCard);
+                        updatedForgotten = [...updatedForgotten, swipedCard];
+                    } else if (swipedCard.status === 'forgotten_level2') {
+                        swipedCard.status = 'forgotten_level2'; 
+                        const reinsertIndex = Math.min(currentCardIndex + 5, newFlashcards.length);
+                        newFlashcards.splice(reinsertIndex, 0, swipedCard);
+                        updatedForgotten = [...updatedForgotten, swipedCard];
+                    }
+                } else {
+                    if (swipedCard.status === 'new') {
+                        swipedCard.status = 'remembered_level1';
+                        updatedRemembered = [...updatedRemembered, swipedCard];
+                        newFlashcards.push(swipedCard); 
+                    } else if (swipedCard.status === 'remembered_level1') {
+                        swipedCard.status = 'remembered_level2';
+                        updatedRemembered = [...updatedRemembered, swipedCard];
+                    } else if (swipedCard.status === 'forgotten_level1') {
+                        swipedCard.status = 'forgotten_level2';
+                        const reinsertIndex =
+
+        // Sample Chinese vocabulary data
+        const CHINESE_VOCABULARY = [
+            { front: "爸爸\nbà ba", back: "dad\nพ่อ", emoji: "👨‍👧‍👦" }, { front: "别\nbié", back: "don't\nอย่า", emoji: "🚫" }, { front: "朋友\npéng yǒu", back: "friend\nเพื่อน", emoji: "👫" }, { front: "怕\npà", back: "to fear\nกลัว", emoji: "😨" }, { front: "妈妈\nmā ma", back: "mom\nแม่", emoji: "👩‍👧‍👦" }, { front: "买\nmǎi", back: "to buy\nซื้อ", emoji: "🛒" }, { front: "饭\nfàn", back: "meal\nข้าว", emoji: "🍽️" }, { front: "富\nfù", back: "rich\nรวย", emoji: "💰" }, { front: "奶奶\nnǎi nai", back: "grandmother\nยาย", emoji: "👵" }, { front: "你\nnǐ", back: "you\nคุณ", emoji: "👤" }, { front: "老\nlǎo", back: "old\nแก่", emoji: "🧓" }, { front: "来\nlái", back: "to come\nมา", emoji: "➡️" }, { front: "大\ndà", back: "big\nใหญ่", emoji: "📏" }, { front: "得\ndé", back: "to get\nได้รับ", emoji: "🏆" }, { front: "跳\ntiào", back: "to jump\nกระโดด", emoji: "🤸" }, { front: "调\ntiáo", back: "to adjust\nปรับ", emoji: "⚙️" }, { front: "猪\nzhū", back: "pig\nหมู", emoji: "🐷" }, { front: "住\nzhù", back: "to live\nอาศัย", emoji: "🏠" }, { front: "吃\nchī", back: "to eat\nกิน", emoji: "🍽️" }, { front: "出\nchū", back: "to go out\nออกไป", emoji: "🚪" }, { front: "高\ngāo", back: "high\nสูง", emoji: "📏" }, { front: "个\ngè", back: "measure word\nลักษณนาม", emoji: "📊" }, { front: "裤\nkù", back: "trousers\nกางเกง", emoji: "👖" }, { front: "可以\nkě yǐ", back: "can\nสามารถ", emoji: "✅" }, { front: "虎\nhǔ", back: "tiger\nเสือ", emoji: "🐅" }, { front: "好\nhǎo", back: "good\nดี", emoji: "👍" }, { front: "家\njiā", back: "home\nบ้าน", emoji: "🏡" }, { front: "就\njiù", back: "then\nแล้ว", emoji: "⏭️" }, { front: "小\nxiǎo", back: "small\nเล็ก", emoji: "🐭" }, { front: "喜欢\nxǐ huān", back: "to like\nชอบ", emoji: "❤️" }, { front: "起\nqǐ", back: "to rise\nลุกขึ้น", emoji: "⬆️" }, { front: "气\nqì", back: "air\nอากาศ", emoji: "💨" }, { front: "瘦\nshòu", back: "thin\nผอม", emoji: "🩲" }, { front: "上\nshàng", back: "up\nขึ้น", emoji: "⬆️" }, { front: "热\nrè", back: "hot\nร้อน", emoji: "🌡️" }, { front: "让\nràng", back: "to let\nให้", emoji: "🤲" }, { front: "菜\ncài", back: "dish\nจาน", emoji: "🥗" }, { front: "才\ncái", back: "just now\nเพิ่ง", emoji: "⏰" }, { front: "要\nyào", back: "to want\nอยาก", emoji: "💭" }, { front: "有\nyǒu", back: "to have\nมี", emoji: "📦" }, { front: "在\nzài", back: "at\nอยู่", emoji: "📍" }, { front: "走\nzǒu", back: "to walk\nเดิน", emoji: "🚶" }, { front: "三\nsān", back: "three\nสาม", emoji: "3️⃣" }, { front: "四\nsì", back: "four\nสี่", emoji: "4️⃣" }, { front: "问\nwèn", back: "to ask\nถาม", emoji: "❓" }, { front: "舞\nwǔ", back: "dance\nเต้นรำ", emoji: "💃" }, { front: "女\nnǚ", back: "woman\nผู้หญิง", emoji: "♀️" }, { front: "去\nqù", back: "to go\nไป", emoji: "➡️" }, { front: "矮\nǎi", back: "short\nเตี้ย", emoji: "📏" }, { front: "爱\nài", back: "to love\nรัก", emoji: "❤️" }, { front: "没\nméi", back: "not\nไม่มี", emoji: "❌" }, { front: "为什么\nwèi shén me", back: "why\nทำไม", emoji: "❓" }, { front: "打\ndǎ", back: "to hit\nตี", emoji: "👊" }, { front: "他\ntā", back: "he/she/it\nเขา", emoji: "👤" }, { front: "我\nwǒ", back: "I\nฉัน", emoji: "👆" }, { front: "摸\nmō", back: "to touch\nแตะ", emoji: "👋" }, { front: "喝\nhē", back: "to drink\nดื่ม", emoji: "🥤" }, { front: "了\nle", back: "particle\nคำลงท้าย", emoji: "✓" }, { front: "鸡\njī", back: "chicken\nไก่", emoji: "🐔" }, { front: "是\nshì", back: "to be/yes\nเป็น/ใช่", emoji: "✓" }, { front: "不\nbù", back: "no\nไม่", emoji: "❌" }, { front: "书\nshū", back: "book\nหนังสือ", emoji: "📖" }, { front: "睡\nshuì", back: "to sleep\nนอนหลับ", emoji: "😴" }, { front: "水\nshuǐ", back: "water\nน้ำ", emoji: "💧" }, { front: "到\ndào", back: "to arrive\nถึง", emoji: "📍" }, { front: "药\nyào", back: "medicine\nยา", emoji: "💊" }, { front: "肉\nròu", back: "meat\nเนื้อ", emoji: "🥩" }, { front: "游\nyóu", back: "to swim\nว่ายน้ำ", emoji: "🏊" }, { front: "球\nqiú", back: "ball\nลูกบอล", emoji: "⚽" }, { front: "牛\nniú", back: "cow\nวัว", emoji: "🐄" }, { front: "鞋\nxié", back: "shoe\nรองเท้า", emoji: "👟" }, { front: "谢\nxiè", back: "to thank\nขอบคุณ", emoji: "🙏" }, { front: "学\nxué", back: "to learn\nเรียน", emoji: "📚" }, { front: "觉\njiào", back: "sleep\nนอน", emoji: "😴" }, { front: "看\nkàn", back: "to look\nดู", emoji: "👁️" }, { front: "玩\nwán", back: "to play\nเล่น", emoji: "🎮" }, { front: "很\nhěn", back: "very\nมาก", emoji: "⭐" },             { front: "人\nrén", back: "people\nคน", emoji: "👥" }, { front: "心\nxīn", back: "heart\nหัวใจ", emoji: "💖" }, { front: "新\nxīn", back: "new\nใหม่", emoji: "✨" }, { front: "困\nkùn", back: "sleepy\nง่วง", emoji: "😪" }, { front: "春\nchūn", back: "spring\nฤดูใบไม้ผลิ", emoji: "🌸" }, { front: "云\nyún", back: "cloud\nเมฆ", emoji: "☁️" }, { front: "军\njūn", back: "army\nกองทัพ", emoji: "🪖" }, { front: "胖\npàng", back: "fat\nอ้วน", emoji: "🫃" }, { front: "唱\nchàng", back: "to sing\nร้องเพลง", emoji: "🎤" }, { front: "生\nshēng", back: "to live\nอยู่", emoji: "🌱" }, { front: "冷\nlěng", back: "cold\nหนาว", emoji: "🥶" }, { front: "病\nbìng", back: "illness\nป่วย", emoji: "🤒" }, { front: "明\nmíng", back: "bright\nสว่าง", emoji: "☀️" }, { front: "空\nkōng", back: "empty\nว่าง", emoji: "📦" }, { front: "泳\nyǒng", back: "to swim\nว่ายน้ำ", emoji: "🏊" }, { front: "笑\nxiào", back: "to laugh\nหัวเราะ", emoji: "😄" }, { front: "叫\njiào", back: "to call/scream\nเรียก/ตะโกน", emoji: "📢" }, { front: "夸\nkuā", back: "to praise\nชม", emoji: "👏" }, { front: "花\nhuā", back: "flower\nดอกไม้", emoji: "🌸" }, { front: "活\nhuó", back: "to live\nอยู่", emoji: "❤️" }, { front: "多\nduō", back: "many\nมาก", emoji: "👥" }, { front: "坏\nhuài", back: "bad\nเสีย", emoji: "😈" }, { front: "快\nkuài", back: "fast\nเร็ว", emoji: "⚡" }, { front: "穿\nchuān", back: "to wear\nใส่", emoji: "👕" }, { front: "全\nquán", back: "entire\nทั้งหมด", emoji: "💯" }, { front: "床\nchuáng", back: "bed\nเตียง", emoji: "🛏️" }, { front: "光\nguāng", back: "light\nแสง", emoji: "💡" }, { front: "想\nxiǎng", back: "to want\nคิด", emoji: "💭" }, { front: "亮\nliàng", back: "bright\nสว่าง", emoji: "💡" }, { front: "现\nxiàn", back: "to appear\nปรากฏ", emoji: "👁️" }, { front: "天\ntiān", back: "day\nวัน", emoji: "📅" }, { front: "熊\nxióng", back: "bear\nหมี", emoji: "🐻" }, { front: "穷\nqióng", back: "poor\nจน", emoji: "💸" }, { front: "元\nyuán", back: "unit of currency\nหน่วยเงิน", emoji: "💰" }, { front: "远\nyuǎn", back: "far\nไกล", emoji: "🏃" }, { front: "儿\nér", back: "son\nลูกชาย", emoji: "👦" }, { front: "二\nèr", back: "two\nสอง", emoji: "2️⃣" }
+        ];
+
+        // Sample Pinyin cards (can be expanded)
+        const PINYIN_CARDS = [
+            { front: "ang", back: "ang\nFinal compound: 'ahng' sound\nเสียงสระผสม: 'อาง'", emoji: "🗣️" }, { front: "ing", back: "ing\nFinal compound: 'eeng' sound\nเสียงสระผสม: 'อิง'", emoji: "🗣️" }, { front: "en", back: "en\nFinal compound: 'uhn' sound\nเสียงสระผสม: 'เอิน'", emoji: "🗣️" }, { front: "ai", back: "ai\nFinal compound: 'eye' sound\nเสียงสระผสม: 'ไอ'", emoji: "🗣️" }, { front: "ao", back: "ao\nFinal compound: 'aow' sound\nเสียงสระผสม: 'เอา'", emoji: "🗣️" }
+        ];
+
+        // Valid access codes and their corresponding deck data
+        const ACCESS_CODES = {
+            "LearnChinesewithHelen1295": {
+                title: "Chinese Vocabulary",
+                // Map cards to add an initial status
+                cards: CHINESE_VOCABULARY.map(card => ({ ...card, status: 'new' })),
+                sampleCard: { ...CHINESE_VOCABULARY[0], status: 'new' } // Ensure sample also has status
+            },
+            "PinyinPractice": {
+                title: "Pinyin Practice",
+                // Map cards to add an initial status
+                cards: PINYIN_CARDS.map(card => ({ ...card, status: 'new' })),
+                sampleCard: { ...PINYIN_CARDS[0], status: 'new' } // Ensure sample also has status
+            },
+            // Add more codes and decks here
+        };
+
+        // --- UTILITY HOOKS & FUNCTIONS ---
+
+        // Custom hook for speech synthesis with improved pronunciation
+        const useSpeech = () => {
+            const [voices, setVoices] = useState([]);
+            const [isReady, setIsReady] = useState(false);
+
+            // Effect to load available voices when component mounts or voices change
+            useEffect(() => {
+                const loadVoices = () => {
+                    const availableVoices = window.speechSynthesis.getVoices();
+                    console.log('Available voices:', availableVoices.map(v => ({ name: v.name, lang: v.lang })));
+                    if (availableVoices.length > 0) {
+                        setVoices(availableVoices);
+                        setIsReady(true);
+                    }
+                };
+                
+                loadVoices(); // Initial load
+                
+                // Listen for voice changes (important for mobile)
+                if (speechSynthesis.onvoiceschanged !== undefined) {
+                    speechSynthesis.onvoiceschanged = loadVoices;
+                }
+                
+                // Fallback for mobile devices that might not trigger onvoiceschanged
+                setTimeout(loadVoices, 1000);
+
+                // Cleanup function
+                return () => {
+                    if (speechSynthesis.onvoiceschanged !== undefined) {
+                        speechSynthesis.onvoiceschanged = null;
+                    }
+                };
+            }, []);
+            
+            // Function to detect language based on text content
+            const detectLanguage = (text) => {
+                if (!text) return 'en-US';
+                const cleanText = text.trim();
+                
+                // Check for Chinese characters (including traditional and simplified)
+                if (/[\u4e00-\u9fff\u3400-\u4dbf]/.test(cleanText)) return 'zh-CN';
+                
+                // Check for Thai characters
+                if (/[\u0e00-\u0e7f]/.test(cleanText)) return 'th-TH';
+                
+                // Check for Pinyin patterns (tone marks and common pinyin combinations)
+                if (/[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/.test(cleanText) || 
+                    /^[a-zA-Z]+$/.test(cleanText) && cleanText.length <= 15 && 
+                    /[aeiou]/.test(cleanText.toLowerCase())) {
+                    return 'zh-CN';
+                }
+                
+                return 'en-US'; // Default to English
+            };
+
+            // Function to clean text for pronunciation
+            const cleanTextForPronunciation = (text, language) => {
+                if (!text) return '';
+                
+                let cleanText = text.trim();
+                
+                if (language === 'zh-CN') {
+                    // For Chinese, remove any extra whitespace and focus on characters
+                    cleanText = cleanText.replace(/\s+/g, ' ');
+                    
+                    // If it's pinyin with tone marks, keep it as is
+                    if (/[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/.test(cleanText)) {
+                        return cleanText;
+                    }
+                    
+                    // For Chinese characters, add slight pauses between characters for clarity
+                    if (/[\u4e00-\u9fff]/.test(cleanText)) {
+                        return cleanText.split('').join(' ');
+                    }
+                }
+                
+                return cleanText;
+            };
+
+            // Function to pronounce text with improved voice selection
+            const pronounceText = useCallback((text, specificLang = null) => {
+                if (!text || !text.trim() || !window.speechSynthesis || !isReady) {
+                    console.warn("Speech synthesis not ready or text is empty.");
+                    return;
+                }
+
+                // Cancel any ongoing speech
+                window.speechSynthesis.cancel();
+
+                // Small delay to ensure cancel works reliably
+                setTimeout(() => {
+                    const lang = specificLang || detectLanguage(text);
+                    const cleanText = cleanTextForPronunciation(text, lang);
+                    
+                    const utterance = new SpeechSynthesisUtterance(cleanText);
+                    utterance.lang = lang;
+                    
+                    let voice = null;
+                    let rate = 0.8;
+                    let pitch = 1.0;
+
+                    // Enhanced voice selection based on language
+                    if (lang.startsWith('zh')) {
+                        // Prioritize native Chinese voices
+                        voice = voices.find(v => 
+                            v.lang === 'zh-CN' && (
+                                v.name.includes('Chinese') || 
+                                v.name.includes('Mandarin') ||
+                                v.name.includes('中文') ||
+                                v.name.includes('普通话')
+                            )
+                        ) || 
+                        voices.find(v => v.lang === 'zh-CN') ||
+                        voices.find(v => v.lang.startsWith('zh')) ||
+                        voices.find(v => v.name.toLowerCase().includes('chinese')) ||
+                        voices.find(v => v.name.toLowerCase().includes('mandarin'));
+                        
+                        rate = 0.6; // Slower for Chinese
+                        pitch = 1.1; // Slightly higher pitch for better clarity
+                    } else if (lang.startsWith('th')) {
+                        // Look for Thai voices
+                        voice = voices.find(v => v.lang === 'th-TH') ||
+                                voices.find(v => v.lang.startsWith('th')) ||
+                                voices.find(v => v.name.toLowerCase().includes('thai'));
+                        rate = 0.7;
+                    } else {
+                        // English voices
+                        voice = voices.find(v => v.lang === 'en-US') ||
+                                voices.find(v => v.lang.startsWith('en'));
+                        rate = 0.8;
+                    }
+                    
+                    if (voice) {
+                        utterance.voice = voice;
+                        console.log(`Using voice: ${voice.name} (${voice.lang}) for text: "${cleanText}"`);
+                    } else {
+                        console.warn(`No suitable voice found for language: ${lang}`);
+                    }
+                    
+                    utterance.rate = rate;
+                    utterance.pitch = pitch;
+                    utterance.volume = 1.0;
+                    
+                    utterance.onerror = (e) => {
+                        console.error('Speech synthesis error:', e.error, e);
+                    };
+                    
+                    utterance.onend = () => {
+                        console.log('Speech synthesis completed');
+                    };
+                    
+                    window.speechSynthesis.speak(utterance);
+                }, 100); 
+            }, [voices, isReady]);
+
+            return { pronounceText, isReady, voices };
+        };
+
+        // Custom Modal component for alerts/messages
+        const Modal = ({ isOpen, onClose, title, message, children }) => {
+            if (!isOpen) return null;
+
+            return (
+                <div className={`modal-overlay ${isOpen ? 'open' : ''}`} onClick={onClose}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        {title && <h3 className="text-2xl font-bold mb-4 text-gray-800">{title}</h3>}
+                        {message && <p className="text-gray-700 mb-6">{message}</p>}
+                        {children}
+                        <button
+                            onClick={onClose}
+                            className="mt-4 px-6 py-3 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 transition duration-300 mobile-button"
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // SlideToUnlock component
+        const SlideToUnlock = ({ onUnlock }) => {
+            const sliderRef = useRef(null);
+            const [isDragging, setIsDragging] = useState(false);
+            const [currentX, setCurrentX] = useState(0);
+            const [unlocked, setUnlocked] = useState(false);
+            const [maxTranslateX, setMaxTranslateX] = useState(0);
+
+            // Calculate maxTranslateX on mount and window resize
+            useEffect(() => {
+                const calculateMaxTranslateX = () => {
+                    if (sliderRef.current) {
+                        setMaxTranslateX(sliderRef.current.offsetWidth - 50);
+                    }
+                };
+
+                calculateMaxTranslateX();
+                window.addEventListener('resize', calculateMaxTranslateX);
+
+                return () => {
+                    window.removeEventListener('resize', calculateMaxTranslateX);
+                };
+            }, []);
+
+            const handleTouchStart = (e) => {
+                if (unlocked) return;
+                setIsDragging(true);
+                sliderRef.current.startX = e.touches[0].clientX;
+                sliderRef.current.initialX = currentX;
+            };
+
+            const handleTouchMove = (e) => {
+                if (!isDragging || unlocked) return;
+                const deltaX = e.touches[0].clientX - sliderRef.current.startX;
+                let newX = sliderRef.current.initialX + deltaX;
+
+                newX = Math.max(0, Math.min(newX, maxTranslateX));
+                setCurrentX(newX);
+
+                if (newX >= maxTranslateX - 5) {
+                    setUnlocked(true);
+                    setIsDragging(false);
+                    onUnlock();
+                }
+            };
+
+            const handleTouchEnd = () => {
+                if (!unlocked) {
+                    setIsDragging(false);
+                    setCurrentX(0);
+                }
+            };
+
+            return (
+                <div 
+                    ref={sliderRef}
+                    className="slide-container relative w-full max-w-xs h-12 bg-white bg-opacity-20 rounded-full overflow-hidden shadow-lg"
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
+                >
+                    <div 
+                        className="slide-fill absolute top-0 left-0 h-full bg-blue-400 bg-opacity-50 rounded-full"
+                        style={{ width: `${(currentX / maxTranslateX) * 100}%` }}
+                    ></div>
+                    <div 
+                        className={`slide-button absolute top-0 left-0 w-12 h-12 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white text-2xl shadow-md ${unlocked ? 'unlocked' : ''}`}
+                        style={{ transform: `translateX(${currentX}px)` }}
+                    >
+                        {unlocked ? <i className="fas fa-check"></i> : <i className="fas fa-chevron-right"></i>}
+                    </div>
+                    <div className={`slide-text absolute w-full h-full flex items-center justify-center text-white text-sm font-semibold pointer-events-none ${unlocked ? 'opacity-0' : 'opacity-100'}`}>
+                        {TRANSLATIONS["en-US"].slideToUnlock}
+                    </div>
+                </div>
+            );
+        };
+
+        // SmallCard component for collection views
+        const SmallCard = ({ card }) => {
+            const [chineseChar] = card.front.split('\n')[0].trim();
+            return (
+                <div className="small-card">
+                    <div className="chinese-character">{chineseChar}</div>
+                    <div className="emoji-display">{card.emoji}</div>
+                </div>
+            );
+        };
+
+        // Flashcard component with improved touch handling
+        const Flashcard = ({ card, onFlip, onSwipe, isCurrent, className = '' }) => {
+            const [isFlipped, setIsFlipped] = useState(false);
+            const cardRef = useRef(null);
+            
+            // Touch handling refs
+            const touchStartX = useRef(0);
+            const touchStartY = useRef(0);
+            const touchStartTime = useRef(0);
+            const currentTransform = useRef({ x: 0, rotation: 0 });
+            const isDragging = useRef(false);
+            const hasMovedEnough = useRef(false);
+            
+            const { pronounceText } = useSpeech();
+
+            // Reset flip state when card changes
+            useEffect(() => {
+                setIsFlipped(false);
+                // Reset transform when card changes
+                if (cardRef.current) {
+                    cardRef.current.style.transform = '';
+                    cardRef.current.style.opacity = '';
+                    cardRef.current.classList.remove('swiping-left', 'swiping-right');
+                }
+                currentTransform.current = { x: 0, rotation: 0 };
+                isDragging.current = false;
+                hasMovedEnough.current = false;
+            }, [card]);
+
+            // Improved touch start handler
+            const handleTouchStart = (e) => {
+                if (!isCurrent || !cardRef.current) return;
+                
+                e.preventDefault(); // Prevent default touch behaviors
+                
+                const touch = e.touches[0];
+                touchStartX.current = touch.clientX;
+                touchStartY.current = touch.clientY;
+                touchStartTime.current = Date.now();
+                isDragging.current = false;
+                hasMovedEnough.current = false;
+                
+                // Disable transitions during touch
+                cardRef.current.style.transition = 'none';
+            };
+
+            // Improved touch move handler
+            const handleTouchMove = (e) => {
+                if (!isCurrent || !cardRef.current) return;
+                
+                e.preventDefault(); // Prevent scrolling
+                
+                const touch = e.touches[0];
+                const deltaX = touch.clientX - touchStartX.current;
+                const deltaY = touch.clientY - touchStartY.current;
+                
+                // Check if this is primarily a horizontal swipe
+                const absX = Math.abs(deltaX);
+                const absY = Math.abs(deltaY);
+                
+                // Only start dragging if horizontal movement is greater than vertical
+                if (absX > absY && absX > 10) {
+                    isDragging.current = true;
+                    hasMovedEnough.current = absX > 20;
+                    
+                    // Calculate rotation based on horizontal movement
+                    const rotation = deltaX * 0.1; // Reduced rotation sensitivity
+                    const opacity = Math.max(0.3, 1 - (absX / window.innerWidth) * 1.5);
+                    
+                    currentTransform.current = { x: deltaX, rotation };
+                    
+                    // Apply transform
+                    cardRef.current.style.transform = `translateX(${deltaX}px) rotateZ(${rotation}deg)`;
+                    cardRef.current.style.opacity = opacity;
+                }
+            };
+
+            // Improved touch end handler
+            const handleTouchEnd = (e) => {
+                if (!isCurrent || !cardRef.current) return;
+                
+                e.preventDefault();
+                
+                const touchEndTime = Date.now();
+                const touchDuration = touchEndTime - touchStartTime.current;
+                const { x: deltaX } = currentTransform.current;
+                
+                // Re-enable transitions
+                cardRef.current.style.transition = 'all 0.6s cubic-bezier(0.6, -0.28, 0.735, 0.045)';
+                
+                // Determine action based on movement and duration
+                if (isDragging.current && hasMovedEnough.current) {
+                    const swipeThreshold = window.innerWidth * 0.25; // 25% of screen width
+                    
+                    if (Math.abs(deltaX) > swipeThreshold) {
+                        // Swipe detected
+                        if (deltaX > 0) {
+                            // Swiped right (remembered)
+                            cardRef.current.classList.add('swiping-right');
+                            setTimeout(() => onSwipe('right'), 300);
+                        } else {
+                            // Swiped left (forgot)
+                            cardRef.current.classList.add('swiping-left');
+                            setTimeout(() => onSwipe('left'), 300);
+                        }
+                    } else {
+                        // Not enough movement, reset card
+                        cardRef.current.style.transform = '';
+                        cardRef.current.style.opacity = '';
+                        currentTransform.current = { x: 0, rotation: 0 };
+                    }
+                } else if (!isDragging.current && touchDuration < 300) {
+                    // Quick tap without dragging - flip the card
+                    setIsFlipped(!isFlipped);
+                    onFlip && onFlip();
+                } else {
+                    // Reset card position
+                    cardRef.current.style.transform = '';
+                    cardRef.current.style.opacity = '';
+                    currentTransform.current = { x: 0, rotation: 0 };
+                }
+                
+                // Reset flags
+                isDragging.current = false;
+                hasMovedEnough.current = false;
+            };
+
+            // Function to handle pronunciation for specific text parts
+            const handlePronounce = (text, lang) => {
+                if (text && text.trim()) {
+                    pronounceText(text.trim(), lang);
+                }
+            };
+
+            // Split front and back content for individual pronunciation
+            const frontParts = card.front.split('\n').map(s => s.trim()).filter(s => s);
+            const backParts = card.back.split('\n').map(s => s.trim()).filter(s => s);
+            
+            const chineseChar = frontParts[0] || '';
+            const pinyin = frontParts[1] || '';
+            const englishTranslation = backParts[0] || '';
+            const thaiTranslation = backParts[1] || '';
+
+            return (
+                <div 
+                    ref={cardRef}
+                    className={`card-3d ${isFlipped ? 'flipped' : ''} ${className}`}
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
+                    style={{ touchAction: 'none' }} // Prevent default touch behaviors
+                >
+                    {/* Front Face */}
+                    <div className="card-face flex flex-col items-center justify-center p-6">
+                        <div className="card-content">
+                            <div 
+                                className="chinese-character" 
+                                onClick={(e) => { 
+                                    e.stopPropagation(); 
+                                    handlePronounce(chineseChar, 'zh-CN'); 
+                                }}
+                            >
+                                {chineseChar}
+                            </div>
+                            <div 
+                                className="pinyin" 
+                                onClick={(e) => { 
+                                    e.stopPropagation(); 
+                                    handlePronounce(pinyin, 'zh-CN'); 
+                                }}
+                            >
+                                {pinyin}
+                            </div>
+                            <div className="emoji-display">{card.emoji}</div>
+                        </div>
+                    </div>
+
+                    {/* Back Face */}
+                    <div className="card-face card-back flex flex-col items-center justify-center p-6">
+                        <div className="card-content">
+                            <div 
+                                className="english-translation" 
+                                onClick={(e) => { 
+                                    e.stopPropagation(); 
+                                    handlePronounce(englishTranslation, 'en-US'); 
+                                }}
+                            >
+                                {englishTranslation}
+                            </div>
+                            <div 
+                                className="thai-translation" 
+                                onClick={(e) => { 
+                                    e.stopPropagation(); 
+                                    handlePronounce(thaiTranslation, 'th-TH'); 
+                                }}
+                            >
+                                {thaiTranslation}
+                            </div>
+                            <div className="emoji-display mt-4">{card.emoji}</div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
