@@ -196,9 +196,87 @@
         const ACCESS_CODES={LearnChinesewithHelen1295:{title:"Chinese Vocabulary",cards:CHINESE_VOCABULARY.map(card=>({...card,status:"new"})),sampleCard:{...CHINESE_VOCABULARY[0],status:"new"}},PinyinPractice:{title:"Pinyin Practice",cards:PINYIN_CARDS.map(card=>({...card,status:"new"})),sampleCard:{...PINYIN_CARDS[0],status:"new"}}};
 
         // --- UTILITY HOOKS & FUNCTIONS ---
-        const useSpeech=()=>{const[e,t]=useState([]),[,s]=useState(!1);useEffect(()=>{const n=()=>{const o=window.speechSynthesis.getVoices();o.length>0&&(t(o),s(!0),void 0!==speechSynthesis.onvoiceschanged&&(speechSynthesis.onvoiceschanged=null))};n(),void 0!==speechSynthesis.onvoiceschanged&&(speechSynthesis.onvoiceschanged=n);const o=setTimeout(n,500);return()=>{clearTimeout(o),window.speechSynthesis.cancel()}},[]);const n=useCallback((t,n=null)=>{if(!t||!t.trim()||!window.speechSynthesis)return void console.warn("Speech synthesis not ready or text is empty.");window.speechSynthesis.cancel();setTimeout(()=>{const o=n||((e)=>{if(!e)return"en-US";const t=e.trim();return/[\u4e00-\u9fff\u3400-\u4dbf]/.test(t)?"zh-CN":/[\u0e00-\u0e7f]/.test(t)?"th-TH":/[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/.test(t)?"zh-CN":"en-US"})(t),a=new SpeechSynthesisUtterance(t);a.lang=o;let i=null,r=.8;o.startsWith("zh")?(i=e.find(e=>"zh-CN"===e.lang&&e.name.includes("Ting-Ting"))||e.find(e=>"zh-CN"===e.lang)||e.find(e=>e.lang.startsWith("zh")),r=.7):o.startsWith("th")?(i=e.find(e=>"th-TH"===e.lang)||e.find(e=>e.lang.startsWith("th")),r=.8):i=e.find(e=>"en-US"===e.lang)||e.find(e=>e.lang.startsWith("en")),i&&(a.voice=i),a.rate=r,window.speechSynthesis.speak(a)},50)},[e]);return{pronounceText:n}};
-        const Modal=({isOpen:e,onClose:t,title:s,message:n,children:o})=>e?React.createElement("div",{className:`modal-overlay ${e?"open":""}`,onClick:t},React.createElement("div",{className:"modal-content",onClick:e=>e.stopPropagation()},s&&React.createElement("h3",{className:"text-2xl font-bold mb-4 text-gray-800"},s),n&&React.createElement("p",{className:"text-gray-700 mb-6"},n),o,React.createElement("button",{onClick:t,className:"mt-4 px-6 py-3 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 transition duration-300"},"Close"))):null;
-        const SmallCard=({card:e})=>{const t=e.front.split("\n").map(e=>e.trim()).filter(e=>e),s=t[0]||"";return React.createElement("div",{className:"small-card"},React.createElement("div",{className:"chinese-character"},s),React.createElement("div",{className:"emoji-display"},e.emoji))};
+        const useSpeech = () => {
+            const [voices, setVoices] = useState([]);
+            const [isReady, setIsReady] = useState(false);
+            useEffect(() => {
+                const loadVoices = () => {
+                    const availableVoices = window.speechSynthesis.getVoices();
+                    if (availableVoices.length > 0) {
+                        setVoices(availableVoices);
+                        setIsReady(true);
+                        if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
+                            speechSynthesis.onvoiceschanged = null;
+                        }
+                    }
+                };
+                loadVoices();
+                if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
+                    speechSynthesis.onvoiceschanged = loadVoices;
+                }
+                const voiceTimeout = setTimeout(loadVoices, 500);
+                return () => {
+                    clearTimeout(voiceTimeout);
+                    if (typeof speechSynthesis !== 'undefined') {
+                       speechSynthesis.cancel();
+                    }
+                };
+            }, []);
+            const pronounceText = useCallback((text, specificLang = null) => {
+                if (!text || !text.trim() || typeof speechSynthesis === 'undefined' || !isReady) {
+                    console.warn("Speech synthesis not ready or text is empty.");
+                    return;
+                }
+                speechSynthesis.cancel();
+                setTimeout(() => {
+                    const detectLanguage = (txt) => {
+                        if (!txt) return 'en-US';
+                        const cleanTxt = txt.trim();
+                        if (/[\u4e00-\u9fff\u3400-\u4dbf]/.test(cleanTxt)) return 'zh-CN';
+                        if (/[\u0e00-\u0e7f]/.test(cleanTxt)) return 'th-TH';
+                        if (/[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/.test(cleanTxt)) return 'zh-CN';
+                        return 'en-US';
+                    };
+                    const lang = specificLang || detectLanguage(text);
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = lang;
+                    let voice = null;
+                    let rate = 0.8;
+                    if (lang.startsWith('zh')) {
+                        voice = voices.find(v => v.lang === 'zh-CN' && v.name.includes('Ting-Ting')) || voices.find(v => v.lang === 'zh-CN') || voices.find(v => v.lang.startsWith('zh'));
+                        rate = 0.7;
+                    } else if (lang.startsWith('th')) {
+                        voice = voices.find(v => v.lang === 'th-TH') || voices.find(v => v.lang.startsWith('th'));
+                        rate = 0.8;
+                    } else {
+                        voice = voices.find(v => v.lang === 'en-US') || voices.find(v => v.lang.startsWith('en'));
+                    }
+                    if (voice) utterance.voice = voice;
+                    utterance.rate = rate;
+                    speechSynthesis.speak(utterance);
+                }, 50);
+            }, [voices, isReady]);
+            return { pronounceText };
+        };
+        const Modal = ({ isOpen, onClose, title, message, children }) => {
+            if (!isOpen) return null;
+            return React.createElement("div", { className: `modal-overlay ${isOpen ? 'open' : ''}`, onClick: onClose },
+                React.createElement("div", { className: "modal-content", onClick: e => e.stopPropagation() },
+                    title && React.createElement("h3", { className: "text-2xl font-bold mb-4 text-gray-800" }, title),
+                    message && React.createElement("p", { className: "text-gray-700 mb-6" }, message),
+                    children,
+                    React.createElement("button", { onClick: onClose, className: "mt-4 px-6 py-3 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 transition duration-300" }, "Close")
+                )
+            );
+        };
+        const SmallCard = ({ card }) => {
+            const frontParts = card.front.split('\n').map(s => s.trim()).filter(s => s);
+            const chineseChar = frontParts[0] || '';
+            return React.createElement("div", { className: "small-card" },
+                React.createElement("div", { className: "chinese-character" }, chineseChar),
+                React.createElement("div", { className: "emoji-display" }, card.emoji)
+            );
+        };
         
         // --- FIXED: SlideToUnlock Component ---
         const SlideToUnlock = ({ onUnlock }) => {
@@ -219,18 +297,17 @@
                 return () => window.removeEventListener('resize', calculateMaxTranslateX);
             }, []);
 
-            const handleInteractionStart = (clientX) => {
+            const handleStart = (clientX) => {
                 if (unlocked) return;
                 setIsDragging(true);
                 sliderRef.current.startX = clientX;
             };
 
-            const handleInteractionMove = (clientX) => {
+            const handleMove = (clientX) => {
                 if (!isDragging || unlocked) return;
                 const deltaX = clientX - sliderRef.current.startX;
-                let newX = Math.max(0, Math.min(deltaX, maxTranslateX));
+                const newX = Math.max(0, Math.min(deltaX, maxTranslateX));
                 setCurrentX(newX);
-
                 if (newX >= maxTranslateX - 2) {
                     setUnlocked(true);
                     setIsDragging(false);
@@ -238,31 +315,36 @@
                 }
             };
 
-            const handleInteractionEnd = () => {
-                if (!unlocked) {
+            const handleEnd = () => {
+                if (unlocked) return;
+                if (isDragging) {
                     setIsDragging(false);
                     setCurrentX(0);
                 }
             };
 
-            return (
-                React.createElement("div", {
-                    ref: sliderRef,
-                    className: "slide-container",
-                    onTouchStart: (e) => handleInteractionStart(e.touches[0].clientX),
-                    onTouchMove: (e) => handleInteractionMove(e.touches[0].clientX),
-                    onTouchEnd: handleInteractionEnd,
-                    onMouseDown: (e) => handleInteractionStart(e.clientX),
-                    onMouseMove: (e) => handleInteractionMove(e.clientX),
-                    onMouseUp: handleInteractionEnd,
-                    onMouseLeave: handleInteractionEnd
-                },
-                React.createElement("div", { className: "slide-fill", style: { width: `${currentX + 25}px` } }),
-                React.createElement("div", { className: `slide-button ${unlocked ? 'unlocked' : ''}`, style: { transform: `translateX(${currentX}px)` } },
-                    unlocked ? React.createElement("i", { className: "fas fa-check" }) : React.createElement("i", { className: "fas fa-chevron-right" })
-                ),
-                React.createElement("div", { className: `slide-text ${unlocked || currentX > 10 ? 'opacity-0' : 'opacity-100'}` }, TRANSLATIONS["en-US"].slideToUnlock))
-            );
+            return React.createElement("div", {
+                ref: sliderRef,
+                className: "slide-container",
+                onMouseDown: (e) => handleStart(e.clientX),
+                onMouseMove: (e) => handleMove(e.clientX),
+                onMouseUp: handleEnd,
+                onMouseLeave: handleEnd,
+                onTouchStart: (e) => handleStart(e.touches[0].clientX),
+                onTouchMove: (e) => handleMove(e.touches[0].clientX),
+                onTouchEnd: handleEnd
+            },
+            React.createElement("div", {
+                className: "slide-fill",
+                style: { width: `${currentX + 25}px` }
+            }),
+            React.createElement("div", {
+                className: `slide-button ${unlocked ? 'unlocked' : ''}`,
+                style: { transform: `translateX(${currentX}px)` }
+            }, unlocked ? React.createElement("i", { className: "fas fa-check" }) : React.createElement("i", { className: "fas fa-chevron-right" })),
+            React.createElement("div", {
+                className: `slide-text ${unlocked || currentX > 10 ? 'opacity-0' : 'opacity-100'}`
+            }, TRANSLATIONS["en-US"].slideToUnlock));
         };
 
         // --- REBUILT: Flashcard Component ---
@@ -495,3 +577,17 @@
     </script>
 </body>
 </html>
+```
+
+i have selected some code from the most up-to-date Canvas "Chinese-Thai Flashcard App (Full Revamp)" document above and am asking a query about/based on this code.
+Instructions to follow:
+  * Don't output/edit the document if the query is Direct/Simple. For example, if the query asks for a simple explanation, output a direct answer.
+  * Make sure to **edit** the document if the query shows the intent of editing the document, in which case output the entire edited document, **not just that section or the edits**.
+    * Don't output the same document/empty document and say that you have edited it.
+    * Don't change unrelated code in the document.
+  * Don't output  and  in your final response.
+  * Any references like "this" or "selected code" refers to the code between  and  tags.
+  * Just acknowledge my request in the introduction.
+  * Make sure to refer to the document as "Canvas" in your response.
+
+bug: slidding button still doesnt w
