@@ -201,44 +201,6 @@
             opacity: 0.8;
         }
 
-        /* Floating background elements */
-        .floating-elements {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
-        }
-
-        .floating-shape {
-            position: absolute;
-            border-radius: 50%;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            animation: float 20s infinite linear;
-        }
-
-        /* Individual floating shape sizes and positions */
-        .floating-shape:nth-child(1) { width: 80px; height: 80px; top: 10%; left: 10%; animation-delay: 0s; animation-duration: 25s; }
-        .floating-shape:nth-child(2) { width: 120px; height: 120px; top: 20%; right: 15%; animation-delay: -5s; animation-duration: 30s; }
-        .floating-shape:nth-child(3) { width: 60px; height: 60px; bottom: 30%; left: 20%; animation-delay: -10s; animation-duration: 20s; }
-        .floating-shape:nth-child(4) { width: 100px; height: 100px; bottom: 20%; right: 25%; animation-delay: -15s; animation-duration: 35s; }
-        .floating-shape:nth-child(5) { width: 40px; height: 40px; top: 50%; left: 5%; animation-delay: -20s; animation-duration: 15s; }
-        .floating-shape:nth-child(6) { width: 90px; height: 90px; top: 70%; right: 10%; animation-delay: -8s; animation-duration: 28s; }
-
-        /* Floating animation keyframes */
-        @keyframes float {
-            0% { transform: translateY(0px) translateX(0px) rotate(0deg) scale(1); opacity: 0.3; }
-            25% { transform: translateY(-20px) translateX(10px) rotate(90deg) scale(1.1); opacity: 0.5; }
-            50% { transform: translateY(-40px) translateX(-5px) rotate(180deg) scale(0.9); opacity: 0.3; }
-            75% { transform: translateY(-20px) translateX(-15px) rotate(270deg) scale(1.05); opacity: 0.4; }
-            100% { transform: translateY(0px) translateX(0px) rotate(360deg) scale(1); opacity: 0.3; }
-        }
-
         /* Animated background gradient */
         .animated-bg {
             background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe, #00f2fe);
@@ -250,40 +212,6 @@
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
-        }
-
-        /* Parallax background layers */
-        .parallax-layer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 120%;
-            height: 120%;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .parallax-1 {
-            background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3), transparent 50%),
-                        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3), transparent 50%);
-            animation: parallaxMove1 30s ease-in-out infinite;
-        }
-
-        .parallax-2 {
-            background: radial-gradient(circle at 60% 20%, rgba(120, 219, 255, 0.2), transparent 50%),
-                        radial-gradient(circle at 40% 80%, rgba(255, 159, 119, 0.2), transparent 50%);
-            animation: parallaxMove2 25s ease-in-out infinite reverse;
-        }
-
-        /* Parallax movement keyframes */
-        @keyframes parallaxMove1 {
-            0%, 100% { transform: translateX(-10px) translateY(-5px) rotate(0deg); }
-            50% { transform: translateX(10px) translateY(5px) rotate(1deg); }
-        }
-
-        @keyframes parallaxMove2 {
-            0%, 100% { transform: translateX(5px) translateY(-10px) rotate(0deg); }
-            50% { transform: translateX(-5px) translateY(10px) rotate(-1deg); }
         }
 
         /* Centering utility for mobile */
@@ -458,26 +386,12 @@
     </style>
 </head>
 <body class="animated-bg font-sans text-gray-800">
-    <!-- Parallax background layers -->
-    <div class="parallax-layer parallax-1"></div>
-    <div class="parallax-layer parallax-2"></div>
-    <!-- Floating elements -->
-    <div class="floating-elements">
-        <div class="floating-shape"></div>
-        <div class="floating-shape"></div>
-        <div class="floating-shape"></div>
-        <div class="floating-shape"></div>
-        <div class="floating-shape"></div>
-        <div class="floating-shape"></div>
-    </div>
-
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useRef, useCallback } = React;
 
         // --- DATA & CONFIG ---
-        // Translations for various UI elements
         const TRANSLATIONS = {
             "en-US": {
                 "flashcardsCode": "Learn Chinese with Flashcards",
@@ -496,7 +410,6 @@
             }
         };
 
-        // Sample Chinese vocabulary data
         const CHINESE_VOCABULARY = [
             { front: "爸爸\nbà ba", back: "dad\nพ่อ", emoji: "👨‍👧‍👦" }, 
             { front: "别\nbié", back: "don't\nอย่า", emoji: "🚫" }, 
@@ -530,7 +443,6 @@
             { front: "喜欢\nxǐ huān", back: "to like\nชอบ", emoji: "❤️" }
         ];
 
-        // Sample Pinyin cards
         const PINYIN_CARDS = [
             { front: "ang", back: "ang\nFinal compound: 'ahng' sound\nเสียงสระผสม: 'อาง'", emoji: "🗣️" }, 
             { front: "ing", back: "ing\nFinal compound: 'eeng' sound\nเสียงสระผสม: 'อิง'", emoji: "🗣️" }, 
@@ -539,7 +451,6 @@
             { front: "ao", back: "ao\nFinal compound: 'aow' sound\nเสียงสระผสม: 'เอา'", emoji: "🗣️" }
         ];
 
-        // Valid access codes and their corresponding deck data
         const ACCESS_CODES = {
             "LearnChinesewithHelen1295": {
                 title: "Chinese Vocabulary",
@@ -555,7 +466,6 @@
 
         // --- UTILITY HOOKS & FUNCTIONS ---
 
-        // Custom hook for speech synthesis
         const useSpeech = () => {
             const [voices, setVoices] = useState([]);
             const [isReady, setIsReady] = useState(false);
@@ -566,21 +476,22 @@
                     if (availableVoices.length > 0) {
                         setVoices(availableVoices);
                         setIsReady(true);
+                        // Stop listening once voices are loaded
+                        if (speechSynthesis.onvoiceschanged !== undefined) {
+                            speechSynthesis.onvoiceschanged = null;
+                        }
                     }
                 };
                 
                 loadVoices();
-                
                 if (speechSynthesis.onvoiceschanged !== undefined) {
                     speechSynthesis.onvoiceschanged = loadVoices;
                 }
-                
-                setTimeout(loadVoices, 1000);
+                const voiceTimeout = setTimeout(loadVoices, 500);
 
                 return () => {
-                    if (speechSynthesis.onvoiceschanged !== undefined) {
-                        speechSynthesis.onvoiceschanged = null;
-                    }
+                    clearTimeout(voiceTimeout);
+                    window.speechSynthesis.cancel();
                 };
             }, []);
             
@@ -590,37 +501,14 @@
                 
                 if (/[\u4e00-\u9fff\u3400-\u4dbf]/.test(cleanText)) return 'zh-CN';
                 if (/[\u0e00-\u0e7f]/.test(cleanText)) return 'th-TH';
-                if (/[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/.test(cleanText) || 
-                    /^[a-zA-Z]+$/.test(cleanText) && cleanText.length <= 15 && 
-                    /[aeiou]/.test(cleanText.toLowerCase())) {
-                    return 'zh-CN';
-                }
+                if (/[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/.test(cleanText)) return 'zh-CN';
                 
                 return 'en-US';
             };
 
-            const cleanTextForPronunciation = (text, language) => {
-                if (!text) return '';
-                
-                let cleanText = text.trim();
-                
-                if (language === 'zh-CN') {
-                    cleanText = cleanText.replace(/\s+/g, ' ');
-                    
-                    if (/[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/.test(cleanText)) {
-                        return cleanText;
-                    }
-                    
-                    if (/[\u4e00-\u9fff]/.test(cleanText)) {
-                        return cleanText.split('').join(' ');
-                    }
-                }
-                
-                return cleanText;
-            };
-
             const pronounceText = useCallback((text, specificLang = null) => {
                 if (!text || !text.trim() || !window.speechSynthesis || !isReady) {
+                    console.warn("Speech synthesis not ready or text is empty.");
                     return;
                 }
 
@@ -628,63 +516,37 @@
 
                 setTimeout(() => {
                     const lang = specificLang || detectLanguage(text);
-                    const cleanText = cleanTextForPronunciation(text, lang);
-                    
-                    const utterance = new SpeechSynthesisUtterance(cleanText);
+                    const utterance = new SpeechSynthesisUtterance(text);
                     utterance.lang = lang;
                     
                     let voice = null;
                     let rate = 0.8;
-                    let pitch = 1.0;
 
                     if (lang.startsWith('zh')) {
-                        voice = voices.find(v => 
-                            v.lang === 'zh-CN' && (
-                                v.name.includes('Chinese') || 
-                                v.name.includes('Mandarin') ||
-                                v.name.includes('中文') ||
-                                v.name.includes('普通话')
-                            )
-                        ) || 
-                        voices.find(v => v.lang === 'zh-CN') ||
-                        voices.find(v => v.lang.startsWith('zh'));
-                        
-                        rate = 0.6;
-                        pitch = 1.1;
+                        voice = voices.find(v => v.lang === 'zh-CN' && v.name.includes('Ting-Ting')) || 
+                                voices.find(v => v.lang === 'zh-CN') ||
+                                voices.find(v => v.lang.startsWith('zh'));
+                        rate = 0.7;
                     } else if (lang.startsWith('th')) {
                         voice = voices.find(v => v.lang === 'th-TH') ||
                                 voices.find(v => v.lang.startsWith('th'));
-                        rate = 0.7;
+                        rate = 0.8;
                     } else {
                         voice = voices.find(v => v.lang === 'en-US') ||
                                 voices.find(v => v.lang.startsWith('en'));
-                        rate = 0.8;
+                        rate = 0.9;
                     }
                     
-                    if (voice) {
-                        utterance.voice = voice;
-                    }
-                    
+                    if (voice) utterance.voice = voice;
                     utterance.rate = rate;
-                    utterance.pitch = pitch;
-                    utterance.volume = 1.0;
-                    
-                    utterance.onerror = (e) => {
-                        console.error('Speech synthesis error:', e.error, e);
-                    };
-                    
-                    utterance.onend = () => {
-                        console.log('Speech synthesis completed');
-                    };
                     
                     window.speechSynthesis.speak(utterance);
-                }, 100); 
+                }, 50); 
             }, [voices, isReady]);
 
-            return { pronounceText, isReady, voices };
+            return { pronounceText };
         };
 
-        // Custom Modal component for alerts/messages
         const Modal = ({ isOpen, onClose, title, message, children }) => {
             if (!isOpen) return null;
 
@@ -705,7 +567,6 @@
             );
         };
 
-        // SlideToUnlock component
         const SlideToUnlock = ({ onUnlock }) => {
             const sliderRef = useRef(null);
             const [isDragging, setIsDragging] = useState(false);
@@ -728,31 +589,29 @@
                 };
             }, []);
 
-            const handleTouchStart = (e) => {
+            const handleInteractionStart = (clientX) => {
                 if (unlocked) return;
                 setIsDragging(true);
-                sliderRef.current.startX = e.touches[0].clientX;
-                sliderRef.current.initialX = currentX;
+                sliderRef.current.startX = clientX;
             };
 
-            const handleTouchMove = (e) => {
+            const handleInteractionMove = (clientX) => {
                 if (!isDragging || unlocked) return;
-                const deltaX = e.touches[0].clientX - sliderRef.current.startX;
-                let newX = sliderRef.current.initialX + deltaX;
-
-                newX = Math.max(0, Math.min(newX, maxTranslateX));
+                const deltaX = clientX - sliderRef.current.startX;
+                let newX = Math.max(0, Math.min(deltaX, maxTranslateX));
                 setCurrentX(newX);
 
-                if (newX >= maxTranslateX - 5) {
+                if (newX >= maxTranslateX - 2) {
                     setUnlocked(true);
                     setIsDragging(false);
                     onUnlock();
                 }
             };
 
-            const handleTouchEnd = () => {
+            const handleInteractionEnd = () => {
                 if (!unlocked) {
                     setIsDragging(false);
+                    // Snap back to start
                     setCurrentX(0);
                 }
             };
@@ -760,29 +619,32 @@
             return (
                 <div 
                     ref={sliderRef}
-                    className="slide-container relative w-full max-w-xs h-12 bg-white bg-opacity-20 rounded-full overflow-hidden shadow-lg"
-                    onTouchStart={handleTouchStart}
-                    onTouchMove={handleTouchMove}
-                    onTouchEnd={handleTouchEnd}
+                    className="slide-container"
+                    onTouchStart={(e) => handleInteractionStart(e.touches[0].clientX)}
+                    onTouchMove={(e) => handleInteractionMove(e.touches[0].clientX)}
+                    onTouchEnd={handleInteractionEnd}
+                    onMouseDown={(e) => handleInteractionStart(e.clientX)}
+                    onMouseMove={(e) => handleInteractionMove(e.clientX)}
+                    onMouseUp={handleInteractionEnd}
+                    onMouseLeave={handleInteractionEnd}
                 >
                     <div 
-                        className="slide-fill absolute top-0 left-0 h-full bg-blue-400 bg-opacity-50 rounded-full"
-                        style={{ width: `${(currentX / maxTranslateX) * 100}%` }}
+                        className="slide-fill"
+                        style={{ width: `${currentX + 25}px` }}
                     ></div>
                     <div 
-                        className={`slide-button absolute top-0 left-0 w-12 h-12 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white text-2xl shadow-md ${unlocked ? 'unlocked' : ''}`}
+                        className={`slide-button ${unlocked ? 'unlocked' : ''}`}
                         style={{ transform: `translateX(${currentX}px)` }}
                     >
                         {unlocked ? <i className="fas fa-check"></i> : <i className="fas fa-chevron-right"></i>}
                     </div>
-                    <div className={`slide-text absolute w-full h-full flex items-center justify-center text-white text-sm font-semibold pointer-events-none ${unlocked ? 'opacity-0' : 'opacity-100'}`}>
+                    <div className={`slide-text ${unlocked || currentX > 10 ? 'opacity-0' : 'opacity-100'}`}>
                         {TRANSLATIONS["en-US"].slideToUnlock}
                     </div>
                 </div>
             );
         };
 
-        // SmallCard component for collection views
         const SmallCard = ({ card }) => {
             const frontParts = card.front.split('\n').map(s => s.trim()).filter(s => s);
             const chineseChar = frontParts[0] || '';
@@ -794,119 +656,87 @@
             );
         };
 
-        // Flashcard component with improved touch handling
         const Flashcard = ({ card, onFlip, onSwipe, isCurrent, className = '' }) => {
             const [isFlipped, setIsFlipped] = useState(false);
             const cardRef = useRef(null);
-            
-            // Touch handling refs
             const touchStartX = useRef(0);
             const touchStartY = useRef(0);
             const touchStartTime = useRef(0);
-            const currentTransform = useRef({ x: 0, rotation: 0 });
             const isDragging = useRef(false);
-            const hasMovedEnough = useRef(false);
             
             const { pronounceText } = useSpeech();
 
-            // Reset flip state when card changes
             useEffect(() => {
                 setIsFlipped(false);
                 if (cardRef.current) {
                     cardRef.current.style.transform = '';
-                    cardRef.current.style.opacity = '';
+                    cardRef.current.style.opacity = '1';
                     cardRef.current.classList.remove('swiping-left', 'swiping-right');
                 }
-                currentTransform.current = { x: 0, rotation: 0 };
                 isDragging.current = false;
-                hasMovedEnough.current = false;
             }, [card]);
 
             const handleTouchStart = (e) => {
-                if (!isCurrent || !cardRef.current) return;
-                
-                e.preventDefault();
-                
-                const touch = e.touches[0];
-                touchStartX.current = touch.clientX;
-                touchStartY.current = touch.clientY;
+                if (!isCurrent) return;
+                isDragging.current = true;
+                touchStartX.current = e.touches[0].clientX;
+                touchStartY.current = e.touches[0].clientY;
                 touchStartTime.current = Date.now();
-                isDragging.current = false;
-                hasMovedEnough.current = false;
-                
-                cardRef.current.style.transition = 'none';
+                cardRef.current.style.transition = 'transform 0s';
             };
 
             const handleTouchMove = (e) => {
-                if (!isCurrent || !cardRef.current) return;
+                if (!isDragging.current || !isCurrent) return;
                 
-                e.preventDefault();
-                
-                const touch = e.touches[0];
-                const deltaX = touch.clientX - touchStartX.current;
-                const deltaY = touch.clientY - touchStartY.current;
-                
-                const absX = Math.abs(deltaX);
-                const absY = Math.abs(deltaY);
-                
-                if (absX > absY && absX > 10) {
-                    isDragging.current = true;
-                    hasMovedEnough.current = absX > 20;
-                    
-                    const rotation = deltaX * 0.1;
-                    const opacity = Math.max(0.3, 1 - (absX / window.innerWidth) * 1.5);
-                    
-                    currentTransform.current = { x: deltaX, rotation };
-                    
-                    cardRef.current.style.transform = `translateX(${deltaX}px) rotateZ(${rotation}deg)`;
-                    cardRef.current.style.opacity = opacity;
+                const deltaX = e.touches[0].clientX - touchStartX.current;
+                const deltaY = Math.abs(e.touches[0].clientY - touchStartY.current);
+
+                // Prioritize vertical scroll if movement is mostly vertical
+                if (Math.abs(deltaX) < deltaY) {
+                    isDragging.current = false;
+                    return;
                 }
+                
+                e.preventDefault(); // Prevent page scroll only when swiping horizontally
+                
+                const rotation = deltaX * 0.1;
+                cardRef.current.style.transform = `translateX(${deltaX}px) rotateZ(${rotation}deg)`;
             };
 
             const handleTouchEnd = (e) => {
-                if (!isCurrent || !cardRef.current) return;
-                
-                e.preventDefault();
-                
-                const touchEndTime = Date.now();
-                const touchDuration = touchEndTime - touchStartTime.current;
-                const { x: deltaX } = currentTransform.current;
-                
-                cardRef.current.style.transition = 'all 0.6s cubic-bezier(0.6, -0.28, 0.735, 0.045)';
-                
-                if (isDragging.current && hasMovedEnough.current) {
-                    const swipeThreshold = window.innerWidth * 0.25;
-                    
-                    if (Math.abs(deltaX) > swipeThreshold) {
-                        if (deltaX > 0) {
-                            cardRef.current.classList.add('swiping-right');
-                            setTimeout(() => onSwipe('right'), 300);
-                        } else {
-                            cardRef.current.classList.add('swiping-left');
-                            setTimeout(() => onSwipe('left'), 300);
-                        }
-                    } else {
-                        cardRef.current.style.transform = '';
-                        cardRef.current.style.opacity = '';
-                        currentTransform.current = { x: 0, rotation: 0 };
-                    }
-                } else if (!isDragging.current && touchDuration < 300) {
-                    setIsFlipped(!isFlipped);
-                    onFlip && onFlip();
-                } else {
-                    cardRef.current.style.transform = '';
-                    cardRef.current.style.opacity = '';
-                    currentTransform.current = { x: 0, rotation: 0 };
-                }
-                
+                if (!isDragging.current || !isCurrent) return;
                 isDragging.current = false;
-                hasMovedEnough.current = false;
-            };
 
-            const handlePronounce = (text, lang) => {
-                if (text && text.trim()) {
-                    pronounceText(text.trim(), lang);
+                const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+                const touchDuration = Date.now() - touchStartTime.current;
+
+                // Check for a tap (short duration, small movement)
+                if (touchDuration < 250 && Math.abs(deltaX) < 10) {
+                    setIsFlipped(prev => !prev);
+                    onFlip && onFlip();
+                    cardRef.current.style.transform = '';
+                    return;
                 }
+
+                // Check for a swipe
+                const swipeThreshold = window.innerWidth * 0.3;
+                cardRef.current.style.transition = 'all 0.6s cubic-bezier(0.6, -0.28, 0.735, 0.045)';
+
+                if (deltaX > swipeThreshold) {
+                    cardRef.current.classList.add('swiping-right');
+                    setTimeout(() => onSwipe('right'), 100);
+                } else if (deltaX < -swipeThreshold) {
+                    cardRef.current.classList.add('swiping-left');
+                    setTimeout(() => onSwipe('left'), 100);
+                } else {
+                    // Not a full swipe, snap back
+                    cardRef.current.style.transform = '';
+                }
+            };
+            
+            const handlePronounce = (e, text, lang) => {
+                e.stopPropagation();
+                pronounceText(text, lang);
             };
 
             const frontParts = card.front.split('\n').map(s => s.trim()).filter(s => s);
@@ -924,29 +754,14 @@
                     onTouchStart={handleTouchStart}
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
-                    style={{ touchAction: 'none' }}
+                    onClick={() => { if (window.innerWidth > 768) { setIsFlipped(prev => !prev); onFlip && onFlip(); }}}
+                    style={{ touchAction: 'pan-y' }}
                 >
                     {/* Front Face */}
                     <div className="card-face flex flex-col items-center justify-center p-6">
                         <div className="card-content">
-                            <div 
-                                className="chinese-character" 
-                                onClick={(e) => { 
-                                    e.stopPropagation(); 
-                                    handlePronounce(chineseChar, 'zh-CN'); 
-                                }}
-                            >
-                                {chineseChar}
-                            </div>
-                            <div 
-                                className="pinyin" 
-                                onClick={(e) => { 
-                                    e.stopPropagation(); 
-                                    handlePronounce(pinyin, 'zh-CN'); 
-                                }}
-                            >
-                                {pinyin}
-                            </div>
+                            <div className="chinese-character" onClick={(e) => handlePronounce(e, chineseChar, 'zh-CN')}>{chineseChar}</div>
+                            <div className="pinyin" onClick={(e) => handlePronounce(e, pinyin, 'zh-CN')}>{pinyin}</div>
                             <div className="emoji-display">{card.emoji}</div>
                         </div>
                     </div>
@@ -954,32 +769,20 @@
                     {/* Back Face */}
                     <div className="card-face card-back flex flex-col items-center justify-center p-6">
                         <div className="card-content">
-                            <div 
-                                className="english-translation" 
-                                onClick={(e) => { 
-                                    e.stopPropagation(); 
-                                    handlePronounce(englishTranslation, 'en-US'); 
-                                }}
-                            >
-                                {englishTranslation}
-                            </div>
-                            <div 
-                                className="thai-translation" 
-                                onClick={(e) => { 
-                                    e.stopPropagation(); 
-                                    handlePronounce(thaiTranslation, 'th-TH'); 
-                                }}
-                            >
-                                {thaiTranslation}
-                            </div>
+                            <div className="english-translation" onClick={(e) => handlePronounce(e, englishTranslation, 'en-US')}>{englishTranslation}</div>
+                            <div className="thai-translation" onClick={(e) => handlePronounce(e, thaiTranslation, 'th-TH')}>{thaiTranslation}</div>
                             <div className="emoji-display mt-4">{card.emoji}</div>
                         </div>
                     </div>
                 </div>
             );
         };
+        
+        // Helper function moved outside component for performance
+        const removeCardFromListByFront = (list, cardToRemove) => {
+            return list.filter(card => card.front !== cardToRemove.front);
+        };
 
-        // Main App component
         const App = () => {
             const [currentPage, setCurrentPage] = useState('landing');
             const [flashcards, setFlashcards] = useState([]);
@@ -991,11 +794,10 @@
             const [code, setCode] = useState('');
             const [activeDeckTitle, setActiveDeckTitle] = useState('');
 
-            // Function to handle code submission and deck loading
             const handleCodeUnlock = () => {
                 const deckData = ACCESS_CODES[code];
                 if (deckData) {
-                    const initialCards = deckData.cards.map(card => ({ ...card, status: 'new' }));
+                    const initialCards = deckData.cards.map(card => ({ ...card, status: 'new', level: 0 }));
                     setFlashcards([...initialCards].sort(() => Math.random() - 0.5));
                     setCurrentCardIndex(0);
                     setRememberedCards([]);
@@ -1008,86 +810,63 @@
                 }
             };
 
-            // Helper function to remove a card from a list by its 'front' content
-            const removeCardFromList = useCallback((list, cardToRemove) => {
-                return list.filter(card => card.front !== cardToRemove.front);
-            }, []);
-
-            // Handle swipe actions - FIXED VERSION
+            // REFACTORED AND DEBUGGED swipe logic
             const handleSwipe = useCallback((direction) => {
-                if (flashcards.length === 0) return;
+                if (flashcards.length === 0 || currentCardIndex >= flashcards.length) return;
 
-                const swipedCard = { ...flashcards[currentCardIndex] }; 
-                let newFlashcards = [...flashcards];
+                const swipedCard = { ...flashcards[currentCardIndex] };
+                
+                // Create a new array for the remaining cards in the deck
+                const remainingCards = flashcards.slice(1);
 
-                // Remove the current card from the deck
-                newFlashcards.splice(currentCardIndex, 1);
+                let nextFlashcards = [...remainingCards];
+                let nextRemembered = [...rememberedCards];
+                let nextForgotten = [...forgottenCards];
 
-                // Remove the card from both collections first
-                let updatedRemembered = removeCardFromList(rememberedCards, swipedCard);
-                let updatedForgotten = removeCardFromList(forgottenCards, swipedCard);
+                // Remove card from both collections to prevent duplicates before re-adding
+                nextRemembered = removeCardFromListByFront(nextRemembered, swipedCard);
+                nextForgotten = removeCardFromListByFront(nextForgotten, swipedCard);
 
-                if (direction === 'left') {
-                    // Swiped left - card was forgotten
-                    if (swipedCard.status === 'remembered_level1') {
-                        // Card was remembered before, now forgotten - put back in deck
-                        swipedCard.status = 'forgotten_level1';
-                        const reinsertIndex = Math.min(currentCardIndex + 5, newFlashcards.length);
-                        newFlashcards.splice(reinsertIndex, 0, swipedCard);
-                        updatedForgotten = [...updatedForgotten, swipedCard];
-                    } else if (swipedCard.status === 'new' || swipedCard.status === 'forgotten_level1') {
-                        // New card or already forgotten - put back in deck
-                        swipedCard.status = 'forgotten_level1';
-                        const reinsertIndex = Math.min(currentCardIndex + 5, newFlashcards.length);
-                        newFlashcards.splice(reinsertIndex, 0, swipedCard);
-                        updatedForgotten = [...updatedForgotten, swipedCard];
-                    } else if (swipedCard.status === 'forgotten_level2') {
-                        // Already forgotten multiple times - keep putting back
-                        swipedCard.status = 'forgotten_level2';
-                        const reinsertIndex = Math.min(currentCardIndex + 5, newFlashcards.length);
-                        newFlashcards.splice(reinsertIndex, 0, swipedCard);
-                        updatedForgotten = [...updatedForgotten, swipedCard];
-                    }
-                } else {
-                    // Swiped right - card was remembered
-                    if (swipedCard.status === 'new') {
-                        // First time seeing this card - remember it but put back for review
-                        swipedCard.status = 'remembered_level1';
-                        updatedRemembered = [...updatedRemembered, swipedCard];
-                        newFlashcards.push(swipedCard); // Add to end of deck for later review
-                    } else if (swipedCard.status === 'remembered_level1') {
-                        // Second time remembering - fully remembered
-                        swipedCard.status = 'remembered_level2';
-                        updatedRemembered = [...updatedRemembered, swipedCard];
-                        // Don't put back in deck - card is mastered
-                    } else if (swipedCard.status === 'forgotten_level1') {
-                        // Was forgotten, now remembered again
-                        swipedCard.status = 'forgotten_level2';
-                        const reinsertIndex = Math.min(currentCardIndex + 10, newFlashcards.length);
-                        newFlashcards.splice(reinsertIndex, 0, swipedCard);
-                        updatedForgotten = [...updatedForgotten, swipedCard];
-                    } else if (swipedCard.status === 'forgotten_level2') {
-                        // Multiple times forgotten, now remembered
+                if (direction === 'left') { // --- FORGOTTEN ---
+                    swipedCard.status = 'forgotten';
+                    swipedCard.level = (swipedCard.level > 0) ? swipedCard.level - 1 : 0;
+                    
+                    // Add to forgotten list
+                    nextForgotten.push(swipedCard);
+                    
+                    // Re-insert the forgotten card into the deck 5 places ahead, or at the end if not enough cards
+                    const reinsertIndex = Math.min(5, nextFlashcards.length);
+                    nextFlashcards.splice(reinsertIndex, 0, swipedCard);
+
+                } else { // --- REMEMBERED ---
+                    swipedCard.level = swipedCard.level + 1;
+                    
+                    // Add to remembered list regardless of level
+                    nextRemembered.push(swipedCard);
+                    
+                    if (swipedCard.level >= 2) {
+                        // Card is "mastered" for this session
                         swipedCard.status = 'remembered';
-                        updatedRemembered = [...updatedRemembered, swipedCard];
-                        // Don't put back - give them credit for finally getting it
+                        // Card is NOT re-inserted into the deck
+                    } else {
+                        // Card is remembered once, needs more review
+                        swipedCard.status = 'reviewing';
+                        // Re-insert at the end of the deck for later review
+                        nextFlashcards.push(swipedCard);
                     }
                 }
 
-                setRememberedCards(updatedRemembered);
-                setForgottenCards(updatedForgotten);
-                setFlashcards(newFlashcards);
+                // Update all state at once
+                setFlashcards(nextFlashcards);
+                setRememberedCards(nextRemembered);
+                setForgottenCards(nextForgotten);
+                
+                // The index is effectively reset to 0 because we sliced the array from the first element
+                // This is simpler and more robust than managing the index number directly
+                
+            }, [flashcards, rememberedCards, forgottenCards]);
 
-                setTimeout(() => {
-                    if (newFlashcards.length === 0) {
-                        setCurrentCardIndex(0);
-                    } else if (currentCardIndex >= newFlashcards.length) {
-                        setCurrentCardIndex(0);
-                    }
-                }, 300); 
-            }, [flashcards, currentCardIndex, rememberedCards, forgottenCards, removeCardFromList]);
 
-            // Reset app state to landing page
             const resetApp = () => {
                 setCurrentPage('landing');
                 setCode('');
@@ -1098,84 +877,61 @@
                 setActiveDeckTitle('');
             };
 
-            // Component for displaying remembered/forgotten cards in a grid
-            const CollectionPage = ({ title, cards, onBack, fallbackMessage }) => {
-                return (
-                    <div className="flex flex-col items-center justify-start min-h-screen min-h-dvh p-4 relative w-full">
-                        <div className="w-full flex justify-between items-center p-4 z-10 bg-white bg-opacity-30 rounded-b-xl shadow-md">
-                            <button 
-                                onClick={onBack}
-                                className="mobile-button bg-white bg-opacity-50 p-3 rounded-full shadow-md text-gray-800 hover:bg-opacity-70 transition"
-                                title={TRANSLATIONS["en-US"].backToStudy}
-                            >
-                                <i className="fas fa-arrow-left text-xl"></i>
-                            </button>
-                            <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
-                            <div className="w-12 h-12"></div>
-                        </div>
-
-                        <div className="flex-grow w-full p-4">
-                            {cards.length > 0 ? (
-                                <div className="small-card-grid">
-                                    {cards.map((card, index) => (
-                                        <SmallCard key={index} card={card} />
-                                    ))}
-                                </div>
-                            ) : (
-                                <p className="text-white text-center text-lg mt-8">{fallbackMessage}</p>
-                            )}
-                        </div>
+            const CollectionPage = ({ title, cards, onBack, fallbackMessage }) => (
+                <div className="flex flex-col items-center justify-start min-h-screen min-h-dvh p-4 relative w-full">
+                    <div className="w-full flex justify-between items-center p-4 z-10 bg-white bg-opacity-30 rounded-b-xl shadow-md">
+                        <button onClick={onBack} className="mobile-button bg-white bg-opacity-50 p-3 rounded-full shadow-md text-gray-800 hover:bg-opacity-70 transition" title={TRANSLATIONS["en-US"].backToStudy}>
+                            <i className="fas fa-arrow-left text-xl"></i>
+                        </button>
+                        <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
+                        <div className="w-12 h-12"></div>
                     </div>
-                );
-            };
-
-            // Component for displaying all decks
-            const AllDecksPage = ({ title, decks, onBack }) => {
-                return (
-                    <div className="flex flex-col items-center justify-start min-h-screen min-h-dvh p-4 relative w-full">
-                        <div className="w-full flex justify-between items-center p-4 z-10 bg-white bg-opacity-30 rounded-b-xl shadow-md">
-                            <button 
-                                onClick={onBack}
-                                className="mobile-button bg-white bg-opacity-50 p-3 rounded-full shadow-md text-gray-800 hover:bg-opacity-70 transition"
-                                title={TRANSLATIONS["en-US"].backToStudy}
-                            >
-                                <i className="fas fa-arrow-left text-xl"></i>
-                            </button>
-                            <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
-                            <div className="w-12 h-12"></div>
-                        </div>
-
-                        <div className="flex-grow w-full p-4">
+                    <div className="flex-grow w-full p-4">
+                        {cards.length > 0 ? (
                             <div className="small-card-grid">
-                                {decks.map((deck, index) => (
-                                    <div key={index} className="small-card flex-col items-center justify-center p-2">
-                                        <h4 className="font-bold text-base mb-2">{deck.title}</h4>
-                                        {deck.card ? (
-                                            <SmallCard card={deck.card} />
-                                        ) : (
-                                            <p className="text-sm text-gray-500">No sample card</p>
-                                        )}
-                                    </div>
-                                ))}
+                                {cards.map((card, index) => <SmallCard key={`${card.front}-${index}`} card={card} />)}
                             </div>
+                        ) : (
+                            <p className="text-white text-center text-lg mt-8">{fallbackMessage}</p>
+                        )}
+                    </div>
+                </div>
+            );
+
+            const AllDecksPage = ({ title, decks, onBack }) => (
+                <div className="flex flex-col items-center justify-start min-h-screen min-h-dvh p-4 relative w-full">
+                    <div className="w-full flex justify-between items-center p-4 z-10 bg-white bg-opacity-30 rounded-b-xl shadow-md">
+                        <button onClick={onBack} className="mobile-button bg-white bg-opacity-50 p-3 rounded-full shadow-md text-gray-800 hover:bg-opacity-70 transition" title={TRANSLATIONS["en-US"].backToStudy}>
+                            <i className="fas fa-arrow-left text-xl"></i>
+                        </button>
+                        <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
+                        <div className="w-12 h-12"></div>
+                    </div>
+                    <div className="flex-grow w-full p-4">
+                        <div className="small-card-grid">
+                            {decks.map((deck, index) => (
+                                <div key={index} className="small-card flex-col items-center justify-center p-2">
+                                    <h4 className="font-bold text-base mb-2">{deck.title}</h4>
+                                    {deck.card ? <SmallCard card={deck.card} /> : <p className="text-sm text-gray-500">No sample card</p>}
+                                </div>
+                            ))}
                         </div>
                     </div>
-                );
-            };
+                </div>
+            );
 
-            // Render content based on current page
             const renderContent = () => { 
+                // Because the current card is always at index 0, this logic simplifies
+                const currentCard = flashcards.length > 0 ? flashcards[0] : null;
+                const nextCard = flashcards.length > 1 ? flashcards[1] : null;
+
                 switch (currentPage) {
                     case 'landing':
                         return (
                             <div className="mobile-center flex-col p-4">
                                 <div className="p-8 flex flex-col items-center gap-8 max-w-md w-full">
-                                    <h1 className="text-3xl font-extrabold text-white text-center drop-shadow-lg">
-                                        {TRANSLATIONS["en-US"].flashcardsCode}
-                                    </h1>
-                                    <p className="text-white text-lg text-center drop-shadow-md">
-                                        {TRANSLATIONS["en-US"].landingPageSubtitle}
-                                    </p>
+                                    <h1 className="text-3xl font-extrabold text-white text-center drop-shadow-lg">{TRANSLATIONS["en-US"].flashcardsCode}</h1>
+                                    <p className="text-white text-lg text-center drop-shadow-md">{TRANSLATIONS["en-US"].landingPageSubtitle}</p>
                                     <input
                                         type="text"
                                         placeholder={TRANSLATIONS["en-US"].pasteCodePlaceholder}
@@ -1188,32 +944,14 @@
                             </div>
                         );
                     case 'flashcards':
-                        const currentCard = flashcards[currentCardIndex];
-                        const nextCard = flashcards[currentCardIndex + 1];
-
-                        if (!currentCard && flashcards.length > 0) {
-                            setCurrentCardIndex(0);
-                            return null;
-                        }
-                        
-                        if (flashcards.length === 0) {
+                        if (!currentCard) {
                             return (
                                 <div className="mobile-center flex-col p-4">
                                     <div className="watercolor-card p-8 flex flex-col items-center gap-6 max-w-md w-full text-center">
                                         <h2 className="text-2xl font-bold text-gray-900">Deck Completed!</h2>
                                         <p className="text-gray-700">You've gone through all the cards in this deck.</p>
-                                        <button
-                                            onClick={resetApp}
-                                            className="px-6 py-3 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 transition duration-300 mobile-button"
-                                        >
-                                            {TRANSLATIONS["en-US"].createNewFlashcardsLink}
-                                        </button>
-                                        <button
-                                            onClick={() => setCurrentPage('allDecks')}
-                                            className="px-6 py-3 bg-purple-500 text-white rounded-full shadow-lg hover:bg-purple-600 transition duration-300 mobile-button"
-                                        >
-                                            View All Decks
-                                        </button>
+                                        <button onClick={resetApp} className="px-6 py-3 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 transition duration-300 mobile-button">{TRANSLATIONS["en-US"].createNewFlashcardsLink}</button>
+                                        <button onClick={() => setCurrentPage('allDecks')} className="mt-2 px-6 py-3 bg-purple-500 text-white rounded-full shadow-lg hover:bg-purple-600 transition duration-300 mobile-button">View All Decks</button>
                                     </div>
                                 </div>
                             );
@@ -1221,101 +959,27 @@
 
                         return (
                             <div className="flex flex-col items-center justify-between min-h-screen min-h-dvh p-4 relative">
-                                {/* Top Navigation Icons */}
-                                <div className="w-full flex justify-between items-center p-4 z-10 space-x-4">
-                                    <button 
-                                        onClick={() => setCurrentPage('remembered')}
-                                        className="mobile-button bg-white bg-opacity-30 p-3 rounded-full shadow-md text-gray-800 hover:bg-opacity-50 transition"
-                                        title={TRANSLATIONS["en-US"].rememberedCards}
-                                    >
-                                        <i className="fas fa-heart text-xl text-gray-600"></i>
-                                    </button>
-                                    <button 
-                                        onClick={() => setCurrentPage('forgotten')}
-                                        className="mobile-button bg-white bg-opacity-30 p-3 rounded-full shadow-md text-gray-800 hover:bg-opacity-50 transition"
-                                        title={TRANSLATIONS["en-US"].forgottenCards}
-                                    >
-                                        <i className="fas fa-question text-xl text-gray-600"></i>
-                                    </button>
-                                    <button 
-                                        onClick={() => setCurrentPage('allDecks')}
-                                        className="mobile-button bg-white bg-opacity-30 p-3 rounded-full shadow-md text-gray-800 hover:bg-opacity-50 transition"
-                                        title={TRANSLATIONS["en-US"].collection}
-                                    >
-                                        <i className="fas fa-layer-group text-xl text-gray-600"></i>
-                                    </button>
-                                    <a 
-                                        href="https://bestling.net" 
-                                        target="_blank" 
-                                        rel="noopener noreferrer"
-                                        className="mobile-button bg-white bg-opacity-30 p-3 rounded-full shadow-md text-gray-800 hover:bg-opacity-50 transition flex items-center gap-2"
-                                        title="Bestling.net"
-                                    >
-                                        <i className="fas fa-book text-xl"></i>
-                                        <span className="hidden sm:inline">Bestling.net</span>
-                                    </a>
-                                    <button 
-                                        onClick={resetApp}
-                                        className="mobile-button bg-white bg-opacity-30 p-3 rounded-full shadow-md text-gray-800 hover:bg-opacity-50 transition"
-                                        title={TRANSLATIONS["en-US"].createNewFlashcardsLink}
-                                    >
-                                        <i className="fas fa-undo text-xl"></i>
-                                    </button>
+                                <div className="w-full flex justify-center items-center p-4 z-10 space-x-2 sm:space-x-4">
+                                    <button onClick={() => setCurrentPage('remembered')} className="mobile-button bg-white bg-opacity-30 p-3 rounded-full shadow-md text-gray-800 hover:bg-opacity-50 transition" title={TRANSLATIONS["en-US"].rememberedCards}><i className="fas fa-check-double text-xl text-green-600"></i></button>
+                                    <button onClick={() => setCurrentPage('forgotten')} className="mobile-button bg-white bg-opacity-30 p-3 rounded-full shadow-md text-gray-800 hover:bg-opacity-50 transition" title={TRANSLATIONS["en-US"].forgottenCards}><i className="fas fa-question text-xl text-yellow-600"></i></button>
+                                    <button onClick={() => setCurrentPage('allDecks')} className="mobile-button bg-white bg-opacity-30 p-3 rounded-full shadow-md text-gray-800 hover:bg-opacity-50 transition" title={TRANSLATIONS["en-US"].collection}><i className="fas fa-layer-group text-xl text-blue-600"></i></button>
+                                    <a href="https://bestling.net" target="_blank" rel="noopener noreferrer" className="mobile-button bg-white bg-opacity-30 p-3 rounded-full shadow-md text-gray-800 hover:bg-opacity-50 transition flex items-center gap-2" title="Bestling.net"><i className="fas fa-book text-xl"></i></a>
+                                    <button onClick={resetApp} className="mobile-button bg-white bg-opacity-30 p-3 rounded-full shadow-md text-gray-800 hover:bg-opacity-50 transition" title={TRANSLATIONS["en-US"].createNewFlashcardsLink}><i className="fas fa-undo text-xl"></i></button>
                                 </div>
 
-                                {/* Card Display Area */}
                                 <div className="card-scene relative w-full flex-grow flex items-center justify-center mb-8">
-                                    {currentCard && (
-                                        <Flashcard 
-                                            card={currentCard} 
-                                            onSwipe={handleSwipe} 
-                                            isCurrent={true} 
-                                            className="show" 
-                                        />
-                                    )}
-                                    {currentCard && nextCard && (
-                                        <Flashcard 
-                                            card={nextCard} 
-                                            isCurrent={false} 
-                                            className="new-card" 
-                                        />
-                                    )}
+                                    {currentCard && <Flashcard card={currentCard} onSwipe={handleSwipe} isCurrent={true} className="show" />}
+                                    {nextCard && <Flashcard card={nextCard} isCurrent={false} className="new-card" />}
                                 </div>
                             </div>
                         );
                     case 'remembered':
-                        return (
-                            <CollectionPage 
-                                title={TRANSLATIONS["en-US"].rememberedCards} 
-                                cards={rememberedCards} 
-                                onBack={() => setCurrentPage('flashcards')} 
-                                fallbackMessage={TRANSLATIONS["en-US"].noCollectedCards}
-                            />
-                        );
+                        return <CollectionPage title={TRANSLATIONS["en-US"].rememberedCards} cards={rememberedCards} onBack={() => setCurrentPage('flashcards')} fallbackMessage={TRANSLATIONS["en-US"].noCollectedCards}/>;
                     case 'forgotten':
-                        return (
-                            <CollectionPage 
-                                title={TRANSLATIONS["en-US"].forgottenCards} 
-                                cards={forgottenCards} 
-                                onBack={() => setCurrentPage('flashcards')}
-                                fallbackMessage={TRANSLATIONS["en-US"].noCollectedCards}
-                            />
-                        );
+                        return <CollectionPage title={TRANSLATIONS["en-US"].forgottenCards} cards={forgottenCards} onBack={() => setCurrentPage('flashcards')} fallbackMessage={TRANSLATIONS["en-US"].noCollectedCards}/>;
                     case 'allDecks':
-                        const allDeckItems = Object.keys(ACCESS_CODES).map(codeKey => {
-                            const deck = ACCESS_CODES[codeKey];
-                            return {
-                                title: deck.title,
-                                card: deck.sampleCard
-                            };
-                        });
-                        return (
-                            <AllDecksPage 
-                                title={TRANSLATIONS["en-US"].collection} 
-                                decks={allDeckItems} 
-                                onBack={() => setCurrentPage('flashcards')}
-                            />
-                        );
+                        const allDeckItems = Object.keys(ACCESS_CODES).map(codeKey => ({ title: ACCESS_CODES[codeKey].title, card: ACCESS_CODES[codeKey].sampleCard }));
+                        return <AllDecksPage title={TRANSLATIONS["en-US"].collection} decks={allDeckItems} onBack={() => setCurrentPage('flashcards')}/>;
                     default:
                         return null;
                 }
@@ -1324,12 +988,7 @@
             return (
                 <div className="min-h-screen min-h-dvh flex flex-col items-center justify-center">
                     {renderContent()}
-                    <Modal
-                        isOpen={showErrorModal}
-                        onClose={() => setShowErrorModal(false)}
-                        title="Error"
-                        message={errorMessage}
-                    />
+                    <Modal isOpen={showErrorModal} onClose={() => setShowErrorModal(false)} title="Error" message={errorMessage} />
                 </div>
             );
         };
