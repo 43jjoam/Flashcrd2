@@ -27,19 +27,16 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* --- MODIFIED: Main Page Layout --- */
         .flashcard-page {
             display: flex;
             flex-direction: column;
-            height: 100vh; /* Full viewport height */
-            height: 100dvh; /* Dynamic viewport height for mobile */
+            height: 100vh;
+            height: 100dvh;
             padding: 1rem;
         }
-        .top-nav {
-            flex-shrink: 0; /* Prevent nav from shrinking */
-        }
+        .top-nav { flex-shrink: 0; }
         .card-scene-wrapper {
-            flex-grow: 1; /* Allow card scene to take up remaining space */
+            flex-grow: 1;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -52,7 +49,7 @@
             position: relative;
         }
 
-        /* --- MODIFIED: Card & Flip Animation --- */
+        /* --- Card & Flip Animation --- */
         .card-container {
             position: absolute;
             width: 100%;
@@ -70,68 +67,40 @@
             backface-visibility: hidden;
             -webkit-backface-visibility: hidden;
             border-radius: 20px;
-            /* --- MODIFIED: Opaque card background --- */
-            background-color: #fdfdfd;
+            background-color: #fdfdfd; /* Opaque background */
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
         }
-        .card-back {
-            transform: rotateY(180deg);
-        }
-        /* --- NEW: 3D Thickness Effect --- */
+        .card-back { transform: rotateY(180deg); }
         .card-back::before {
             content: '';
             position: absolute;
-            top: 2px;
-            left: 2px;
-            right: 2px;
-            bottom: 2px;
+            top: 2px; left: 2px; right: 2px; bottom: 2px;
             background: #e0e0e0;
             transform: translateZ(-2px);
             border-radius: 18px;
         }
 
-        /* --- MODIFIED: Card Stack & Swipe Animation Logic --- */
+        /* --- Card Stack & Swipe Animation --- */
         .card-stack-item {
             position: absolute;
             width: 100%;
             height: 100%;
             transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.4s;
-            touch-action: none; /* We handle all touch events */
+            touch-action: none;
         }
         .card-stack-item[data-index="0"] { z-index: 3; }
         .card-stack-item[data-index="1"] {
             transform: scale(0.9) translateY(-30px);
-            opacity: 0.8;
             z-index: 2;
         }
         .card-stack-item[data-index="2"] {
             transform: scale(0.8) translateY(-60px);
-            opacity: 0.4;
             z-index: 1;
         }
-
-        /* --- NEW: Bumble-style Swipe Overlay --- */
-        .swipe-overlay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 60px;
-            opacity: 0;
-            transform: translate(-50%, -50%) scale(0.5);
-            pointer-events: none;
-        }
-        .swipe-overlay.like { background-color: rgba(46, 204, 113, 0.7); color: white; }
-        .swipe-overlay.nope { background-color: rgba(231, 76, 60, 0.7); color: white; }
 
         /* --- Card Content & UI Elements --- */
         .card-content {
@@ -144,43 +113,58 @@
             text-align: center;
             gap: 1rem;
         }
-        .chinese-character {
-            font-size: clamp(2.5rem, 8vw, 4rem);
-            font-weight: 400;
-            color: #1f2937;
-            cursor: pointer;
-            user-select: none;
-        }
-        .pinyin {
-            font-size: clamp(1.2rem, 4vw, 1.6rem);
-            color: #6b7280;
-            cursor: pointer;
-            user-select: none;
-        }
-        .emoji-display {
-            font-size: clamp(2.5rem, 7vw, 3.5rem);
-        }
-        .english-translation {
-            font-size: clamp(1.2rem, 4vw, 1.5rem);
-            font-weight: 500;
-            color: #374151;
-            cursor: pointer;
-            user-select: none;
-        }
-        .thai-translation {
-            font-size: clamp(1.1rem, 3.5vw, 1.3rem);
-            color: #6b7280;
-            cursor: pointer;
-            user-select: none;
-        }
-        .mobile-button {
-            background: none; border: none; padding: 8px; color: white; opacity: 0.8;
-            transition: all 0.2s ease;
-        }
+        .chinese-character { font-size: clamp(2.5rem, 8vw, 4rem); font-weight: 400; color: #1f2937; cursor: pointer; user-select: none; }
+        .pinyin { font-size: clamp(1.2rem, 4vw, 1.6rem); color: #6b7280; cursor: pointer; user-select: none; }
+        .emoji-display { font-size: clamp(2.5rem, 7vw, 3.5rem); }
+        .english-translation { font-size: clamp(1.2rem, 4vw, 1.5rem); font-weight: 500; color: #374151; cursor: pointer; user-select: none; }
+        .thai-translation { font-size: clamp(1.1rem, 3.5vw, 1.3rem); color: #6b7280; cursor: pointer; user-select: none; }
+        .mobile-button { background: none; border: none; padding: 8px; color: white; opacity: 0.8; transition: all 0.2s ease; }
         .mobile-button:active { transform: scale(0.9); opacity: 1; }
         
-        /* Other styles (Modal, SlideToUnlock, etc.) remain largely the same but can be tweaked if needed */
-        .slide-container{position:relative;width:100%;max-width:300px;height:50px;background-color:rgba(255,255,255,0.2);border-radius:25px;overflow:hidden;box-shadow:inset 0 0 10px rgba(0,0,0,0.1)}.slide-text{position:absolute;width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.8);font-weight:bold;font-size:1rem;pointer-events:none;transition:opacity .3s ease}.slide-button{width:50px;height:50px;background:linear-gradient(135deg,#00f2fe,#4facfe);border-radius:50%;position:absolute;left:0;top:0;display:flex;align-items:center;justify-content:center;cursor:grab;box-shadow:0 5px 15px rgba(0,0,0,0.2);transition:transform .1s ease-out;touch-action:pan-x}.slide-button.unlocked{transform:translateX(calc(100% - 50px));cursor:auto}.slide-fill{height:100%;background:linear-gradient(90deg,#4facfe,#00f2fe);border-radius:25px;width:0;transition:width .1s ease-out}.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s ease}.modal-overlay.open{opacity:1;visibility:visible}.modal-content{background:linear-gradient(135deg,rgba(255,255,255,0.95) 0%,rgba(248,250,252,0.9) 100%);border-radius:20px;padding:30px;box-shadow:0 20px 40px rgba(0,0,0,0.2);max-width:90vw;width:400px;text-align:center;transform:translateY(-20px);opacity:0;transition:transform .3s ease,opacity .3s ease}.modal-overlay.open .modal-content{transform:translateY(0);opacity:1}.small-card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:16px;padding:10px;max-height:60vh;overflow-y:auto;-webkit-overflow-scrolling:touch}.small-card{background:linear-gradient(135deg,rgba(255,255,255,0.9) 0%,rgba(248,250,252,0.8) 100%);border-radius:15px;box-shadow:0 10px 20px rgba(0,0,0,0.08);border:1px solid rgba(255,255,255,0.4);backdrop-filter:blur(5px);padding:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:120px;font-size:.8rem;color:#374151;transition:transform .2s ease}.small-card:hover{transform:translateY(-5px)}.small-card .chinese-character{font-size:1.5rem;margin-bottom:4px}.small-card .pinyin{font-size:.9rem;margin-bottom:8px}.small-card .emoji-display{font-size:1.2rem;margin-bottom:4px}.small-card .english-translation,.small-card .thai-translation{font-size:.8rem;padding:0;margin:0}.mobile-center{display:flex;align-items:center;justify-content:center;min-height:100vh;min-height:100dvh;width:100%;padding:16px;box-sizing:border-box}
+        /* --- MODIFIED: Collection Page Layout --- */
+        .collection-page {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            height: 100dvh;
+            padding: 1rem;
+            overflow: hidden; /* No scrollbars */
+        }
+        .collection-grid {
+            flex-grow: 1;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(3, 1fr); /* 3 rows */
+            gap: 1rem;
+            padding-top: 1rem;
+        }
+        .small-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #374151;
+            transition: transform 0.2s ease;
+            font-size: 0.7rem;
+            line-height: 1.2;
+        }
+        .small-card .chinese-character { font-size: 1.2rem; margin-bottom: 0.1rem; }
+        .small-card .pinyin { font-size: 0.7rem; margin-bottom: 0.2rem; color: #6b7280; }
+        .small-card .emoji-display { font-size: 1rem; }
+        .small-card .english-translation { font-weight: 500; }
+        .small-card .thai-translation { color: #6b7280; }
+
+        .flippable-small-card .card-container {
+            transition-duration: 0.6s;
+        }
+        
+        /* Other styles */
+        .slide-container{position:relative;width:100%;max-width:300px;height:50px;background-color:rgba(255,255,255,0.2);border-radius:25px;overflow:hidden;box-shadow:inset 0 0 10px rgba(0,0,0,0.1)}.slide-text{position:absolute;width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.8);font-weight:bold;font-size:1rem;pointer-events:none;transition:opacity .3s ease}.slide-button{width:50px;height:50px;background:linear-gradient(135deg,#00f2fe,#4facfe);border-radius:50%;position:absolute;left:0;top:0;display:flex;align-items:center;justify-content:center;cursor:grab;box-shadow:0 5px 15px rgba(0,0,0,0.2);transition:transform .1s ease-out;touch-action:pan-x}.slide-button.unlocked{transform:translateX(calc(100% - 50px));cursor:auto}.slide-fill{height:100%;background:linear-gradient(90deg,#4facfe,#00f2fe);border-radius:25px;width:0;transition:width .1s ease-out}.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s ease}.modal-overlay.open{opacity:1;visibility:visible}.modal-content{background:linear-gradient(135deg,rgba(255,255,255,0.95) 0%,rgba(248,250,252,0.9) 100%);border-radius:20px;padding:30px;box-shadow:0 20px 40px rgba(0,0,0,0.2);max-width:90vw;width:400px;text-align:center;transform:translateY(-20px);opacity:0;transition:transform .3s ease,opacity .3s ease}.modal-overlay.open .modal-content{transform:translateY(0);opacity:1}.mobile-center{display:flex;align-items:center;justify-content:center;min-height:100vh;min-height:100dvh;width:100%;padding:16px;box-sizing:border-box}
     </style>
 </head>
 <body class="animated-bg font-sans text-gray-800">
@@ -189,8 +173,8 @@
     <script type="text/babel">
         const { useState, useEffect, useRef, useCallback } = React;
 
-        // --- DATA & CONFIG (No Changes) ---
-        const TRANSLATIONS={"en-US":{flashcardsCode:"Learn Chinese with Flashcards",slideToUnlock:"slide to unlock",pasteCodePlaceholder:"paste or type your unique code here...",generatingTitle:"Loading your flashcard set...",generatingSubtitle:"Please wait while we prepare your cards...",createNewFlashcardsLink:"Enter new code",collection:"All Decks",backToStudy:"Back to Study",noCollectedCards:"No cards collected yet",rememberedCards:"Remembered Cards",forgottenCards:"Forgotten Cards",totalCards:"Total Cards",landingPageSubtitle:'Enter "LearnChinesewithHelen1295" or "PinyinPractice" to start.'}};
+        // --- DATA & CONFIG ---
+        const TRANSLATIONS={"en-US":{flashcardsCode:"Learn Chinese with Flashcards",slideToUnlock:"slide to unlock",pasteCodePlaceholder:"paste or type your unique code here...",createNewFlashcardsLink:"Enter new code",collection:"All Decks",backToStudy:"Back to Study",noCollectedCards:"No cards collected yet",rememberedCards:"Remembered Cards",forgottenCards:"Forgotten Cards",landingPageSubtitle:'Enter "LearnChinesewithHelen1295" or "PinyinPractice" to start.'}};
         const CHINESE_VOCABULARY=[{front:"爸爸\nbà ba",back:"dad\nพ่อ",emoji:"👨‍👧‍👦"},{front:"别\nbié",back:"don't\nอย่า",emoji:"🚫"},{front:"朋友\npéng yǒu",back:"friend\nเพื่อน",emoji:"👫"},{front:"怕\npà",back:"to fear\nกลัว",emoji:"😨"},{front:"妈妈\nmā ma",back:"mom\nแม่",emoji:"👩‍👧‍👦"},{front:"买\nmǎi",back:"to buy\nซื้อ",emoji:"🛒"},{front:"饭\nfàn",back:"meal\nข้าว",emoji:"🍽️"},{front:"富\nfù",back:"rich\nรวย",emoji:"💰"},{front:"奶奶\nnǎi nai",back:"grandmother\nยาย",emoji:"👵"},{front:"你\nnǐ",back:"you\nคุณ",emoji:"👤"},{front:"老\nlǎo",back:"old\nแก่",emoji:"🧓"},{front:"来\nlái",back:"to come\nมา",emoji:"➡️"},{front:"大\ndà",back:"big\nใหญ่",emoji:"📏"},{front:"得\ndé",back:"to get\nได้รับ",emoji:"🏆"},{front:"跳\ntiào",back:"to jump\nกระโดด",emoji:"🤸"},{front:"调\ntiáo",back:"to adjust\nปรับ",emoji:"⚙️"},{front:"猪\nzhū",back:"pig\nหมู",emoji:"🐷"},{front:"住\nzhù",back:"to live\nอาศัย",emoji:"🏠"},{front:"吃\nchī",back:"to eat\nกิน",emoji:"🍽️"},{front:"出\nchū",back:"to go out\nออกไป",emoji:"🚪"},{front:"高\ngāo",back:"high\nสูง",emoji:"📏"},{front:"个\ngè",back:"measure word\nลักษณนาม",emoji:"📊"},{front:"裤\nkù",back:"trousers\nกางเกง",emoji:"👖"},{front:"可以\nkě yǐ",back:"can\nสามารถ",emoji:"✅"},{front:"虎\nhǔ",back:"tiger\nเสือ",emoji:"🐅"},{front:"好\nhǎo",back:"good\nดี",emoji:"👍"},{front:"家\njiā",back:"home\nบ้าน",emoji:"🏡"},{front:"就\njiù",back:"then\nแล้ว",emoji:"⏭️"},{front:"小\nxiǎo",back:"small\nเล็ก",emoji:"🐭"},{front:"喜欢\nxǐ huān",back:"to like\nชอบ",emoji:"❤️"}];
         const PINYIN_CARDS=[{front:"ang",back:"ang\nFinal compound: 'ahng' sound\nเสียงสระผสม: 'อาง'",emoji:"🗣️"},{front:"ing",back:"ing\nFinal compound: 'eeng' sound\nเสียงสระผสม: 'อิง'",emoji:"🗣️"},{front:"en",back:"en\nFinal compound: 'uhn' sound\nเสียงสระผสม: 'เอิน'",emoji:"🗣️"},{front:"ai",back:"ai\nFinal compound: 'eye' sound\nเสียงสระผสม: 'ไอ'",emoji:"🗣️"},{front:"ao",back:"ao\nFinal compound: 'aow' sound\nเสียงสระผสม: 'เอา'",emoji:"🗣️"}];
         const ACCESS_CODES={LearnChinesewithHelen1295:{title:"Chinese Vocabulary",cards:CHINESE_VOCABULARY.map(card=>({...card,status:"new"})),sampleCard:{...CHINESE_VOCABULARY[0],status:"new"}},PinyinPractice:{title:"Pinyin Practice",cards:PINYIN_CARDS.map(card=>({...card,status:"new"})),sampleCard:{...PINYIN_CARDS[0],status:"new"}}};
@@ -224,7 +208,6 @@
             }, []);
             const pronounceText = useCallback((text, specificLang = null) => {
                 if (!text || !text.trim() || typeof speechSynthesis === 'undefined' || !isReady) {
-                    console.warn("Speech synthesis not ready or text is empty.");
                     return;
                 }
                 speechSynthesis.cancel();
@@ -269,23 +252,12 @@
                 )
             );
         };
-        const SmallCard = ({ card }) => {
-            const frontParts = card.front.split('\n').map(s => s.trim()).filter(s => s);
-            const chineseChar = frontParts[0] || '';
-            return React.createElement("div", { className: "small-card" },
-                React.createElement("div", { className: "chinese-character" }, chineseChar),
-                React.createElement("div", { className: "emoji-display" }, card.emoji)
-            );
-        };
-        
-        // --- FIXED: SlideToUnlock Component ---
         const SlideToUnlock = ({ onUnlock }) => {
             const sliderRef = useRef(null);
             const [isDragging, setIsDragging] = useState(false);
             const [currentX, setCurrentX] = useState(0);
             const [unlocked, setUnlocked] = useState(false);
             const [maxTranslateX, setMaxTranslateX] = useState(0);
-
             useEffect(() => {
                 const calculateMaxTranslateX = () => {
                     if (sliderRef.current) {
@@ -296,13 +268,11 @@
                 window.addEventListener('resize', calculateMaxTranslateX);
                 return () => window.removeEventListener('resize', calculateMaxTranslateX);
             }, []);
-
             const handleStart = (clientX) => {
                 if (unlocked) return;
                 setIsDragging(true);
                 sliderRef.current.startX = clientX;
             };
-
             const handleMove = (clientX) => {
                 if (!isDragging || unlocked) return;
                 const deltaX = clientX - sliderRef.current.startX;
@@ -314,7 +284,6 @@
                     onUnlock();
                 }
             };
-
             const handleEnd = () => {
                 if (unlocked) return;
                 if (isDragging) {
@@ -322,41 +291,20 @@
                     setCurrentX(0);
                 }
             };
-
-            return React.createElement("div", {
-                ref: sliderRef,
-                className: "slide-container",
-                onMouseDown: (e) => handleStart(e.clientX),
-                onMouseMove: (e) => handleMove(e.clientX),
-                onMouseUp: handleEnd,
-                onMouseLeave: handleEnd,
-                onTouchStart: (e) => handleStart(e.touches[0].clientX),
-                onTouchMove: (e) => handleMove(e.touches[0].clientX),
-                onTouchEnd: handleEnd
-            },
-            React.createElement("div", {
-                className: "slide-fill",
-                style: { width: `${currentX + 25}px` }
-            }),
-            React.createElement("div", {
-                className: `slide-button ${unlocked ? 'unlocked' : ''}`,
-                style: { transform: `translateX(${currentX}px)` }
-            }, unlocked ? React.createElement("i", { className: "fas fa-check" }) : React.createElement("i", { className: "fas fa-chevron-right" })),
-            React.createElement("div", {
-                className: `slide-text ${unlocked || currentX > 10 ? 'opacity-0' : 'opacity-100'}`
-            }, TRANSLATIONS["en-US"].slideToUnlock));
+            return React.createElement("div", { ref: sliderRef, className: "slide-container", onMouseDown: (e) => handleStart(e.clientX), onMouseMove: (e) => handleMove(e.clientX), onMouseUp: handleEnd, onMouseLeave: handleEnd, onTouchStart: (e) => handleStart(e.touches[0].clientX), onTouchMove: (e) => handleMove(e.touches[0].clientX), onTouchEnd: handleEnd },
+            React.createElement("div", { className: "slide-fill", style: { width: `${currentX + 25}px` } }),
+            React.createElement("div", { className: `slide-button ${unlocked ? 'unlocked' : ''}`, style: { transform: `translateX(${currentX}px)` } }, unlocked ? React.createElement("i", { className: "fas fa-check" }) : React.createElement("i", { className: "fas fa-chevron-right" })),
+            React.createElement("div", { className: `slide-text ${unlocked || currentX > 10 ? 'opacity-0' : 'opacity-100'}` }, TRANSLATIONS["en-US"].slideToUnlock));
         };
-
-        // --- REBUILT: Flashcard Component ---
+        
+        // --- REBUILT: Main Flashcard Component ---
         const Flashcard = ({ card, onSwipe, index }) => {
             const [isFlipped, setIsFlipped] = useState(false);
             const cardRef = useRef(null);
             const touchState = useRef({ startX: 0, startY: 0, startTime: 0, isDragging: false, deltaX: 0 }).current;
             const { pronounceText } = useSpeech();
 
-            useEffect(() => {
-                setIsFlipped(false);
-            }, [card]);
+            useEffect(() => { setIsFlipped(false); }, [card]);
 
             const handlePointerDown = (e) => {
                 touchState.isDragging = true;
@@ -384,7 +332,6 @@
                 if (!touchState.isDragging) return;
                 touchState.isDragging = false;
                 e.target.releasePointerCapture(e.pointerId);
-
                 const touchDuration = Date.now() - touchState.startTime;
 
                 if (touchDuration < 250 && Math.abs(touchState.deltaX) < 15) {
@@ -395,12 +342,15 @@
                 } else {
                     const swipeThreshold = window.innerWidth * 0.35;
                     if (Math.abs(touchState.deltaX) > swipeThreshold) {
-                        onSwipe(touchState.deltaX > 0 ? 'right' : 'left', index);
+                        const direction = touchState.deltaX > 0 ? 'right' : 'left';
+                        cardRef.current.style.transition = 'transform 0.4s';
+                        cardRef.current.style.transform = `translateX(${direction === 'right' ? '200%' : '-200%'}) rotate(${direction === 'right' ? 45 : -45}deg)`;
+                        setTimeout(() => onSwipe(direction), 100);
+                    } else {
+                       cardRef.current.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)';
+                       cardRef.current.style.transform = '';
                     }
                 }
-                
-                cardRef.current.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)';
-                cardRef.current.style.transform = '';
             };
             
             const handlePronounce = (e, text, lang) => {
@@ -408,20 +358,10 @@
                 pronounceText(text, lang);
             };
 
-            const frontParts = card.front.split('\n').map(s => s.trim()).filter(s => s);
-            const backParts = card.back.split('\n').map(s => s.trim()).filter(s => s);
-            const [chineseChar, pinyin] = frontParts;
-            const [englishTranslation, thaiTranslation] = backParts;
+            const [chineseChar, pinyin] = card.front.split('\n').map(s => s.trim());
+            const [englishTranslation, thaiTranslation] = card.back.split('\n').map(s => s.trim());
 
-            return (
-                React.createElement("div", {
-                    ref: cardRef,
-                    className: "card-stack-item",
-                    "data-index": index,
-                    onPointerDown: handlePointerDown,
-                    onPointerMove: handlePointerMove,
-                    onPointerUp: handlePointerUp,
-                },
+            return React.createElement("div", { ref: cardRef, className: "card-stack-item", "data-index": index, onPointerDown: handlePointerDown, onPointerMove: handlePointerMove, onPointerUp: handlePointerUp },
                 React.createElement("div", { className: `card-container ${isFlipped ? 'flipped' : ''}` },
                     React.createElement("div", { className: "card-face" },
                         React.createElement("div", { className: "card-content" },
@@ -437,10 +377,67 @@
                             React.createElement("div", { className: "emoji-display" }, card.emoji)
                         )
                     )
-                ))
+                )
             );
         };
         
+        // --- NEW: Flippable Small Card for Forgotten Section ---
+        const FlippableSmallCard = ({ card, onLongPress }) => {
+            const [isFlipped, setIsFlipped] = useState(false);
+            const longPressTimeout = useRef(null);
+
+            const handlePointerDown = () => {
+                longPressTimeout.current = setTimeout(() => {
+                    onLongPress(card);
+                }, 500); // 500ms for long press
+            };
+
+            const handlePointerUp = () => {
+                clearTimeout(longPressTimeout.current);
+            };
+
+            const handleClick = () => {
+                setIsFlipped(true);
+                setTimeout(() => setIsFlipped(false), 2000); // Flip back after 2s
+            };
+
+            const [chineseChar, pinyin] = card.front.split('\n').map(s => s.trim());
+            const [englishTranslation, thaiTranslation] = card.back.split('\n').map(s => s.trim());
+
+            return React.createElement("div", { 
+                className: "flippable-small-card", 
+                onClick: handleClick,
+                onPointerDown: handlePointerDown,
+                onPointerUp: handlePointerUp,
+                onPointerLeave: handlePointerUp
+            },
+                React.createElement("div", { className: `card-container ${isFlipped ? 'flipped' : ''}` },
+                    React.createElement("div", { className: "card-face small-card" },
+                        React.createElement("div", { className: "chinese-character" }, chineseChar),
+                        React.createElement("div", { className: "pinyin" }, pinyin),
+                        React.createElement("div", { className: "emoji-display" }, card.emoji)
+                    ),
+                    React.createElement("div", { className: "card-face card-back small-card" },
+                        React.createElement("div", { className: "english-translation" }, englishTranslation),
+                        React.createElement("div", { className: "thai-translation" }, thaiTranslation)
+                    )
+                )
+            );
+        };
+        
+        // --- NEW: Static Small Card for Remembered Section ---
+        const StaticSmallCard = ({ card }) => {
+            const [chineseChar, pinyin] = card.front.split('\n').map(s => s.trim());
+            const [englishTranslation, thaiTranslation] = card.back.split('\n').map(s => s.trim());
+            return React.createElement("div", { className: "small-card" },
+                React.createElement("div", { className: "chinese-character" }, chineseChar),
+                React.createElement("div", { className: "pinyin" }, pinyin),
+                React.createElement("div", { className: "english-translation" }, englishTranslation),
+                React.createElement("div", { className: "thai-translation" }, thaiTranslation),
+                React.createElement("div", { className: "emoji-display" }, card.emoji)
+            );
+        };
+
         const removeCardFromListByFront = (list, cardToRemove) => list.filter(c => c.front !== cardToRemove.front);
 
         const App = () => {
@@ -496,6 +493,13 @@
                 setVisibleCards(deckUpdate.slice(0, 3));
             }, [deck, visibleCards, rememberedCards, forgottenCards]);
 
+            const handleLongPress = (cardToStudy) => {
+                const newDeck = [cardToStudy, ...deck.filter(c => c.key !== cardToStudy.key)];
+                setDeck(newDeck);
+                setVisibleCards(newDeck.slice(0, 3));
+                setCurrentPage('flashcards');
+            };
+
             const resetApp = () => {
                 setCurrentPage('landing');
                 setCode('');
@@ -505,8 +509,23 @@
                 setForgottenCards([]);
             };
             
-            const CollectionPage=({title:e,cards:t,onBack:s,fallbackMessage:n})=>React.createElement("div",{className:"flex flex-col items-center justify-start min-h-screen min-h-dvh p-4 relative w-full"},React.createElement("div",{className:"w-full flex justify-between items-center p-4 z-10"},React.createElement("button",{onClick:s,className:"mobile-button",title:TRANSLATIONS["en-US"].backToStudy},React.createElement("i",{className:"fas fa-arrow-left text-2xl"})),React.createElement("h2",{className:"text-2xl font-bold text-white"},e),React.createElement("div",{className:"w-12 h-12"})),React.createElement("div",{className:"flex-grow w-full p-4"},t.length>0?React.createElement("div",{className:"small-card-grid"},t.map((e,t)=>React.createElement(SmallCard,{key:`${e.front}-${t}`,card:e}))):React.createElement("p",{className:"text-white text-center text-lg mt-8"},n)));
-            const AllDecksPage=({title:e,decks:t,onBack:s})=>React.createElement("div",{className:"flex flex-col items-center justify-start min-h-screen min-h-dvh p-4 relative w-full"},React.createElement("div",{className:"w-full flex justify-between items-center p-4 z-10"},React.createElement("button",{onClick:s,className:"mobile-button",title:TRANSLATIONS["en-US"].backToStudy},React.createElement("i",{className:"fas fa-arrow-left text-2xl"})),React.createElement("h2",{className:"text-2xl font-bold text-white"},e),React.createElement("div",{className:"w-12 h-12"})),React.createElement("div",{className:"flex-grow w-full p-4"},React.createElement("div",{className:"small-card-grid"},t.map((e,t)=>React.createElement("div",{key:t,className:"small-card flex-col items-center justify-center p-2"},React.createElement("h4",{className:"font-bold text-base mb-2"},e.title),e.card?React.createElement(SmallCard,{card:e.card}):React.createElement("p",{className:"text-sm text-gray-500"},"No sample card"))))));
+            const CollectionPage = ({ title, cards, onBack, fallbackMessage, cardType }) => (
+                React.createElement("div", { className: "collection-page" },
+                    React.createElement("div", { className: "top-nav w-full flex justify-between items-center" },
+                        React.createElement("button", { onClick: onBack, className: "mobile-button", title: TRANSLATIONS["en-US"].backToStudy }, React.createElement("i", { className: "fas fa-arrow-left text-2xl" })),
+                        React.createElement("h2", { className: "text-2xl font-bold text-white" }, title),
+                        React.createElement("div", { className: "w-12 h-12" })
+                    ),
+                    cards.length > 0 ? React.createElement("div", { className: "collection-grid" },
+                        cards.slice(0, 6).map((card) => (
+                           cardType === 'remembered' 
+                           ? React.createElement(StaticSmallCard, { key: card.key, card: card })
+                           : React.createElement(FlippableSmallCard, { key: card.key, card: card, onLongPress: handleLongPress })
+                        ))
+                    ) : React.createElement("div", {className: "flex-grow flex items-center justify-center"}, React.createElement("p", { className: "text-white text-center text-lg" }, fallbackMessage))
+                )
+            );
+            const AllDecksPage=({title:e,decks:t,onBack:s})=>React.createElement("div",{className:"collection-page"},React.createElement("div",{className:"top-nav w-full flex justify-between items-center"},React.createElement("button",{onClick:s,className:"mobile-button",title:TRANSLATIONS["en-US"].backToStudy},React.createElement("i",{className:"fas fa-arrow-left text-2xl"})),React.createElement("h2",{className:"text-2xl font-bold text-white"},e),React.createElement("div",{className:"w-12 h-12"})),React.createElement("div",{className:"collection-grid"},t.map((e,t)=>React.createElement("div",{key:t,className:"small-card flex-col items-center justify-center p-2"},React.createElement("h4",{className:"font-bold text-base mb-2"},e.title),e.card?React.createElement(SmallCard,{card:e.card}):React.createElement("p",{className:"text-sm text-gray-500"},"No sample card")))));
 
             const renderContent = () => { 
                 switch (currentPage) {
@@ -554,9 +573,9 @@
                             </div>
                         );
                     case 'remembered':
-                        return React.createElement(CollectionPage,{title:TRANSLATIONS["en-US"].rememberedCards,cards:rememberedCards,onBack:()=>setCurrentPage("flashcards"),fallbackMessage:TRANSLATIONS["en-US"].noCollectedCards});
+                        return React.createElement(CollectionPage,{title:TRANSLATIONS["en-US"].rememberedCards,cards:rememberedCards,onBack:()=>setCurrentPage("flashcards"),fallbackMessage:TRANSLATIONS["en-US"].noCollectedCards, cardType: 'remembered'});
                     case 'forgotten':
-                        return React.createElement(CollectionPage,{title:TRANSLATIONS["en-US"].forgottenCards,cards:forgottenCards,onBack:()=>setCurrentPage("flashcards"),fallbackMessage:TRANSLATIONS["en-US"].noCollectedCards});
+                        return React.createElement(CollectionPage,{title:TRANSLATIONS["en-US"].forgottenCards,cards:forgottenCards,onBack:()=>setCurrentPage("flashcards"),fallbackMessage:TRANSLATIONS["en-US"].noCollectedCards, cardType: 'forgotten'});
                     case 'allDecks':
                         const allDeckItems = Object.keys(ACCESS_CODES).map(codeKey => ({ title: ACCESS_CODES[codeKey].title, card: ACCESS_CODES[codeKey].sampleCard }));
                         return React.createElement(AllDecksPage,{title:TRANSLATIONS["en-US"].collection,decks:allDeckItems,onBack:()=>setCurrentPage("flashcards")});
@@ -577,17 +596,3 @@
     </script>
 </body>
 </html>
-```
-
-i have selected some code from the most up-to-date Canvas "Chinese-Thai Flashcard App (Full Revamp)" document above and am asking a query about/based on this code.
-Instructions to follow:
-  * Don't output/edit the document if the query is Direct/Simple. For example, if the query asks for a simple explanation, output a direct answer.
-  * Make sure to **edit** the document if the query shows the intent of editing the document, in which case output the entire edited document, **not just that section or the edits**.
-    * Don't output the same document/empty document and say that you have edited it.
-    * Don't change unrelated code in the document.
-  * Don't output  and  in your final response.
-  * Any references like "this" or "selected code" refers to the code between  and  tags.
-  * Just acknowledge my request in the introduction.
-  * Make sure to refer to the document as "Canvas" in your response.
-
-bug: slidding button still doesnt w
