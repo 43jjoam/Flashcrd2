@@ -129,15 +129,17 @@
             height: 100vh;
             height: 100dvh;
             padding: 1rem;
-            overflow: hidden; /* No scrollbars */
+        }
+        .collection-grid-wrapper {
+            flex-grow: 1;
+            overflow-y: auto; /* Allow vertical scrolling */
+            -webkit-overflow-scrolling: touch;
+            padding-top: 1rem;
         }
         .collection-grid {
-            flex-grow: 1;
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(3, 1fr); /* 3 rows */
             gap: 1rem;
-            padding-top: 1rem;
         }
         .small-card {
             background: rgba(255, 255, 255, 0.95);
@@ -152,6 +154,7 @@
             color: #374151;
             font-size: 0.7rem;
             line-height: 1.3;
+            min-height: 150px; /* Give cards a consistent height */
         }
         /* --- MODIFIED: Remembered Card Text Hierarchy --- */
         .small-card .chinese-character { font-size: 1.5rem; font-weight: 500; margin-bottom: 0.1rem; }
@@ -247,13 +250,15 @@
         };
         const Modal = ({ isOpen, onClose, title, message, children }) => {
             if (!isOpen) return null;
-            return React.createElement("div", { className: `modal-overlay ${isOpen ? 'open' : ''}`, onClick: onClose },
-                React.createElement("div", { className: "modal-content", onClick: e => e.stopPropagation() },
-                    title && React.createElement("h3", { className: "text-2xl font-bold mb-4 text-gray-800" }, title),
-                    message && React.createElement("p", { className: "text-gray-700 mb-6" }, message),
-                    children,
-                    React.createElement("button", { onClick: onClose, className: "mt-4 px-6 py-3 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 transition duration-300" }, "Close")
-                )
+            return (
+                <div className={`modal-overlay ${isOpen ? 'open' : ''}`} onClick={onClose}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
+                        {title && <h3 className="text-2xl font-bold mb-4 text-gray-800">{title}</h3>}
+                        {message && <p className="text-gray-700 mb-6">{message}</p>}
+                        {children}
+                        <button onClick={onClose} className="mt-4 px-6 py-3 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 transition duration-300">Close</button>
+                    </div>
+                </div>
             );
         };
         const SlideToUnlock = ({ onUnlock }) => {
@@ -295,13 +300,17 @@
                     setCurrentX(0);
                 }
             };
-            return React.createElement("div", { ref: sliderRef, className: "slide-container", onMouseDown: (e) => handleStart(e.clientX), onMouseMove: (e) => handleMove(e.clientX), onMouseUp: handleEnd, onMouseLeave: handleEnd, onTouchStart: (e) => handleStart(e.touches[0].clientX), onTouchMove: (e) => handleMove(e.touches[0].clientX), onTouchEnd: handleEnd },
-            React.createElement("div", { className: "slide-fill", style: { width: `${currentX + 25}px` } }),
-            React.createElement("div", { className: `slide-button ${unlocked ? 'unlocked' : ''}`, style: { transform: `translateX(${currentX}px)` } }, unlocked ? React.createElement("i", { className: "fas fa-check" }) : React.createElement("i", { className: "fas fa-chevron-right" })),
-            React.createElement("div", { className: `slide-text ${unlocked || currentX > 10 ? 'opacity-0' : 'opacity-100'}` }, TRANSLATIONS["en-US"].slideToUnlock));
+            return (
+                <div ref={sliderRef} className="slide-container" onMouseDown={(e) => handleStart(e.clientX)} onMouseMove={(e) => handleMove(e.clientX)} onMouseUp={handleEnd} onMouseLeave={handleEnd} onTouchStart={(e) => handleStart(e.touches[0].clientX)} onTouchMove={(e) => handleMove(e.touches[0].clientX)} onTouchEnd={handleEnd}>
+                    <div className="slide-fill" style={{ width: `${currentX + 25}px` }} />
+                    <div className={`slide-button ${unlocked ? 'unlocked' : ''}`} style={{ transform: `translateX(${currentX}px)` }}>
+                        <i className={`fas ${unlocked ? 'fa-check' : 'fa-chevron-right'}`} />
+                    </div>
+                    <div className={`slide-text ${unlocked || currentX > 10 ? 'opacity-0' : 'opacity-100'}`}>{TRANSLATIONS["en-US"].slideToUnlock}</div>
+                </div>
+            );
         };
         
-        // --- REBUILT: Main Flashcard Component ---
         const Flashcard = ({ card, onSwipe, index }) => {
             const [isFlipped, setIsFlipped] = useState(false);
             const cardRef = useRef(null);
@@ -362,30 +371,36 @@
                 pronounceText(text, lang);
             };
 
-            const [chineseChar, pinyin] = card.front.split('\n').map(s => s.trim());
-            const [englishTranslation, thaiTranslation] = card.back.split('\n').map(s => s.trim());
+            const frontParts = (card.front || '').split('\n').map(s => s.trim());
+            const chineseChar = frontParts[0] || '';
+            const pinyin = frontParts[1] || '';
 
-            return React.createElement("div", { ref: cardRef, className: "card-stack-item", "data-index": index, onPointerDown: handlePointerDown, onPointerMove: handlePointerMove, onPointerUp: handlePointerUp },
-                React.createElement("div", { className: `card-container ${isFlipped ? 'flipped' : ''}` },
-                    React.createElement("div", { className: "card-face" },
-                        React.createElement("div", { className: "card-content" },
-                            React.createElement("div", { className: "chinese-character", onClick: (e) => handlePronounce(e, chineseChar, 'zh-CN') }, chineseChar),
-                            React.createElement("div", { className: "pinyin", onClick: (e) => handlePronounce(e, pinyin, 'zh-CN') }, pinyin),
-                            React.createElement("div", { className: "emoji-display" }, card.emoji)
-                        )
-                    ),
-                    React.createElement("div", { className: "card-face card-back" },
-                        React.createElement("div", { className: "card-content" },
-                            React.createElement("div", { className: "english-translation", onClick: (e) => handlePronounce(e, englishTranslation, 'en-US') }, englishTranslation),
-                            React.createElement("div", { className: "thai-translation", onClick: (e) => handlePronounce(e, thaiTranslation, 'th-TH') }, thaiTranslation),
-                            React.createElement("div", { className: "emoji-display" }, card.emoji)
-                        )
-                    )
-                )
+            const backParts = (card.back || '').split('\n').map(s => s.trim());
+            const englishTranslation = backParts[0] || '';
+            const thaiTranslation = backParts[1] || '';
+
+            return (
+                <div ref={cardRef} className="card-stack-item" data-index={index} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp}>
+                    <div className={`card-container ${isFlipped ? 'flipped' : ''}`}>
+                        <div className="card-face">
+                            <div className="card-content">
+                                <div className="chinese-character" onClick={(e) => handlePronounce(e, chineseChar, 'zh-CN')}>{chineseChar}</div>
+                                <div className="pinyin" onClick={(e) => handlePronounce(e, pinyin, 'zh-CN')}>{pinyin}</div>
+                                <div className="emoji-display">{card.emoji}</div>
+                            </div>
+                        </div>
+                        <div className="card-face card-back">
+                            <div className="card-content">
+                                <div className="english-translation" onClick={(e) => handlePronounce(e, englishTranslation, 'en-US')}>{englishTranslation}</div>
+                                <div className="thai-translation" onClick={(e) => handlePronounce(e, thaiTranslation, 'th-TH')}>{thaiTranslation}</div>
+                                <div className="emoji-display">{card.emoji}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             );
         };
         
-        // --- NEW: Flippable Small Card for Forgotten Section ---
         const FlippableSmallCard = ({ card, onLongPress }) => {
             const [isFlipped, setIsFlipped] = useState(false);
             const longPressTimeout = useRef(null);
@@ -393,52 +408,45 @@
             const handlePointerDown = () => {
                 longPressTimeout.current = setTimeout(() => {
                     onLongPress(card);
-                }, 500); // 500ms for long press
+                }, 500);
             };
-
-            const handlePointerUp = () => {
-                clearTimeout(longPressTimeout.current);
-            };
-
+            const handlePointerUp = () => clearTimeout(longPressTimeout.current);
             const handleClick = () => {
                 setIsFlipped(true);
-                setTimeout(() => setIsFlipped(false), 2000); // Flip back after 2s
+                setTimeout(() => setIsFlipped(false), 2000);
             };
 
-            const [chineseChar, pinyin] = card.front.split('\n').map(s => s.trim());
-            const [englishTranslation, thaiTranslation] = card.back.split('\n').map(s => s.trim());
+            const frontParts = (card.front || '').split('\n').map(s => s.trim());
+            const backParts = (card.back || '').split('\n').map(s => s.trim());
 
-            return React.createElement("div", { 
-                className: "flippable-small-card", 
-                onClick: handleClick,
-                onPointerDown: handlePointerDown,
-                onPointerUp: handlePointerUp,
-                onPointerLeave: handlePointerUp
-            },
-                React.createElement("div", { className: `card-container ${isFlipped ? 'flipped' : ''}` },
-                    React.createElement("div", { className: "card-face small-card" },
-                        React.createElement("div", { className: "chinese-character" }, chineseChar),
-                        React.createElement("div", { className: "pinyin" }, pinyin),
-                        React.createElement("div", { className: "emoji-display" }, card.emoji)
-                    ),
-                    React.createElement("div", { className: "card-face card-back small-card" },
-                        React.createElement("div", { className: "english-translation" }, englishTranslation),
-                        React.createElement("div", { className: "thai-translation" }, thaiTranslation)
-                    )
-                )
+            return (
+                <div className="flippable-small-card" onClick={handleClick} onPointerDown={handlePointerDown} onPointerUp={handlePointerUp} onPointerLeave={handlePointerUp}>
+                    <div className={`card-container ${isFlipped ? 'flipped' : ''}`}>
+                        <div className="card-face small-card">
+                            <div className="chinese-character">{frontParts[0] || ''}</div>
+                            <div className="pinyin">{frontParts[1] || ''}</div>
+                            <div className="emoji-display">{card.emoji}</div>
+                        </div>
+                        <div className="card-face card-back small-card">
+                            <div className="english-translation">{backParts[0] || ''}</div>
+                            <div className="thai-translation">{backParts[1] || ''}</div>
+                        </div>
+                    </div>
+                </div>
             );
         };
         
-        // --- NEW: Static Small Card for Remembered Section ---
         const StaticSmallCard = ({ card }) => {
-            const [chineseChar, pinyin] = card.front.split('\n').map(s => s.trim());
-            const [englishTranslation, thaiTranslation] = card.back.split('\n').map(s => s.trim());
-            return React.createElement("div", { className: "small-card" },
-                React.createElement("div", { className: "chinese-character" }, chineseChar),
-                React.createElement("div", { className: "pinyin" }, pinyin),
-                React.createElement("div", { className: "english-translation" }, englishTranslation),
-                React.createElement("div", { className: "thai-translation" }, thaiTranslation),
-                React.createElement("div", { className: "emoji-display" }, card.emoji)
+            const frontParts = (card.front || '').split('\n').map(s => s.trim());
+            const backParts = (card.back || '').split('\n').map(s => s.trim());
+            return (
+                <div className="small-card">
+                    <div className="chinese-character">{frontParts[0] || ''}</div>
+                    <div className="pinyin">{frontParts[1] || ''}</div>
+                    <div className="english-translation">{backParts[0] || ''}</div>
+                    <div className="thai-translation">{backParts[1] || ''}</div>
+                    <div className="emoji-display">{card.emoji}</div>
+                </div>
             );
         };
 
@@ -453,6 +461,8 @@
             const [showErrorModal, setShowErrorModal] = useState(false);
             const [errorMessage, setErrorMessage] = useState('');
             const [code, setCode] = useState('');
+            const [selectedDeckCode, setSelectedDeckCode] = useState(null);
+
 
             const handleCodeUnlock = () => {
                 const deckData = ACCESS_CODES[code];
@@ -503,6 +513,11 @@
                 setVisibleCards(newDeck.slice(0, 3));
                 setCurrentPage('flashcards');
             };
+            
+            const handleSelectDeck = (deckCode) => {
+                setSelectedDeckCode(deckCode);
+                setCurrentPage('deckDetail');
+            };
 
             const resetApp = () => {
                 setCurrentPage('landing');
@@ -514,27 +529,77 @@
             };
             
             const CollectionPage = ({ title, cards, onBack, fallbackMessage, cardType }) => (
-                React.createElement("div", { className: "collection-page" },
-                    React.createElement("div", { className: "top-nav w-full flex justify-between items-center" },
-                        React.createElement("button", { onClick: onBack, className: "mobile-button", title: TRANSLATIONS["en-US"].backToStudy }, React.createElement("i", { className: "fas fa-arrow-left text-2xl" })),
-                        React.createElement("h2", { className: "text-2xl font-bold text-white" }, title),
-                        React.createElement("div", { className: "w-12 h-12" })
-                    ),
-                    cards.length > 0 ? React.createElement("div", { className: "collection-grid" },
-                        cards.slice(0, 6).map((card) => (
-                           cardType === 'remembered' 
-                           ? React.createElement(StaticSmallCard, { key: card.key, card: card })
-                           : React.createElement(FlippableSmallCard, { key: card.key, card: card, onLongPress: handleLongPress })
-                        ))
-                    ) : React.createElement("div", {className: "flex-grow flex items-center justify-center"}, React.createElement("p", { className: "text-white text-center text-lg" }, fallbackMessage))
-                )
+                <div className="collection-page">
+                    <div className="top-nav w-full flex justify-between items-center">
+                        <button onClick={onBack} className="mobile-button" title={TRANSLATIONS["en-US"].backToStudy}><i className="fas fa-arrow-left text-2xl" /></button>
+                        <h2 className="text-2xl font-bold text-white">{title}</h2>
+                        <div className="w-12 h-12" />
+                    </div>
+                    {cards.length > 0 ? (
+                        <div className="collection-grid-wrapper">
+                            <div className="collection-grid">
+                                {cards.map((card) => (
+                                   cardType === 'remembered' 
+                                   ? <StaticSmallCard key={card.key} card={card} />
+                                   : <FlippableSmallCard key={card.key} card={card} onLongPress={handleLongPress} />
+                                ))}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex-grow flex items-center justify-center">
+                            <p className="text-white text-center text-lg">{fallbackMessage}</p>
+                        </div>
+                    )}
+                </div>
             );
-            const AllDecksPage=({title:e,decks:t,onBack:s})=>React.createElement("div",{className:"collection-page"},React.createElement("div",{className:"top-nav w-full flex justify-between items-center"},React.createElement("button",{onClick:s,className:"mobile-button",title:TRANSLATIONS["en-US"].backToStudy},React.createElement("i",{className:"fas fa-arrow-left text-2xl"})),React.createElement("h2",{className:"text-2xl font-bold text-white"},e),React.createElement("div",{className:"w-12 h-12"})),React.createElement("div",{className:"collection-grid"},t.map((e,t)=>React.createElement("div",{key:t,className:"small-card flex-col items-center justify-center p-2"},React.createElement("h4",{className:"font-bold text-base mb-2"},e.title),e.card?React.createElement(SmallCard,{card:e.card}):React.createElement("p",{className:"text-sm text-gray-500"},"No sample card")))));
+
+            const AllDecksPage=({ onBack, onSelectDeck })=> (
+                <div className="collection-page">
+                    <div className="top-nav w-full flex justify-between items-center">
+                        <button onClick={onBack} className="mobile-button" title={TRANSLATIONS["en-US"].backToStudy}><i className="fas fa-arrow-left text-2xl" /></button>
+                        <h2 className="text-2xl font-bold text-white">{TRANSLATIONS["en-US"].collection}</h2>
+                        <div className="w-12 h-12" />
+                    </div>
+                    <div className="collection-grid-wrapper">
+                        <div className="collection-grid">
+                            {Object.entries(ACCESS_CODES).map(([code, deckData]) => (
+                                <div key={code} onClick={() => onSelectDeck(code)} className="cursor-pointer">
+                                    <h3 className="text-white text-center font-bold mb-2">{deckData.title}</h3>
+                                    <StaticSmallCard card={deckData.sampleCard} />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const DeckDetailPage = ({ deckCode, onBack }) => {
+                const deck = ACCESS_CODES[deckCode];
+                if (!deck) return null;
+                return (
+                    <CollectionPage 
+                        title={deck.title}
+                        cards={deck.cards}
+                        onBack={onBack}
+                        fallbackMessage="This deck is empty."
+                        cardType="remembered"
+                    />
+                );
+            };
 
             const renderContent = () => { 
                 switch (currentPage) {
                     case 'landing':
-                        return React.createElement("div",{className:"mobile-center flex-col p-4"},React.createElement("div",{className:"p-8 flex flex-col items-center gap-8 max-w-md w-full"},React.createElement("h1",{className:"text-3xl font-extrabold text-white text-center drop-shadow-lg"},TRANSLATIONS["en-US"].flashcardsCode),React.createElement("p",{className:"text-white text-lg text-center drop-shadow-md"},TRANSLATIONS["en-US"].landingPageSubtitle),React.createElement("input",{type:"text",placeholder:TRANSLATIONS["en-US"].pasteCodePlaceholder,className:"w-full p-3 rounded-xl bg-gray-100 bg-opacity-70 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200 text-center text-lg text-gray-800",value:code,onChange:e=>setCode(e.target.value)}),React.createElement(SlideToUnlock,{onUnlock:handleCodeUnlock})));
+                        return (
+                            <div className="mobile-center flex-col p-4">
+                                <div className="p-8 flex flex-col items-center gap-8 max-w-md w-full">
+                                    <h1 className="text-3xl font-extrabold text-white text-center drop-shadow-lg">{TRANSLATIONS["en-US"].flashcardsCode}</h1>
+                                    <p className="text-white text-lg text-center drop-shadow-md">{TRANSLATIONS["en-US"].landingPageSubtitle}</p>
+                                    <input type="text" placeholder={TRANSLATIONS["en-US"].pasteCodePlaceholder} className="w-full p-3 rounded-xl bg-gray-100 bg-opacity-70 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200 text-center text-lg text-gray-800" value={code} onChange={e=>setCode(e.target.value)} />
+                                    <SlideToUnlock onUnlock={handleCodeUnlock} />
+                                </div>
+                            </div>
+                        );
                     case 'flashcards':
                         if (visibleCards.length === 0) {
                             return (
@@ -577,12 +642,13 @@
                             </div>
                         );
                     case 'remembered':
-                        return React.createElement(CollectionPage,{title:TRANSLATIONS["en-US"].rememberedCards,cards:rememberedCards,onBack:()=>setCurrentPage("flashcards"),fallbackMessage:TRANSLATIONS["en-US"].noCollectedCards, cardType: 'remembered'});
+                        return <CollectionPage title={TRANSLATIONS["en-US"].rememberedCards} cards={rememberedCards} onBack={()=>setCurrentPage("flashcards")} fallbackMessage={TRANSLATIONS["en-US"].noCollectedCards} cardType="remembered" />;
                     case 'forgotten':
-                        return React.createElement(CollectionPage,{title:TRANSLATIONS["en-US"].forgottenCards,cards:forgottenCards,onBack:()=>setCurrentPage("flashcards"),fallbackMessage:TRANSLATIONS["en-US"].noCollectedCards, cardType: 'forgotten'});
+                        return <CollectionPage title={TRANSLATIONS["en-US"].forgottenCards} cards={forgottenCards} onBack={()=>setCurrentPage("flashcards")} fallbackMessage={TRANSLATIONS["en-US"].noCollectedCards} cardType="forgotten" />;
                     case 'allDecks':
-                        const allDeckItems = Object.keys(ACCESS_CODES).map(codeKey => ({ title: ACCESS_CODES[codeKey].title, card: ACCESS_CODES[codeKey].sampleCard }));
-                        return React.createElement(AllDecksPage,{title:TRANSLATIONS["en-US"].collection,decks:allDeckItems,onBack:()=>setCurrentPage("flashcards")});
+                        return <AllDecksPage onBack={()=>setCurrentPage("flashcards")} onSelectDeck={handleSelectDeck} />;
+                    case 'deckDetail':
+                        return <DeckDetailPage deckCode={selectedDeckCode} onBack={() => setCurrentPage('allDecks')} />;
                     default:
                         return null;
                 }
@@ -596,29 +662,7 @@
             );
         };
 
-        ReactDOM.render(React.createElement(App), document.getElementById('root'));
+        ReactDOM.render(<App />, document.getElementById('root'));
     </script>
 </body>
 </html>
-" and the user query "here are some bugs after update:
-1. when card flipping, it doesnt show thai and english translation
-2. when click chinese and pinyin, it doesnt trigger pronounciation
-3. blank content on forgotten cards page and bad ui design
-4. crowded text content on each card at the remembered section. try to make the chinese and pinyin as the bigger text, and keep thai and english readable" to answer the user's query.
-
-I have selected some code from the most up-to-date Canvas "Chinese-Thai Flashcard App (Final Polish)" document above and am asking a query about/based on this code.
-Instructions to follow:
-  * Don't output/edit the document if the query is Direct/Simple. For example, if the query asks for a simple explanation, output a direct answer.
-  * Make sure to **edit** the document if the query shows the intent of editing the document, in which case output the entire edited document, **not just that section or the edits**.
-    * Don't output the same document/empty document and say that you have edited it.
-    * Don't change unrelated code in the document.
-  * Don't output  and  in your final response.
-  * Any references like "this" or "selected code" refers to the code between  and  tags.
-  * Just acknowledge my request in the introduction.
-  * Make sure to refer to the document as "Canvas" in your response.
-
-here are some bugs after update:
-1. when card flipping, it doesnt show thai and english translation
-2. when click chinese and pinyin, it doesnt trigger pronounciation
-3. blank content on forgotten cards page and bad ui design
-4. crowded text content on each card at the remembered section. try to make the chinese and pinyin as the bigger text, and keep thai and english reada
