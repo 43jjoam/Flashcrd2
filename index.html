@@ -105,6 +105,8 @@
 
         /* --- Card Content & UI Elements --- */
         .card-content {
+            position: relative; /* FIX: Ensure content is above pseudo-elements */
+            z-index: 1; /* FIX: Ensure content is above pseudo-elements */
             width: 100%;
             padding: clamp(16px, 5vw, 28px);
             display: flex;
@@ -165,6 +167,7 @@
         .flippable-small-card {
             perspective: 800px;
             position: relative; 
+            min-height: 150px; /* FIX: Ensure container has height */
         }
         .flippable-small-card .card-container {
             transition-duration: 0.6s;
@@ -304,6 +307,7 @@
             );
         };
         
+        // --- REBUILT & FIXED: Flashcard Component ---
         const Flashcard = ({ card, onSwipe, index }) => {
             const [isFlipped, setIsFlipped] = useState(false);
             const cardRef = useRef(null);
@@ -361,7 +365,7 @@
             };
             
             const handlePronounce = (e, text, lang) => {
-                e.stopPropagation();
+                // e.stopPropagation(); // FIX: Removed to allow audio context to initialize
                 pronounceText(text, lang);
             };
 
@@ -528,9 +532,9 @@
                         <div className="collection-grid-wrapper">
                             <div className="collection-grid">
                                 {cards.map((card) => (
-                                   cardType === 'remembered' 
-                                   ? <StaticSmallCard key={card.key} card={card} />
-                                   : <FlippableSmallCard key={card.key} card={card} onLongPress={handleLongPress} />
+                                    cardType === 'remembered' 
+                                    ? <StaticSmallCard key={card.key} card={card} />
+                                    : <FlippableSmallCard key={card.key} card={card} onLongPress={handleLongPress} />
                                 ))}
                             </div>
                         </div>
