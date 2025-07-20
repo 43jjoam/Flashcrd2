@@ -852,6 +852,13 @@
             const [code, setCode] = useState(''); // Define code state here
             const [activeDeckTitle, setActiveDeckTitle] = useState(''); // To display current deck title
 
+            // Ensure currentCardIndex is valid when the flashcards array changes
+            useEffect(() => {
+                if (flashcards.length > 0 && currentCardIndex >= flashcards.length) {
+                    setCurrentCardIndex(0);
+                }
+            }, [flashcards, currentCardIndex]);
+
             // Function to handle code submission and deck loading
             const handleCodeUnlock = () => {
                 const deckData = ACCESS_CODES[code];
@@ -993,11 +1000,9 @@
                         const nextCard = flashcards[currentCardIndex + 1]; // Still useful for pre-rendering next card
 
                         if (!currentCard && flashcards.length > 0) {
-                            // This case handles when currentCardIndex has gone past the last card
-                            // but there are still cards in the deck (e.g., forgotten cards re-added later)
-                            // We should loop back to the beginning of the remaining cards.
-                            setCurrentCardIndex(0);
-                            return null; // Render nothing for a moment while state updates
+                            // When the index exceeds the deck size, allow the
+                            // effect hook to reset the index.
+                            return null; // Render nothing while index resets
                         }
                         
                         if (flashcards.length === 0) {
