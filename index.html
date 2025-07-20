@@ -74,12 +74,14 @@
             justify-content: center;
             overflow: hidden;
         }
-        /* FIX: Properly hide the mirrored front content on back face */
+        /* FIX: Ensure front face is completely hidden when flipped */
+        .card-face:first-child {
+            z-index: 2;
+        }
         .card-back { 
             transform: rotateY(180deg);
             background-color: #f8f9fa;
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
+            z-index: 1;
         }
 
         /* --- Card Stack & Swipe Animation --- */
@@ -189,34 +191,42 @@
 
         // --- UTILITY HOOKS & FUNCTIONS ---
         const useSpeech = () => {
-            const audioContext = useRef(null);
-            
-            useEffect(() => {
-                const initAudio = () => {
-                    try {
-                        if (!audioContext.current) {
-                            audioContext.current = new (window.AudioContext || window.webkitAudioContext)();
-                        }
-                    } catch (error) {
-                        console.warn("Could not initialize audio context:", error);
-                    }
-                };
-                initAudio();
-            }, []);
-
             const pronounceText = useCallback(async (text, lang) => {
                 if (!text || !text.trim()) {
                     console.error("No text to pronounce.");
                     return;
                 }
                 
-                // FIX: Fallback to browser's built-in speech synthesis if TTS service fails
-                try {
-                    if (!audioContext.current) {
-                        audioContext.current = new (window.AudioContext || window.webkitAudioContext)();
+                console.log(`Attempting to pronounce: "${text}" in ${lang}`);
+                
+                // FIX: Use browser's speech synthesis directly as primary method
+                if ('speechSynthesis' in window) {
+                    try {
+                        // Cancel any ongoing speech
+                        speechSynthesis.cancel();
+                        
+                        const utterance = new SpeechSynthesisUtterance(text);
+                        utterance.lang = lang;
+                        utterance.rate = 0.8;
+                        utterance.volume = 1.0;
+                        
+                        // Add event listeners for debugging
+                        utterance.onstart = () => console.log('Speech started');
+                        utterance.onend = () => console.log('Speech ended');
+                        utterance.onerror = (e) => console.error('Speech error:', e);
+                        
+                        speechSynthesis.speak(utterance);
+                        return;
+                    } catch (error) {
+                        console.error("Browser speech synthesis failed:", error);
                     }
-                    if (audioContext.current.state === 'suspended') {
-                        await audioContext.current.resume();
+                }
+                
+                // Fallback to external TTS service if browser synthesis fails
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    if (audioContext.state === 'suspended') {
+                        await audioContext.resume();
                     }
 
                     const backendUrl = "https://d682f7a4-5681-429e-9c86-22b8329e4b8e-00-liewh2dfj37m.sisko.replit.dev/tts";
@@ -232,22 +242,14 @@
                     }
 
                     const audioData = await response.arrayBuffer();
-                    const audioBuffer = await audioContext.current.decodeAudioData(audioData);
-                    const source = audioContext.current.createBufferSource();
+                    const audioBuffer = await audioContext.decodeAudioData(audioData);
+                    const source = audioContext.createBufferSource();
                     source.buffer = audioBuffer;
-                    source.connect(audioContext.current.destination);
+                    source.connect(audioContext.destination);
                     source.start(0);
 
                 } catch (error) {
-                    console.error("Error fetching TTS audio, falling back to browser speech:", error);
-                    
-                    // FIX: Fallback to browser's speech synthesis
-                    if ('speechSynthesis' in window) {
-                        const utterance = new SpeechSynthesisUtterance(text);
-                        utterance.lang = lang;
-                        utterance.rate = 0.8;
-                        speechSynthesis.speak(utterance);
-                    }
+                    console.error("External TTS service also failed:", error);
                 }
             }, []);
 
@@ -374,9 +376,10 @@
                 }
             };
             
-            // FIX: Remove stopPropagation and ensure audio context is properly initialized
+            // FIX: Simplify pronunciation handling and ensure it works
             const handlePronounce = (e, text, lang) => {
-                e.preventDefault();
+                e.stopPropagation(); // Prevent card flip
+                console.log(`Click detected for pronunciation: "${text}" in ${lang}`);
                 pronounceText(text, lang);
             };
 
