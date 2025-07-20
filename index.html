@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Chinese-Thai Flashcard App</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
@@ -11,97 +11,58 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     
     <style>
-        /* Base styles for the watercolor card effect */
-        .watercolor-card {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(10px);
-            touch-action: manipulation;
+        /* --- CORE LAYOUT & APPEARANCE --- */
+        html, body, #root {
+            height: 100%;
+            overflow: hidden;
+        }
+        .animated-bg {
+            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe, #00f2fe);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
-        /* Styles for the 3D card scene and individual cards */
-        .card-scene {
-            width: min(80vw, 360px);
-            height: min(65vh, 500px);
-            margin: 0 auto;
-            perspective: 1000px;
+        /* --- MODIFIED: Main Page Layout --- */
+        .flashcard-page {
+            display: flex;
+            flex-direction: column;
+            height: 100vh; /* Full viewport height */
+            height: 100dvh; /* Dynamic viewport height for mobile */
+            padding: 1rem;
+        }
+        .top-nav {
+            flex-shrink: 0; /* Prevent nav from shrinking */
+        }
+        .card-scene-wrapper {
+            flex-grow: 1; /* Allow card scene to take up remaining space */
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
         }
+        .card-scene {
+            width: min(85vw, 380px);
+            height: min(70vh, 520px);
+            perspective: 1200px;
+            position: relative;
+        }
 
-        .card-3d {
+        /* --- MODIFIED: Card & Flip Animation --- */
+        .card-container {
             position: absolute;
             width: 100%;
             height: 100%;
             transform-style: preserve-3d;
-            transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.5s ease-out;
-            cursor: pointer;
-            touch-action: pan-y;
-            -webkit-tap-highlight-color: transparent;
-            overflow: hidden; /* Important for keeping overlays inside */
+            transition: transform 0.7s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
-
-        .card-3d.flipped {
+        .card-container.flipped {
             transform: rotateY(180deg);
         }
-
-        /* Swipe animations */
-        .card-3d.swiping-left {
-            transform: translateX(-150vw) rotateZ(-30deg) scale(0.5); 
-            opacity: 0;
-            transition: all 0.6s cubic-bezier(0.6, -0.28, 0.735, 0.045);
-        }
-
-        .card-3d.swiping-right {
-            transform: translateX(150vw) rotateZ(30deg) scale(0.5); 
-            opacity: 0;
-            transition: all 0.6s cubic-bezier(0.6, -0.28, 0.735, 0.045);
-        }
-
-        .card-3d.background-card {
-            transform: scale(0.9) translateY(-20px);
-            opacity: 0.7;
-            z-index: 1; 
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        
-        .card-3d.main-card {
-            z-index: 2;
-        }
-
-        /* --- NEW: Swipe overlay styles (Bumble-inspired) --- */
-        .swipe-overlay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 80px;
-            opacity: 0;
-            transform: translate(-50%, -50%) scale(0.5);
-            transition: opacity 0.2s, transform 0.2s;
-            pointer-events: none;
-        }
-
-        .swipe-overlay.like {
-            background-color: rgba(0, 255, 127, 0.3);
-            color: white;
-        }
-
-        .swipe-overlay.nope {
-            background-color: rgba(255, 0, 0, 0.3);
-            color: white;
-        }
-
-        /* Card faces (front and back) */
         .card-face {
             position: absolute;
             width: 100%;
@@ -109,276 +70,117 @@
             backface-visibility: hidden;
             -webkit-backface-visibility: hidden;
             border-radius: 20px;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15), 0 10px 20px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.6);
+            /* --- MODIFIED: Opaque card background --- */
+            background-color: #fdfdfd;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
-            touch-action: manipulation;
+            overflow: hidden;
         }
-
         .card-back {
             transform: rotateY(180deg);
         }
+        /* --- NEW: 3D Thickness Effect --- */
+        .card-back::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            bottom: 2px;
+            background: #e0e0e0;
+            transform: translateZ(-2px);
+            border-radius: 18px;
+        }
 
+        /* --- MODIFIED: Card Stack & Swipe Animation Logic --- */
+        .card-stack-item {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.4s;
+            touch-action: none; /* We handle all touch events */
+        }
+        .card-stack-item[data-index="0"] { z-index: 3; }
+        .card-stack-item[data-index="1"] {
+            transform: scale(0.9) translateY(-30px);
+            opacity: 0.8;
+            z-index: 2;
+        }
+        .card-stack-item[data-index="2"] {
+            transform: scale(0.8) translateY(-60px);
+            opacity: 0.4;
+            z-index: 1;
+        }
+
+        /* --- NEW: Bumble-style Swipe Overlay --- */
+        .swipe-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.5);
+            pointer-events: none;
+        }
+        .swipe-overlay.like { background-color: rgba(46, 204, 113, 0.7); color: white; }
+        .swipe-overlay.nope { background-color: rgba(231, 76, 60, 0.7); color: white; }
+
+        /* --- Card Content & UI Elements --- */
         .card-content {
             width: 100%;
-            padding: clamp(16px, 4vw, 24px);
+            padding: clamp(16px, 5vw, 28px);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
+            gap: 1rem;
         }
-
         .chinese-character {
-            font-size: clamp(2rem, 6vw, 3.5rem);
-            font-weight: 300;
-            color: #1f2937;
-            margin-bottom: 8px;
-            line-height: 1;
-            cursor: pointer;
-            padding: 10px;
-            border-radius: 10px;
-            transition: all 0.2s ease;
-            user-select: none;
-        }
-
-        .pinyin {
-            font-size: clamp(1rem, 3vw, 1.4rem);
-            color: #6b7280;
+            font-size: clamp(2.5rem, 8vw, 4rem);
             font-weight: 400;
-            margin-bottom: 16px;
+            color: #1f2937;
             cursor: pointer;
-            padding: 8px;
-            border-radius: 8px;
-            transition: all 0.2s ease;
             user-select: none;
         }
-
-        .emoji-display {
-            font-size: clamp(2rem, 5vw, 2.8rem);
-            margin-bottom: 8px;
+        .pinyin {
+            font-size: clamp(1.2rem, 4vw, 1.6rem);
+            color: #6b7280;
+            cursor: pointer;
+            user-select: none;
         }
-
+        .emoji-display {
+            font-size: clamp(2.5rem, 7vw, 3.5rem);
+        }
         .english-translation {
-            font-size: clamp(1rem, 3vw, 1.25rem);
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
             font-weight: 500;
             color: #374151;
-            margin-bottom: 4px;
             cursor: pointer;
-            padding: 8px;
-            border-radius: 8px;
-            transition: all 0.2s ease;
             user-select: none;
         }
-
         .thai-translation {
-            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            font-size: clamp(1.1rem, 3.5vw, 1.3rem);
             color: #6b7280;
-            font-weight: 400;
             cursor: pointer;
-            padding: 8px;
-            border-radius: 8px;
-            transition: all 0.2s ease;
             user-select: none;
         }
-
         .mobile-button {
-            min-height: 44px;
-            min-width: 44px;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
+            background: none; border: none; padding: 8px; color: white; opacity: 0.8;
             transition: all 0.2s ease;
-            background: none;
-            border: none;
-            padding: 8px;
-            color: white;
-            opacity: 0.8;
         }
-
-        .mobile-button:active {
-            transform: scale(0.9);
-            opacity: 1;
-        }
-
-        .animated-bg {
-            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe, #00f2fe);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
-        }
-
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .mobile-center {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            min-height: 100dvh;
-            width: 100%;
-            padding: 16px;
-            box-sizing: border-box;
-        }
+        .mobile-button:active { transform: scale(0.9); opacity: 1; }
         
-        @media (max-width: 480px) {
-            .card-scene {
-                width: 90vw;
-                height: 60vh;
-            }
-            .mobile-center {
-                padding: 12px;
-            }
-        }
-
-        .slide-container {
-            position: relative;
-            width: 100%;
-            max-width: 300px;
-            height: 50px;
-            background-color: rgba(255, 255, 255, 0.2);
-            border-radius: 25px;
-            overflow: hidden;
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .slide-text {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: rgba(255, 255, 255, 0.8);
-            font-weight: bold;
-            font-size: 1rem;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-
-        .slide-button {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #00f2fe, #4facfe);
-            border-radius: 50%;
-            position: absolute;
-            left: 0;
-            top: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: grab;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            transition: transform 0.1s ease-out;
-            touch-action: pan-x;
-        }
-
-        .slide-button.unlocked {
-            transform: translateX(calc(100% - 50px));
-            cursor: auto;
-        }
-
-        .slide-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #4facfe, #00f2fe);
-            border-radius: 25px;
-            width: 0;
-            transition: width 0.1s ease-out;
-        }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-
-        .modal-overlay.open {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal-content {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-            max-width: 90vw;
-            width: 400px;
-            text-align: center;
-            transform: translateY(-20px);
-            opacity: 0;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
-
-        .modal-overlay.open .modal-content {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        .small-card-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 16px;
-            padding: 10px;
-            max-height: 60vh;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .small-card {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.8) 100%);
-            border-radius: 15px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            backdrop-filter: blur(5px);
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            min-height: 120px;
-            font-size: 0.8rem;
-            color: #374151;
-            transition: transform 0.2s ease;
-        }
-
-        .small-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .small-card .chinese-character {
-            font-size: 1.5rem;
-            margin-bottom: 4px;
-        }
-        .small-card .pinyin {
-            font-size: 0.9rem;
-            margin-bottom: 8px;
-        }
-        .small-card .emoji-display {
-            font-size: 1.2rem;
-            margin-bottom: 4px;
-        }
-        .small-card .english-translation, .small-card .thai-translation {
-            font-size: 0.8rem;
-            padding: 0;
-            margin: 0;
-        }
+        /* Other styles (Modal, SlideToUnlock, etc.) remain largely the same but can be tweaked if needed */
+        .slide-container{position:relative;width:100%;max-width:300px;height:50px;background-color:rgba(255,255,255,0.2);border-radius:25px;overflow:hidden;box-shadow:inset 0 0 10px rgba(0,0,0,0.1)}.slide-text{position:absolute;width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.8);font-weight:bold;font-size:1rem;pointer-events:none;transition:opacity .3s ease}.slide-button{width:50px;height:50px;background:linear-gradient(135deg,#00f2fe,#4facfe);border-radius:50%;position:absolute;left:0;top:0;display:flex;align-items:center;justify-content:center;cursor:grab;box-shadow:0 5px 15px rgba(0,0,0,0.2);transition:transform .1s ease-out;touch-action:pan-x}.slide-button.unlocked{transform:translateX(calc(100% - 50px));cursor:auto}.slide-fill{height:100%;background:linear-gradient(90deg,#4facfe,#00f2fe);border-radius:25px;width:0;transition:width .1s ease-out}.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s ease}.modal-overlay.open{opacity:1;visibility:visible}.modal-content{background:linear-gradient(135deg,rgba(255,255,255,0.95) 0%,rgba(248,250,252,0.9) 100%);border-radius:20px;padding:30px;box-shadow:0 20px 40px rgba(0,0,0,0.2);max-width:90vw;width:400px;text-align:center;transform:translateY(-20px);opacity:0;transition:transform .3s ease,opacity .3s ease}.modal-overlay.open .modal-content{transform:translateY(0);opacity:1}.small-card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:16px;padding:10px;max-height:60vh;overflow-y:auto;-webkit-overflow-scrolling:touch}.small-card{background:linear-gradient(135deg,rgba(255,255,255,0.9) 0%,rgba(248,250,252,0.8) 100%);border-radius:15px;box-shadow:0 10px 20px rgba(0,0,0,0.08);border:1px solid rgba(255,255,255,0.4);backdrop-filter:blur(5px);padding:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:120px;font-size:.8rem;color:#374151;transition:transform .2s ease}.small-card:hover{transform:translateY(-5px)}.small-card .chinese-character{font-size:1.5rem;margin-bottom:4px}.small-card .pinyin{font-size:.9rem;margin-bottom:8px}.small-card .emoji-display{font-size:1.2rem;margin-bottom:4px}.small-card .english-translation,.small-card .thai-translation{font-size:.8rem;padding:0;margin:0}.mobile-center{display:flex;align-items:center;justify-content:center;min-height:100vh;min-height:100dvh;width:100%;padding:16px;box-sizing:border-box}
     </style>
 </head>
 <body class="animated-bg font-sans text-gray-800">
@@ -387,559 +189,208 @@
     <script type="text/babel">
         const { useState, useEffect, useRef, useCallback } = React;
 
-        // --- DATA & CONFIG ---
-        const TRANSLATIONS = {
-            "en-US": {
-                "flashcardsCode": "Learn Chinese with Flashcards",
-                "slideToUnlock": "slide to unlock",
-                "pasteCodePlaceholder": "paste or type your unique code here...",
-                "generatingTitle": "Loading your flashcard set...",
-                "generatingSubtitle": "Please wait while we prepare your cards...",
-                "createNewFlashcardsLink": "Enter new code",
-                "collection": "All Decks",
-                "backToStudy": "Back to Study",
-                "noCollectedCards": "No cards collected yet",
-                "rememberedCards": "Remembered Cards",
-                "forgottenCards": "Forgotten Cards",
-                "totalCards": "Total Cards",
-                "landingPageSubtitle": "Enter \"LearnChinesewithHelen1295\" or \"PinyinPractice\" to start."
-            }
-        };
+        // --- DATA & CONFIG (No Changes) ---
+        const TRANSLATIONS={"en-US":{flashcardsCode:"Learn Chinese with Flashcards",slideToUnlock:"slide to unlock",pasteCodePlaceholder:"paste or type your unique code here...",generatingTitle:"Loading your flashcard set...",generatingSubtitle:"Please wait while we prepare your cards...",createNewFlashcardsLink:"Enter new code",collection:"All Decks",backToStudy:"Back to Study",noCollectedCards:"No cards collected yet",rememberedCards:"Remembered Cards",forgottenCards:"Forgotten Cards",totalCards:"Total Cards",landingPageSubtitle:'Enter "LearnChinesewithHelen1295" or "PinyinPractice" to start.'}};
+        const CHINESE_VOCABULARY=[{front:"爸爸\nbà ba",back:"dad\nพ่อ",emoji:"👨‍👧‍👦"},{front:"别\nbié",back:"don't\nอย่า",emoji:"🚫"},{front:"朋友\npéng yǒu",back:"friend\nเพื่อน",emoji:"👫"},{front:"怕\npà",back:"to fear\nกลัว",emoji:"😨"},{front:"妈妈\nmā ma",back:"mom\nแม่",emoji:"👩‍👧‍👦"},{front:"买\nmǎi",back:"to buy\nซื้อ",emoji:"🛒"},{front:"饭\nfàn",back:"meal\nข้าว",emoji:"🍽️"},{front:"富\nfù",back:"rich\nรวย",emoji:"💰"},{front:"奶奶\nnǎi nai",back:"grandmother\nยาย",emoji:"👵"},{front:"你\nnǐ",back:"you\nคุณ",emoji:"👤"},{front:"老\nlǎo",back:"old\nแก่",emoji:"🧓"},{front:"来\nlái",back:"to come\nมา",emoji:"➡️"},{front:"大\ndà",back:"big\nใหญ่",emoji:"📏"},{front:"得\ndé",back:"to get\nได้รับ",emoji:"🏆"},{front:"跳\ntiào",back:"to jump\nกระโดด",emoji:"🤸"},{front:"调\ntiáo",back:"to adjust\nปรับ",emoji:"⚙️"},{front:"猪\nzhū",back:"pig\nหมู",emoji:"🐷"},{front:"住\nzhù",back:"to live\nอาศัย",emoji:"🏠"},{front:"吃\nchī",back:"to eat\nกิน",emoji:"🍽️"},{front:"出\nchū",back:"to go out\nออกไป",emoji:"🚪"},{front:"高\ngāo",back:"high\nสูง",emoji:"📏"},{front:"个\ngè",back:"measure word\nลักษณนาม",emoji:"📊"},{front:"裤\nkù",back:"trousers\nกางเกง",emoji:"👖"},{front:"可以\nkě yǐ",back:"can\nสามารถ",emoji:"✅"},{front:"虎\nhǔ",back:"tiger\nเสือ",emoji:"🐅"},{front:"好\nhǎo",back:"good\nดี",emoji:"👍"},{front:"家\njiā",back:"home\nบ้าน",emoji:"🏡"},{front:"就\njiù",back:"then\nแล้ว",emoji:"⏭️"},{front:"小\nxiǎo",back:"small\nเล็ก",emoji:"🐭"},{front:"喜欢\nxǐ huān",back:"to like\nชอบ",emoji:"❤️"}];
+        const PINYIN_CARDS=[{front:"ang",back:"ang\nFinal compound: 'ahng' sound\nเสียงสระผสม: 'อาง'",emoji:"🗣️"},{front:"ing",back:"ing\nFinal compound: 'eeng' sound\nเสียงสระผสม: 'อิง'",emoji:"🗣️"},{front:"en",back:"en\nFinal compound: 'uhn' sound\nเสียงสระผสม: 'เอิน'",emoji:"🗣️"},{front:"ai",back:"ai\nFinal compound: 'eye' sound\nเสียงสระผสม: 'ไอ'",emoji:"🗣️"},{front:"ao",back:"ao\nFinal compound: 'aow' sound\nเสียงสระผสม: 'เอา'",emoji:"🗣️"}];
+        const ACCESS_CODES={LearnChinesewithHelen1295:{title:"Chinese Vocabulary",cards:CHINESE_VOCABULARY.map(card=>({...card,status:"new"})),sampleCard:{...CHINESE_VOCABULARY[0],status:"new"}},PinyinPractice:{title:"Pinyin Practice",cards:PINYIN_CARDS.map(card=>({...card,status:"new"})),sampleCard:{...PINYIN_CARDS[0],status:"new"}}};
 
-        const CHINESE_VOCABULARY = [
-            { front: "爸爸\nbà ba", back: "dad\nพ่อ", emoji: "👨‍👧‍👦" }, 
-            { front: "别\nbié", back: "don't\nอย่า", emoji: "🚫" }, 
-            { front: "朋友\npéng yǒu", back: "friend\nเพื่อน", emoji: "👫" }, 
-            { front: "怕\npà", back: "to fear\nกลัว", emoji: "😨" }, 
-            { front: "妈妈\nmā ma", back: "mom\nแม่", emoji: "👩‍👧‍👦" }, 
-            { front: "买\nmǎi", back: "to buy\nซื้อ", emoji: "🛒" }, 
-            { front: "饭\nfàn", back: "meal\nข้าว", emoji: "🍽️" }, 
-            { front: "富\nfù", back: "rich\nรวย", emoji: "💰" }, 
-            { front: "奶奶\nnǎi nai", back: "grandmother\nยาย", emoji: "👵" }, 
-            { front: "你\nnǐ", back: "you\nคุณ", emoji: "👤" }, 
-            { front: "老\nlǎo", back: "old\nแก่", emoji: "🧓" }, 
-            { front: "来\nlái", back: "to come\nมา", emoji: "➡️" }, 
-            { front: "大\ndà", back: "big\nใหญ่", emoji: "📏" }, 
-            { front: "得\ndé", back: "to get\nได้รับ", emoji: "🏆" }, 
-            { front: "跳\ntiào", back: "to jump\nกระโดด", emoji: "🤸" }, 
-            { front: "调\ntiáo", back: "to adjust\nปรับ", emoji: "⚙️" }, 
-            { front: "猪\nzhū", back: "pig\nหมู", emoji: "🐷" }, 
-            { front: "住\nzhù", back: "to live\nอาศัย", emoji: "🏠" }, 
-            { front: "吃\nchī", back: "to eat\nกิน", emoji: "🍽️" }, 
-            { front: "出\nchū", back: "to go out\nออกไป", emoji: "🚪" },
-            { front: "高\ngāo", back: "high\nสูง", emoji: "📏" }, 
-            { front: "个\ngè", back: "measure word\nลักษณนาม", emoji: "📊" }, 
-            { front: "裤\nkù", back: "trousers\nกางเกง", emoji: "👖" }, 
-            { front: "可以\nkě yǐ", back: "can\nสามารถ", emoji: "✅" }, 
-            { front: "虎\nhǔ", back: "tiger\nเสือ", emoji: "🐅" }, 
-            { front: "好\nhǎo", back: "good\nดี", emoji: "👍" }, 
-            { front: "家\njiā", back: "home\nบ้าน", emoji: "🏡" }, 
-            { front: "就\njiù", back: "then\nแล้ว", emoji: "⏭️" }, 
-            { front: "小\nxiǎo", back: "small\nเล็ก", emoji: "🐭" }, 
-            { front: "喜欢\nxǐ huān", back: "to like\nชอบ", emoji: "❤️" }
-        ];
-
-        const PINYIN_CARDS = [
-            { front: "ang", back: "ang\nFinal compound: 'ahng' sound\nเสียงสระผสม: 'อาง'", emoji: "🗣️" }, 
-            { front: "ing", back: "ing\nFinal compound: 'eeng' sound\nเสียงสระผสม: 'อิง'", emoji: "🗣️" }, 
-            { front: "en", back: "en\nFinal compound: 'uhn' sound\nเสียงสระผสม: 'เอิน'", emoji: "🗣️" }, 
-            { front: "ai", back: "ai\nFinal compound: 'eye' sound\nเสียงสระผสม: 'ไอ'", emoji: "🗣️" }, 
-            { front: "ao", back: "ao\nFinal compound: 'aow' sound\nเสียงสระผสม: 'เอา'", emoji: "🗣️" }
-        ];
-
-        const ACCESS_CODES = {
-            "LearnChinesewithHelen1295": {
-                title: "Chinese Vocabulary",
-                cards: CHINESE_VOCABULARY.map(card => ({ ...card, status: 'new' })),
-                sampleCard: { ...CHINESE_VOCABULARY[0], status: 'new' }
-            },
-            "PinyinPractice": {
-                title: "Pinyin Practice",
-                cards: PINYIN_CARDS.map(card => ({ ...card, status: 'new' })),
-                sampleCard: { ...PINYIN_CARDS[0], status: 'new' }
-            }
-        };
-
-        // --- UTILITY HOOKS & FUNCTIONS ---
-
-        const useSpeech = () => {
-            const [voices, setVoices] = useState([]);
-            const [isReady, setIsReady] = useState(false);
-
-            useEffect(() => {
-                const loadVoices = () => {
-                    const availableVoices = window.speechSynthesis.getVoices();
-                    if (availableVoices.length > 0) {
-                        setVoices(availableVoices);
-                        setIsReady(true);
-                        if (speechSynthesis.onvoiceschanged !== undefined) {
-                            speechSynthesis.onvoiceschanged = null;
-                        }
-                    }
-                };
-                
-                loadVoices();
-                if (speechSynthesis.onvoiceschanged !== undefined) {
-                    speechSynthesis.onvoiceschanged = loadVoices;
-                }
-                const voiceTimeout = setTimeout(loadVoices, 500);
-
-                return () => {
-                    clearTimeout(voiceTimeout);
-                    window.speechSynthesis.cancel();
-                };
-            }, []);
-            
-            const detectLanguage = (text) => {
-                if (!text) return 'en-US';
-                const cleanText = text.trim();
-                
-                if (/[\u4e00-\u9fff\u3400-\u4dbf]/.test(cleanText)) return 'zh-CN';
-                if (/[\u0e00-\u0e7f]/.test(cleanText)) return 'th-TH';
-                if (/[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/.test(cleanText)) return 'zh-CN';
-                
-                return 'en-US';
-            };
-
-            const pronounceText = useCallback((text, specificLang = null) => {
-                if (!text || !text.trim() || !window.speechSynthesis || !isReady) {
-                    console.warn("Speech synthesis not ready or text is empty.");
-                    return;
-                }
-
-                window.speechSynthesis.cancel();
-
-                setTimeout(() => {
-                    const lang = specificLang || detectLanguage(text);
-                    const utterance = new SpeechSynthesisUtterance(text);
-                    utterance.lang = lang;
-                    
-                    let voice = null;
-                    let rate = 0.8;
-
-                    if (lang.startsWith('zh')) {
-                        voice = voices.find(v => v.lang === 'zh-CN' && v.name.includes('Ting-Ting')) || 
-                                voices.find(v => v.lang === 'zh-CN') ||
-                                voices.find(v => v.lang.startsWith('zh'));
-                        rate = 0.7;
-                    } else if (lang.startsWith('th')) {
-                        voice = voices.find(v => v.lang === 'th-TH') ||
-                                voices.find(v => v.lang.startsWith('th'));
-                        rate = 0.8;
-                    } else {
-                        voice = voices.find(v => v.lang === 'en-US') ||
-                                voices.find(v => v.lang.startsWith('en'));
-                        rate = 0.9;
-                    }
-                    
-                    if (voice) utterance.voice = voice;
-                    utterance.rate = rate;
-                    
-                    window.speechSynthesis.speak(utterance);
-                }, 50); 
-            }, [voices, isReady]);
-
-            return { pronounceText };
-        };
-
-        const Modal = ({ isOpen, onClose, title, message, children }) => {
-            if (!isOpen) return null;
-
-            return (
-                <div className={`modal-overlay ${isOpen ? 'open' : ''}`} onClick={onClose}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        {title && <h3 className="text-2xl font-bold mb-4 text-gray-800">{title}</h3>}
-                        {message && <p className="text-gray-700 mb-6">{message}</p>}
-                        {children}
-                        <button
-                            onClick={onClose}
-                            className="mt-4 px-6 py-3 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 transition duration-300"
-                        >
-                            Close
-                        </button>
-                    </div>
-                </div>
-            );
-        };
-
-        const SlideToUnlock = ({ onUnlock }) => {
-            const sliderRef = useRef(null);
-            const [isDragging, setIsDragging] = useState(false);
-            const [currentX, setCurrentX] = useState(0);
-            const [unlocked, setUnlocked] = useState(false);
-            const [maxTranslateX, setMaxTranslateX] = useState(0);
-
-            useEffect(() => {
-                const calculateMaxTranslateX = () => {
-                    if (sliderRef.current) {
-                        setMaxTranslateX(sliderRef.current.offsetWidth - 50);
-                    }
-                };
-
-                calculateMaxTranslateX();
-                window.addEventListener('resize', calculateMaxTranslateX);
-
-                return () => {
-                    window.removeEventListener('resize', calculateMaxTranslateX);
-                };
-            }, []);
-
-            const handleInteractionStart = (clientX) => {
-                if (unlocked) return;
-                setIsDragging(true);
-                sliderRef.current.startX = clientX;
-            };
-
-            const handleInteractionMove = (clientX) => {
-                if (!isDragging || unlocked) return;
-                const deltaX = clientX - sliderRef.current.startX;
-                let newX = Math.max(0, Math.min(deltaX, maxTranslateX));
-                setCurrentX(newX);
-
-                if (newX >= maxTranslateX - 2) {
-                    setUnlocked(true);
-                    setIsDragging(false);
-                    onUnlock();
-                }
-            };
-
-            const handleInteractionEnd = () => {
-                if (!unlocked) {
-                    setIsDragging(false);
-                    setCurrentX(0);
-                }
-            };
-
-            return (
-                <div 
-                    ref={sliderRef}
-                    className="slide-container"
-                    onTouchStart={(e) => handleInteractionStart(e.touches[0].clientX)}
-                    onTouchMove={(e) => handleInteractionMove(e.touches[0].clientX)}
-                    onTouchEnd={handleInteractionEnd}
-                    onMouseDown={(e) => handleInteractionStart(e.clientX)}
-                    onMouseMove={(e) => handleInteractionMove(e.clientX)}
-                    onMouseUp={handleInteractionEnd}
-                    onMouseLeave={handleInteractionEnd}
-                >
-                    <div 
-                        className="slide-fill"
-                        style={{ width: `${currentX + 25}px` }}
-                    ></div>
-                    <div 
-                        className={`slide-button ${unlocked ? 'unlocked' : ''}`}
-                        style={{ transform: `translateX(${currentX}px)` }}
-                    >
-                        {unlocked ? <i className="fas fa-check"></i> : <i className="fas fa-chevron-right"></i>}
-                    </div>
-                    <div className={`slide-text ${unlocked || currentX > 10 ? 'opacity-0' : 'opacity-100'}`}>
-                        {TRANSLATIONS["en-US"].slideToUnlock}
-                    </div>
-                </div>
-            );
-        };
-
-        const SmallCard = ({ card }) => {
-            const frontParts = card.front.split('\n').map(s => s.trim()).filter(s => s);
-            const chineseChar = frontParts[0] || '';
-            return (
-                <div className="small-card">
-                    <div className="chinese-character">{chineseChar}</div>
-                    <div className="emoji-display">{card.emoji}</div>
-                </div>
-            );
-        };
-
-        const Flashcard = ({ card, onFlip, onSwipe, isCurrent, className = '' }) => {
+        // --- UTILITY HOOKS & FUNCTIONS (Largely Unchanged) ---
+        const useSpeech=()=>{const[e,t]=useState([]),[,s]=useState(!1);useEffect(()=>{const n=()=>{const o=window.speechSynthesis.getVoices();o.length>0&&(t(o),s(!0),void 0!==speechSynthesis.onvoiceschanged&&(speechSynthesis.onvoiceschanged=null))};n(),void 0!==speechSynthesis.onvoiceschanged&&(speechSynthesis.onvoiceschanged=n);const o=setTimeout(n,500);return()=>{clearTimeout(o),window.speechSynthesis.cancel()}},[]);const n=useCallback((t,n=null)=>{if(!t||!t.trim()||!window.speechSynthesis)return void console.warn("Speech synthesis not ready or text is empty.");window.speechSynthesis.cancel();setTimeout(()=>{const o=n||((e)=>{if(!e)return"en-US";const t=e.trim();return/[\u4e00-\u9fff\u3400-\u4dbf]/.test(t)?"zh-CN":/[\u0e00-\u0e7f]/.test(t)?"th-TH":/[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/.test(t)?"zh-CN":"en-US"})(t),a=new SpeechSynthesisUtterance(t);a.lang=o;let i=null,r=.8;o.startsWith("zh")?(i=e.find(e=>"zh-CN"===e.lang&&e.name.includes("Ting-Ting"))||e.find(e=>"zh-CN"===e.lang)||e.find(e=>e.lang.startsWith("zh")),r=.7):o.startsWith("th")?(i=e.find(e=>"th-TH"===e.lang)||e.find(e=>e.lang.startsWith("th")),r=.8):i=e.find(e=>"en-US"===e.lang)||e.find(e=>e.lang.startsWith("en")),i&&(a.voice=i),a.rate=r,window.speechSynthesis.speak(a)},50)},[e]);return{pronounceText:n}};
+        const Modal=({isOpen:e,onClose:t,title:s,message:n,children:o})=>e?React.createElement("div",{className:`modal-overlay ${e?"open":""}`,onClick:t},React.createElement("div",{className:"modal-content",onClick:e=>e.stopPropagation()},s&&React.createElement("h3",{className:"text-2xl font-bold mb-4 text-gray-800"},s),n&&React.createElement("p",{className:"text-gray-700 mb-6"},n),o,React.createElement("button",{onClick:t,className:"mt-4 px-6 py-3 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 transition duration-300"},"Close"))):null;
+        const SlideToUnlock=({onUnlock:e})=>{const t=useRef(null),[s,n]=useState(!1),[o,a]=useState(0),[i,r]=useState(!1),[l,c]=useState(0);useEffect(()=>{const e=()=>{t.current&&c(t.current.offsetWidth-50)};return e(),window.addEventListener("resize",e),()=>window.removeEventListener("resize",e)},[]);const d=e=>{i||(n(!0),t.current.startX=e)},u=e=>{if(s&&!i){const t=e-t.current.startX;let s=Math.max(0,Math.min(t,l));a(s),s>=l-2&&(r(!0),n(!1),onUnlock())}};return React.createElement("div",{ref:t,className:"slide-container",onTouchStart:e=>d(e.touches[0].clientX),onTouchMove:e=>u(e.touches[0].clientX),onTouchEnd:()=>{i||(n(!1),a(0))},onMouseDown:e=>d(e.clientX),onMouseMove:e=>u(e.clientX),onMouseUp:()=>{i||(n(!1),a(0))},onMouseLeave:()=>{i||(n(!1),a(0))}},React.createElement("div",{className:"slide-fill",style:{width:`${o+25}px`}}),React.createElement("div",{className:`slide-button ${i?"unlocked":""}`,style:{transform:`translateX(${o}px)`}},i?React.createElement("i",{className:"fas fa-check"}):React.createElement("i",{className:"fas fa-chevron-right"})),React.createElement("div",{className:`slide-text ${i||o>10?"opacity-0":"opacity-100"}`},TRANSLATIONS["en-US"].slideToUnlock))};
+        const SmallCard=({card:e})=>{const t=e.front.split("\n").map(e=>e.trim()).filter(e=>e),s=t[0]||"";return React.createElement("div",{className:"small-card"},React.createElement("div",{className:"chinese-character"},s),React.createElement("div",{className:"emoji-display"},e.emoji))};
+        
+        // --- MODIFIED & REBUILT: Flashcard Component ---
+        const Flashcard = ({ card, onSwipe, index }) => {
             const [isFlipped, setIsFlipped] = useState(false);
-            const [swipeOpacity, setSwipeOpacity] = useState(0);
-            const [swipeTransform, setSwipeTransform] = useState('scale(0.5)');
-            const [swipeDirection, setSwipeDirection] = useState(null);
-
             const cardRef = useRef(null);
-            const touchStartX = useRef(0);
-            const touchStartY = useRef(0);
-            const touchStartTime = useRef(0);
-            const isDragging = useRef(false);
-            
+            const touchState = useRef({ startX: 0, startY: 0, startTime: 0, isDragging: false, deltaX: 0 }).current;
             const { pronounceText } = useSpeech();
 
+            // Reset flip state when card data changes
             useEffect(() => {
                 setIsFlipped(false);
-                setSwipeOpacity(0);
-                setSwipeDirection(null);
-                if (cardRef.current) {
-                    cardRef.current.style.transform = '';
-                    cardRef.current.style.opacity = '1';
-                    cardRef.current.classList.remove('swiping-left', 'swiping-right');
-                }
-                isDragging.current = false;
             }, [card]);
 
-            const handleTouchStart = (e) => {
-                if (!isCurrent) return;
-                isDragging.current = true;
-                touchStartX.current = e.touches[0].clientX;
-                touchStartY.current = e.touches[0].clientY;
-                touchStartTime.current = Date.now();
-                cardRef.current.style.transition = 'transform 0s';
+            const handlePointerDown = (e) => {
+                touchState.isDragging = true;
+                touchState.startX = e.clientX;
+                touchState.startY = e.clientY;
+                touchState.startTime = Date.now();
+                cardRef.current.style.transition = 'none';
+                e.target.setPointerCapture(e.pointerId);
             };
 
-            const handleTouchMove = (e) => {
-                if (!isDragging.current || !isCurrent) return;
-                
-                const deltaX = e.touches[0].clientX - touchStartX.current;
-                const deltaY = Math.abs(e.touches[0].clientY - touchStartY.current);
+            const handlePointerMove = (e) => {
+                if (!touchState.isDragging) return;
 
-                if (Math.abs(deltaX) < deltaY) {
-                    isDragging.current = false;
+                touchState.deltaX = e.clientX - touchState.startX;
+                const deltaY = e.clientY - touchState.startY;
+
+                // Prevent swipe if scrolling vertically
+                if (Math.abs(touchState.deltaX) < Math.abs(deltaY) && Date.now() - touchState.startTime > 100) {
+                    touchState.isDragging = false;
                     return;
                 }
                 
-                e.preventDefault();
-                
-                const rotation = deltaX * 0.1;
-                cardRef.current.style.transform = `translateX(${deltaX}px) rotateZ(${rotation}deg)`;
-
-                // --- NEW: Update swipe overlay ---
-                const swipePower = Math.min(Math.abs(deltaX) / (window.innerWidth * 0.4), 1);
-                setSwipeOpacity(swipePower);
-                setSwipeTransform(`scale(${0.5 + (swipePower * 0.5)})`);
-                setSwipeDirection(deltaX > 0 ? 'right' : 'left');
+                // Bumble-style pivot rotation
+                const rotation = touchState.deltaX * 0.1;
+                cardRef.current.style.transformOrigin = `50% ${window.innerHeight}px`;
+                cardRef.current.style.transform = `translateX(${touchState.deltaX}px) rotate(${rotation}deg)`;
             };
 
-            const handleTouchEnd = (e) => {
-                if (!isDragging.current || !isCurrent) return;
-                isDragging.current = false;
+            const handlePointerUp = (e) => {
+                if (!touchState.isDragging) return;
+                touchState.isDragging = false;
+                e.target.releasePointerCapture(e.pointerId);
 
-                const deltaX = e.changedTouches[0].clientX - touchStartX.current;
-                const touchDuration = Date.now() - touchStartTime.current;
+                const touchDuration = Date.now() - touchState.startTime;
 
-                setSwipeOpacity(0);
-                setSwipeTransform('scale(0.5)');
-
-                if (touchDuration < 250 && Math.abs(deltaX) < 10) {
-                    setIsFlipped(prev => !prev);
-                    onFlip && onFlip();
-                    cardRef.current.style.transform = '';
-                    return;
-                }
-
-                const swipeThreshold = window.innerWidth * 0.3;
-                cardRef.current.style.transition = 'all 0.6s cubic-bezier(0.6, -0.28, 0.735, 0.045)';
-
-                if (deltaX > swipeThreshold) {
-                    cardRef.current.classList.add('swiping-right');
-                    setTimeout(() => onSwipe('right'), 100);
-                } else if (deltaX < -swipeThreshold) {
-                    cardRef.current.classList.add('swiping-left');
-                    setTimeout(() => onSwipe('left'), 100);
+                // --- FIXED: Tap vs. Swipe Logic ---
+                if (touchDuration < 250 && Math.abs(touchState.deltaX) < 15) {
+                    // This is a TAP
+                    const isTextArea = e.target.closest('.chinese-character, .pinyin, .english-translation, .thai-translation');
+                    if (!isTextArea) {
+                        setIsFlipped(prev => !prev);
+                    }
                 } else {
-                    cardRef.current.style.transform = '';
+                    // This is a SWIPE
+                    const swipeThreshold = window.innerWidth * 0.35;
+                    if (Math.abs(touchState.deltaX) > swipeThreshold) {
+                        onSwipe(touchState.deltaX > 0 ? 'right' : 'left', index);
+                    }
                 }
+                
+                // Reset card style if not swiped away
+                cardRef.current.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)';
+                cardRef.current.style.transform = '';
             };
             
+            // --- FIXED: Pronunciation Click Handler ---
             const handlePronounce = (e, text, lang) => {
-                e.stopPropagation();
+                e.stopPropagation(); // Prevent card flip when clicking text
                 pronounceText(text, lang);
             };
 
             const frontParts = card.front.split('\n').map(s => s.trim()).filter(s => s);
             const backParts = card.back.split('\n').map(s => s.trim()).filter(s => s);
-            
-            const chineseChar = frontParts[0] || '';
-            const pinyin = frontParts[1] || '';
-            const englishTranslation = backParts[0] || '';
-            const thaiTranslation = backParts[1] || '';
+            const [chineseChar, pinyin] = frontParts;
+            const [englishTranslation, thaiTranslation] = backParts;
 
             return (
-                <div 
-                    ref={cardRef}
-                    className={`card-3d ${isFlipped ? 'flipped' : ''} ${className}`}
-                    onTouchStart={handleTouchStart}
-                    onTouchMove={handleTouchMove}
-                    onTouchEnd={handleTouchEnd}
-                    onClick={() => { if (window.innerWidth > 768) { setIsFlipped(prev => !prev); onFlip && onFlip(); }}}
-                    style={{ touchAction: 'pan-y' }}
-                >
-                    {/* --- NEW: Swipe Overlays --- */}
-                    <div 
-                        className={`swipe-overlay like`} 
-                        style={{ opacity: swipeDirection === 'right' ? swipeOpacity : 0, transform: swipeDirection === 'right' ? swipeTransform : 'scale(0.5)' }}
-                    >
-                        <i className="fas fa-check"></i>
-                    </div>
-                    <div 
-                        className={`swipe-overlay nope`} 
-                        style={{ opacity: swipeDirection === 'left' ? swipeOpacity : 0, transform: swipeDirection === 'left' ? swipeTransform : 'scale(0.5)' }}
-                    >
-                        <i className="fas fa-times"></i>
-                    </div>
-
-                    {/* Front Face */}
-                    <div className="card-face flex flex-col items-center justify-center p-6">
-                        <div className="card-content">
-                            <div className="chinese-character" onClick={(e) => handlePronounce(e, chineseChar, 'zh-CN')}>{chineseChar}</div>
-                            <div className="pinyin" onClick={(e) => handlePronounce(e, pinyin, 'zh-CN')}>{pinyin}</div>
-                            <div className="emoji-display">{card.emoji}</div>
-                        </div>
-                    </div>
-
-                    {/* Back Face */}
-                    <div className="card-face card-back flex flex-col items-center justify-center p-6">
-                        <div className="card-content">
-                            <div className="english-translation" onClick={(e) => handlePronounce(e, englishTranslation, 'en-US')}>{englishTranslation}</div>
-                            <div className="thai-translation" onClick={(e) => handlePronounce(e, thaiTranslation, 'th-TH')}>{thaiTranslation}</div>
-                            <div className="emoji-display mt-4">{card.emoji}</div>
-                        </div>
-                    </div>
-                </div>
+                React.createElement("div", {
+                    ref: cardRef,
+                    className: "card-stack-item",
+                    "data-index": index,
+                    onPointerDown: handlePointerDown,
+                    onPointerMove: handlePointerMove,
+                    onPointerUp: handlePointerUp,
+                },
+                React.createElement("div", { className: `card-container ${isFlipped ? 'flipped' : ''}` },
+                    // Front Face
+                    React.createElement("div", { className: "card-face" },
+                        React.createElement("div", { className: "card-content" },
+                            React.createElement("div", { className: "chinese-character", onClick: (e) => handlePronounce(e, chineseChar, 'zh-CN') }, chineseChar),
+                            React.createElement("div", { className: "pinyin", onClick: (e) => handlePronounce(e, pinyin, 'zh-CN') }, pinyin),
+                            React.createElement("div", { className: "emoji-display" }, card.emoji)
+                        )
+                    ),
+                    // Back Face
+                    React.createElement("div", { className: "card-face card-back" },
+                        React.createElement("div", { className: "card-content" },
+                            React.createElement("div", { className: "english-translation", onClick: (e) => handlePronounce(e, englishTranslation, 'en-US') }, englishTranslation),
+                            React.createElement("div", { className: "thai-translation", onClick: (e) => handlePronounce(e, thaiTranslation, 'th-TH') }, thaiTranslation),
+                            React.createElement("div", { className: "emoji-display" }, card.emoji)
+                        )
+                    )
+                ))
             );
         };
         
-        const removeCardFromListByFront = (list, cardToRemove) => {
-            return list.filter(card => card.front !== cardToRemove.front);
-        };
+        const removeCardFromListByFront = (list, cardToRemove) => list.filter(c => c.front !== cardToRemove.front);
 
         const App = () => {
             const [currentPage, setCurrentPage] = useState('landing');
-            const [flashcards, setFlashcards] = useState([]);
+            const [deck, setDeck] = useState([]); // The full, original deck
+            const [visibleCards, setVisibleCards] = useState([]); // The 2-3 cards currently in the DOM
             const [rememberedCards, setRememberedCards] = useState([]);
             const [forgottenCards, setForgottenCards] = useState([]);
             const [showErrorModal, setShowErrorModal] = useState(false);
             const [errorMessage, setErrorMessage] = useState('');
             const [code, setCode] = useState('');
-            const [activeDeckTitle, setActiveDeckTitle] = useState('');
 
             const handleCodeUnlock = () => {
                 const deckData = ACCESS_CODES[code];
                 if (deckData) {
-                    const initialCards = deckData.cards.map(card => ({ ...card, status: 'new', level: 0 }));
-                    setFlashcards([...initialCards].sort(() => Math.random() - 0.5));
+                    const initialDeck = deckData.cards.map(card => ({ ...card, status: 'new', level: 0, key: Math.random() }));
+                    const shuffledDeck = [...initialDeck].sort(() => Math.random() - 0.5);
+                    setDeck(shuffledDeck);
+                    setVisibleCards(shuffledDeck.slice(0, 3)); // Load first 3 cards
                     setRememberedCards([]);
                     setForgottenCards([]);
-                    setActiveDeckTitle(deckData.title);
                     setCurrentPage('flashcards');
                 } else {
                     setErrorMessage("Invalid code. Please try again.");
                     setShowErrorModal(true);
                 }
             };
-
+            
+            // --- REBUILT: Swipe and Card Management Logic ---
             const handleSwipe = useCallback((direction) => {
-                if (flashcards.length === 0) return;
+                if (visibleCards.length === 0) return;
 
-                const swipedCard = { ...flashcards[0] }; 
-                const remainingCards = flashcards.slice(1);
-
-                let nextFlashcards = [...remainingCards];
+                const swipedCard = visibleCards[0];
+                const newDeck = deck.slice(1); // Remove card from master deck
+                
                 let nextRemembered = [...rememberedCards];
                 let nextForgotten = [...forgottenCards];
 
                 nextRemembered = removeCardFromListByFront(nextRemembered, swipedCard);
                 nextForgotten = removeCardFromListByFront(nextForgotten, swipedCard);
+                
+                let deckUpdate = [...newDeck];
 
-                if (direction === 'left') { 
-                    swipedCard.status = 'forgotten';
-                    swipedCard.level = (swipedCard.level > 0) ? swipedCard.level - 1 : 0;
+                if (direction === 'left') {
+                    swipedCard.level = Math.max(0, swipedCard.level - 1);
                     nextForgotten.push(swipedCard);
-                    const reinsertIndex = Math.min(5, nextFlashcards.length);
-                    nextFlashcards.splice(reinsertIndex, 0, swipedCard);
-                } else { 
-                    swipedCard.level = swipedCard.level + 1;
+                    const reinsertIndex = Math.min(5, deckUpdate.length);
+                    deckUpdate.splice(reinsertIndex, 0, swipedCard);
+                } else {
+                    swipedCard.level += 1;
                     nextRemembered.push(swipedCard);
-                    
-                    if (swipedCard.level >= 2) {
-                        swipedCard.status = 'remembered';
-                    } else {
-                        swipedCard.status = 'reviewing';
-                        nextFlashcards.push(swipedCard);
+                    if (swipedCard.level < 2) {
+                        deckUpdate.push(swipedCard); // Add to end for review
                     }
                 }
-
-                setFlashcards(nextFlashcards);
+                
+                setDeck(deckUpdate);
                 setRememberedCards(nextRemembered);
                 setForgottenCards(nextForgotten);
-                
-            }, [flashcards, rememberedCards, forgottenCards]);
 
+                // This triggers the animation: remove the top card, and add the next one from the deck
+                setVisibleCards(deckUpdate.slice(0, 3));
+
+            }, [deck, visibleCards, rememberedCards, forgottenCards]);
 
             const resetApp = () => {
                 setCurrentPage('landing');
                 setCode('');
-                setFlashcards([]);
+                setDeck([]);
+                setVisibleCards([]);
                 setRememberedCards([]);
                 setForgottenCards([]);
-                setActiveDeckTitle('');
             };
-
-            const CollectionPage = ({ title, cards, onBack, fallbackMessage }) => (
-                <div className="flex flex-col items-center justify-start min-h-screen min-h-dvh p-4 relative w-full">
-                    <div className="w-full flex justify-between items-center p-4 z-10">
-                        <button onClick={onBack} className="mobile-button" title={TRANSLATIONS["en-US"].backToStudy}>
-                            <i className="fas fa-arrow-left text-2xl"></i>
-                        </button>
-                        <h2 className="text-2xl font-bold text-white">{title}</h2>
-                        <div className="w-12 h-12"></div>
-                    </div>
-                    <div className="flex-grow w-full p-4">
-                        {cards.length > 0 ? (
-                            <div className="small-card-grid">
-                                {cards.map((card, index) => <SmallCard key={`${card.front}-${index}`} card={card} />)}
-                            </div>
-                        ) : (
-                            <p className="text-white text-center text-lg mt-8">{fallbackMessage}</p>
-                        )}
-                    </div>
-                </div>
-            );
-
-            const AllDecksPage = ({ title, decks, onBack }) => (
-                <div className="flex flex-col items-center justify-start min-h-screen min-h-dvh p-4 relative w-full">
-                    <div className="w-full flex justify-between items-center p-4 z-10">
-                        <button onClick={onBack} className="mobile-button" title={TRANSLATIONS["en-US"].backToStudy}>
-                            <i className="fas fa-arrow-left text-2xl"></i>
-                        </button>
-                        <h2 className="text-2xl font-bold text-white">{title}</h2>
-                        <div className="w-12 h-12"></div>
-                    </div>
-                    <div className="flex-grow w-full p-4">
-                        <div className="small-card-grid">
-                            {decks.map((deck, index) => (
-                                <div key={index} className="small-card flex-col items-center justify-center p-2">
-                                    <h4 className="font-bold text-base mb-2">{deck.title}</h4>
-                                    {deck.card ? <SmallCard card={deck.card} /> : <p className="text-sm text-gray-500">No sample card</p>}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            );
+            
+            const CollectionPage=({title:e,cards:t,onBack:s,fallbackMessage:n})=>React.createElement("div",{className:"flex flex-col items-center justify-start min-h-screen min-h-dvh p-4 relative w-full"},React.createElement("div",{className:"w-full flex justify-between items-center p-4 z-10"},React.createElement("button",{onClick:s,className:"mobile-button",title:TRANSLATIONS["en-US"].backToStudy},React.createElement("i",{className:"fas fa-arrow-left text-2xl"})),React.createElement("h2",{className:"text-2xl font-bold text-white"},e),React.createElement("div",{className:"w-12 h-12"})),React.createElement("div",{className:"flex-grow w-full p-4"},t.length>0?React.createElement("div",{className:"small-card-grid"},t.map((e,t)=>React.createElement(SmallCard,{key:`${e.front}-${t}`,card:e}))):React.createElement("p",{className:"text-white text-center text-lg mt-8"},n)));
+            const AllDecksPage=({title:e,decks:t,onBack:s})=>React.createElement("div",{className:"flex flex-col items-center justify-start min-h-screen min-h-dvh p-4 relative w-full"},React.createElement("div",{className:"w-full flex justify-between items-center p-4 z-10"},React.createElement("button",{onClick:s,className:"mobile-button",title:TRANSLATIONS["en-US"].backToStudy},React.createElement("i",{className:"fas fa-arrow-left text-2xl"})),React.createElement("h2",{className:"text-2xl font-bold text-white"},e),React.createElement("div",{className:"w-12 h-12"})),React.createElement("div",{className:"flex-grow w-full p-4"},React.createElement("div",{className:"small-card-grid"},t.map((e,t)=>React.createElement("div",{key:t,className:"small-card flex-col items-center justify-center p-2"},React.createElement("h4",{className:"font-bold text-base mb-2"},e.title),e.card?React.createElement(SmallCard,{card:e.card}):React.createElement("p",{className:"text-sm text-gray-500"},"No sample card"))))));
 
             const renderContent = () => { 
-                const currentCard = flashcards.length > 0 ? flashcards[0] : null;
-                const nextCard = flashcards.length > 1 ? flashcards[1] : null;
-
                 switch (currentPage) {
                     case 'landing':
-                        return (
-                            <div className="mobile-center flex-col p-4">
-                                <div className="p-8 flex flex-col items-center gap-8 max-w-md w-full">
-                                    <h1 className="text-3xl font-extrabold text-white text-center drop-shadow-lg">{TRANSLATIONS["en-US"].flashcardsCode}</h1>
-                                    <p className="text-white text-lg text-center drop-shadow-md">{TRANSLATIONS["en-US"].landingPageSubtitle}</p>
-                                    <input
-                                        type="text"
-                                        placeholder={TRANSLATIONS["en-US"].pasteCodePlaceholder}
-                                        className="w-full p-3 rounded-xl bg-gray-100 bg-opacity-70 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200 text-center text-lg text-gray-800"
-                                        value={code}
-                                        onChange={(e) => setCode(e.target.value)}
-                                    />
-                                    <SlideToUnlock onUnlock={handleCodeUnlock} />
-                                </div>
-                            </div>
-                        );
+                        return React.createElement("div",{className:"mobile-center flex-col p-4"},React.createElement("div",{className:"p-8 flex flex-col items-center gap-8 max-w-md w-full"},React.createElement("h1",{className:"text-3xl font-extrabold text-white text-center drop-shadow-lg"},TRANSLATIONS["en-US"].flashcardsCode),React.createElement("p",{className:"text-white text-lg text-center drop-shadow-md"},TRANSLATIONS["en-US"].landingPageSubtitle),React.createElement("input",{type:"text",placeholder:TRANSLATIONS["en-US"].pasteCodePlaceholder,className:"w-full p-3 rounded-xl bg-gray-100 bg-opacity-70 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200 text-center text-lg text-gray-800",value:code,onChange:e=>setCode(e.target.value)}),React.createElement(SlideToUnlock,{onUnlock:handleCodeUnlock})));
                     case 'flashcards':
-                        if (!currentCard) {
+                        if (visibleCards.length === 0) {
                             return (
                                 <div className="mobile-center flex-col p-4">
                                     <div className="watercolor-card p-8 flex flex-col items-center gap-6 max-w-md w-full text-center">
@@ -957,42 +408,49 @@
                         }
 
                         return (
-                            <div className="flex flex-col items-center justify-between min-h-screen min-h-dvh p-4 relative">
-                                {/* --- MODIFIED: Top-right navigation --- */}
-                                <div className="w-full flex justify-end items-center p-4 z-10 space-x-2 sm:space-x-4">
+                            <div className="flashcard-page">
+                                <div className="top-nav w-full flex justify-end items-center space-x-2 sm:space-x-4">
                                     <button onClick={() => setCurrentPage('remembered')} className="mobile-button" title={TRANSLATIONS["en-US"].rememberedCards}><i className="fas fa-check-double text-2xl"></i></button>
                                     <button onClick={() => setCurrentPage('forgotten')} className="mobile-button" title={TRANSLATIONS["en-US"].forgottenCards}><i className="fas fa-question text-2xl"></i></button>
                                     <button onClick={() => setCurrentPage('allDecks')} className="mobile-button" title={TRANSLATIONS["en-US"].collection}><i className="fas fa-layer-group text-2xl"></i></button>
                                     <button onClick={resetApp} className="mobile-button" title={TRANSLATIONS["en-US"].createNewFlashcardsLink}><i className="fas fa-undo text-2xl"></i></button>
                                 </div>
 
-                                <div className="card-scene relative w-full flex-grow flex items-center justify-center mb-8">
-                                    {nextCard && <Flashcard card={nextCard} isCurrent={false} className="background-card" />}
-                                    {currentCard && <Flashcard card={currentCard} onSwipe={handleSwipe} isCurrent={true} className="main-card" />}
+                                <div className="card-scene-wrapper">
+                                    <div className="card-scene">
+                                        {visibleCards.map((card, index) => (
+                                            <Flashcard 
+                                                key={card.key} 
+                                                card={card} 
+                                                onSwipe={handleSwipe} 
+                                                index={index} 
+                                            />
+                                        )).reverse()}
+                                    </div>
                                 </div>
                             </div>
                         );
                     case 'remembered':
-                        return <CollectionPage title={TRANSLATIONS["en-US"].rememberedCards} cards={rememberedCards} onBack={() => setCurrentPage('flashcards')} fallbackMessage={TRANSLATIONS["en-US"].noCollectedCards}/>;
+                        return React.createElement(CollectionPage,{title:TRANSLATIONS["en-US"].rememberedCards,cards:rememberedCards,onBack:()=>setCurrentPage("flashcards"),fallbackMessage:TRANSLATIONS["en-US"].noCollectedCards});
                     case 'forgotten':
-                        return <CollectionPage title={TRANSLATIONS["en-US"].forgottenCards} cards={forgottenCards} onBack={() => setCurrentPage('flashcards')} fallbackMessage={TRANSLATIONS["en-US"].noCollectedCards}/>;
+                        return React.createElement(CollectionPage,{title:TRANSLATIONS["en-US"].forgottenCards,cards:forgottenCards,onBack:()=>setCurrentPage("flashcards"),fallbackMessage:TRANSLATIONS["en-US"].noCollectedCards});
                     case 'allDecks':
                         const allDeckItems = Object.keys(ACCESS_CODES).map(codeKey => ({ title: ACCESS_CODES[codeKey].title, card: ACCESS_CODES[codeKey].sampleCard }));
-                        return <AllDecksPage title={TRANSLATIONS["en-US"].collection} decks={allDeckItems} onBack={() => setCurrentPage('flashcards')}/>;
+                        return React.createElement(AllDecksPage,{title:TRANSLATIONS["en-US"].collection,decks:allDeckItems,onBack:()=>setCurrentPage("flashcards")});
                     default:
                         return null;
                 }
             };
 
             return (
-                <div className="min-h-screen min-h-dvh flex flex-col items-center justify-center">
+                <div className="h-full">
                     {renderContent()}
                     <Modal isOpen={showErrorModal} onClose={() => setShowErrorModal(false)} title="Error" message={errorMessage} />
                 </div>
             );
         };
 
-        ReactDOM.render(<App />, document.getElementById('root'));
+        ReactDOM.render(React.createElement(App), document.getElementById('root'));
     </script>
 </body>
 </html>
