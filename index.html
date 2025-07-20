@@ -199,10 +199,45 @@
                 
                 console.log(`Attempting to pronounce: "${text}" in ${lang}`);
                 
-                // FIX: Use browser's speech synthesis directly as primary method
+                // FIX: For Chinese, prioritize external TTS service for better pronunciation
+                if (lang === 'zh-CN' || lang.startsWith('zh')) {
+                    try {
+                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        if (audioContext.state === 'suspended') {
+                            await audioContext.resume();
+                        }
+
+                        const backendUrl = "https://d682f7a4-5681-429e-9c86-22b8329e4b8e-00-liewh2dfj37m.sisko.replit.dev/tts";
+
+                        console.log('Calling external TTS for Chinese...');
+                        const response = await fetch(backendUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ text, lang })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`TTS request failed with status ${response.status}`);
+                        }
+
+                        const audioData = await response.arrayBuffer();
+                        const audioBuffer = await audioContext.decodeAudioData(audioData);
+                        const source = audioContext.createBufferSource();
+                        source.buffer = audioBuffer;
+                        source.connect(audioContext.destination);
+                        source.start(0);
+                        
+                        console.log('External TTS played successfully');
+                        return;
+
+                    } catch (error) {
+                        console.error("External TTS failed for Chinese, falling back to browser:", error);
+                    }
+                }
+                
+                // Use browser speech synthesis for non-Chinese or as fallback
                 if ('speechSynthesis' in window) {
                     try {
-                        // Cancel any ongoing speech
                         speechSynthesis.cancel();
                         
                         const utterance = new SpeechSynthesisUtterance(text);
@@ -210,10 +245,9 @@
                         utterance.rate = 0.8;
                         utterance.volume = 1.0;
                         
-                        // Add event listeners for debugging
-                        utterance.onstart = () => console.log('Speech started');
-                        utterance.onend = () => console.log('Speech ended');
-                        utterance.onerror = (e) => console.error('Speech error:', e);
+                        utterance.onstart = () => console.log('Browser speech started');
+                        utterance.onend = () => console.log('Browser speech ended');
+                        utterance.onerror = (e) => console.error('Browser speech error:', e);
                         
                         speechSynthesis.speak(utterance);
                         return;
@@ -222,35 +256,7 @@
                     }
                 }
                 
-                // Fallback to external TTS service if browser synthesis fails
-                try {
-                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    if (audioContext.state === 'suspended') {
-                        await audioContext.resume();
-                    }
-
-                    const backendUrl = "https://d682f7a4-5681-429e-9c86-22b8329e4b8e-00-liewh2dfj37m.sisko.replit.dev/tts";
-
-                    const response = await fetch(backendUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ text, lang })
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`TTS request failed with status ${response.status}`);
-                    }
-
-                    const audioData = await response.arrayBuffer();
-                    const audioBuffer = await audioContext.decodeAudioData(audioData);
-                    const source = audioContext.createBufferSource();
-                    source.buffer = audioBuffer;
-                    source.connect(audioContext.destination);
-                    source.start(0);
-
-                } catch (error) {
-                    console.error("External TTS service also failed:", error);
-                }
+                console.error("No speech synthesis method available");
             }, []);
 
             return { pronounceText };
