@@ -195,20 +195,83 @@
         const PINYIN_CARDS=[{front:"ang",back:"ang\nFinal compound: 'ahng' sound\nเสียงสระผสม: 'อาง'",emoji:"🗣️"},{front:"ing",back:"ing\nFinal compound: 'eeng' sound\nเสียงสระผสม: 'อิง'",emoji:"🗣️"},{front:"en",back:"en\nFinal compound: 'uhn' sound\nเสียงสระผสม: 'เอิน'",emoji:"🗣️"},{front:"ai",back:"ai\nFinal compound: 'eye' sound\nเสียงสระผสม: 'ไอ'",emoji:"🗣️"},{front:"ao",back:"ao\nFinal compound: 'aow' sound\nเสียงสระผสม: 'เอา'",emoji:"🗣️"}];
         const ACCESS_CODES={LearnChinesewithHelen1295:{title:"Chinese Vocabulary",cards:CHINESE_VOCABULARY.map(card=>({...card,status:"new"})),sampleCard:{...CHINESE_VOCABULARY[0],status:"new"}},PinyinPractice:{title:"Pinyin Practice",cards:PINYIN_CARDS.map(card=>({...card,status:"new"})),sampleCard:{...PINYIN_CARDS[0],status:"new"}}};
 
-        // --- UTILITY HOOKS & FUNCTIONS (Largely Unchanged) ---
+        // --- UTILITY HOOKS & FUNCTIONS ---
         const useSpeech=()=>{const[e,t]=useState([]),[,s]=useState(!1);useEffect(()=>{const n=()=>{const o=window.speechSynthesis.getVoices();o.length>0&&(t(o),s(!0),void 0!==speechSynthesis.onvoiceschanged&&(speechSynthesis.onvoiceschanged=null))};n(),void 0!==speechSynthesis.onvoiceschanged&&(speechSynthesis.onvoiceschanged=n);const o=setTimeout(n,500);return()=>{clearTimeout(o),window.speechSynthesis.cancel()}},[]);const n=useCallback((t,n=null)=>{if(!t||!t.trim()||!window.speechSynthesis)return void console.warn("Speech synthesis not ready or text is empty.");window.speechSynthesis.cancel();setTimeout(()=>{const o=n||((e)=>{if(!e)return"en-US";const t=e.trim();return/[\u4e00-\u9fff\u3400-\u4dbf]/.test(t)?"zh-CN":/[\u0e00-\u0e7f]/.test(t)?"th-TH":/[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/.test(t)?"zh-CN":"en-US"})(t),a=new SpeechSynthesisUtterance(t);a.lang=o;let i=null,r=.8;o.startsWith("zh")?(i=e.find(e=>"zh-CN"===e.lang&&e.name.includes("Ting-Ting"))||e.find(e=>"zh-CN"===e.lang)||e.find(e=>e.lang.startsWith("zh")),r=.7):o.startsWith("th")?(i=e.find(e=>"th-TH"===e.lang)||e.find(e=>e.lang.startsWith("th")),r=.8):i=e.find(e=>"en-US"===e.lang)||e.find(e=>e.lang.startsWith("en")),i&&(a.voice=i),a.rate=r,window.speechSynthesis.speak(a)},50)},[e]);return{pronounceText:n}};
         const Modal=({isOpen:e,onClose:t,title:s,message:n,children:o})=>e?React.createElement("div",{className:`modal-overlay ${e?"open":""}`,onClick:t},React.createElement("div",{className:"modal-content",onClick:e=>e.stopPropagation()},s&&React.createElement("h3",{className:"text-2xl font-bold mb-4 text-gray-800"},s),n&&React.createElement("p",{className:"text-gray-700 mb-6"},n),o,React.createElement("button",{onClick:t,className:"mt-4 px-6 py-3 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 transition duration-300"},"Close"))):null;
-        const SlideToUnlock=({onUnlock:e})=>{const t=useRef(null),[s,n]=useState(!1),[o,a]=useState(0),[i,r]=useState(!1),[l,c]=useState(0);useEffect(()=>{const e=()=>{t.current&&c(t.current.offsetWidth-50)};return e(),window.addEventListener("resize",e),()=>window.removeEventListener("resize",e)},[]);const d=e=>{i||(n(!0),t.current.startX=e)},u=e=>{if(s&&!i){const t=e-t.current.startX;let s=Math.max(0,Math.min(t,l));a(s),s>=l-2&&(r(!0),n(!1),onUnlock())}};return React.createElement("div",{ref:t,className:"slide-container",onTouchStart:e=>d(e.touches[0].clientX),onTouchMove:e=>u(e.touches[0].clientX),onTouchEnd:()=>{i||(n(!1),a(0))},onMouseDown:e=>d(e.clientX),onMouseMove:e=>u(e.clientX),onMouseUp:()=>{i||(n(!1),a(0))},onMouseLeave:()=>{i||(n(!1),a(0))}},React.createElement("div",{className:"slide-fill",style:{width:`${o+25}px`}}),React.createElement("div",{className:`slide-button ${i?"unlocked":""}`,style:{transform:`translateX(${o}px)`}},i?React.createElement("i",{className:"fas fa-check"}):React.createElement("i",{className:"fas fa-chevron-right"})),React.createElement("div",{className:`slide-text ${i||o>10?"opacity-0":"opacity-100"}`},TRANSLATIONS["en-US"].slideToUnlock))};
         const SmallCard=({card:e})=>{const t=e.front.split("\n").map(e=>e.trim()).filter(e=>e),s=t[0]||"";return React.createElement("div",{className:"small-card"},React.createElement("div",{className:"chinese-character"},s),React.createElement("div",{className:"emoji-display"},e.emoji))};
         
-        // --- MODIFIED & REBUILT: Flashcard Component ---
+        // --- FIXED: SlideToUnlock Component ---
+        const SlideToUnlock = ({ onUnlock }) => {
+            const sliderRef = useRef(null);
+            const [isDragging, setIsDragging] = useState(false);
+            const [currentX, setCurrentX] = useState(0);
+            const [unlocked, setUnlocked] = useState(false);
+            const [maxTranslateX, setMaxTranslateX] = useState(0);
+
+            useEffect(() => {
+                const calculateMaxTranslateX = () => {
+                    if (sliderRef.current) {
+                        setMaxTranslateX(sliderRef.current.offsetWidth - 50);
+                    }
+                };
+                calculateMaxTranslateX();
+                window.addEventListener('resize', calculateMaxTranslateX);
+                return () => window.removeEventListener('resize', calculateMaxTranslateX);
+            }, []);
+
+            const handleInteractionStart = (clientX) => {
+                if (unlocked) return;
+                setIsDragging(true);
+                sliderRef.current.startX = clientX;
+            };
+
+            const handleInteractionMove = (clientX) => {
+                if (!isDragging || unlocked) return;
+                const deltaX = clientX - sliderRef.current.startX;
+                let newX = Math.max(0, Math.min(deltaX, maxTranslateX));
+                setCurrentX(newX);
+
+                if (newX >= maxTranslateX - 2) {
+                    setUnlocked(true);
+                    setIsDragging(false);
+                    onUnlock();
+                }
+            };
+
+            const handleInteractionEnd = () => {
+                if (!unlocked) {
+                    setIsDragging(false);
+                    setCurrentX(0);
+                }
+            };
+
+            return (
+                React.createElement("div", {
+                    ref: sliderRef,
+                    className: "slide-container",
+                    onTouchStart: (e) => handleInteractionStart(e.touches[0].clientX),
+                    onTouchMove: (e) => handleInteractionMove(e.touches[0].clientX),
+                    onTouchEnd: handleInteractionEnd,
+                    onMouseDown: (e) => handleInteractionStart(e.clientX),
+                    onMouseMove: (e) => handleInteractionMove(e.clientX),
+                    onMouseUp: handleInteractionEnd,
+                    onMouseLeave: handleInteractionEnd
+                },
+                React.createElement("div", { className: "slide-fill", style: { width: `${currentX + 25}px` } }),
+                React.createElement("div", { className: `slide-button ${unlocked ? 'unlocked' : ''}`, style: { transform: `translateX(${currentX}px)` } },
+                    unlocked ? React.createElement("i", { className: "fas fa-check" }) : React.createElement("i", { className: "fas fa-chevron-right" })
+                ),
+                React.createElement("div", { className: `slide-text ${unlocked || currentX > 10 ? 'opacity-0' : 'opacity-100'}` }, TRANSLATIONS["en-US"].slideToUnlock))
+            );
+        };
+
+        // --- REBUILT: Flashcard Component ---
         const Flashcard = ({ card, onSwipe, index }) => {
             const [isFlipped, setIsFlipped] = useState(false);
             const cardRef = useRef(null);
             const touchState = useRef({ startX: 0, startY: 0, startTime: 0, isDragging: false, deltaX: 0 }).current;
             const { pronounceText } = useSpeech();
 
-            // Reset flip state when card data changes
             useEffect(() => {
                 setIsFlipped(false);
             }, [card]);
@@ -224,17 +287,12 @@
 
             const handlePointerMove = (e) => {
                 if (!touchState.isDragging) return;
-
                 touchState.deltaX = e.clientX - touchState.startX;
                 const deltaY = e.clientY - touchState.startY;
-
-                // Prevent swipe if scrolling vertically
                 if (Math.abs(touchState.deltaX) < Math.abs(deltaY) && Date.now() - touchState.startTime > 100) {
                     touchState.isDragging = false;
                     return;
                 }
-                
-                // Bumble-style pivot rotation
                 const rotation = touchState.deltaX * 0.1;
                 cardRef.current.style.transformOrigin = `50% ${window.innerHeight}px`;
                 cardRef.current.style.transform = `translateX(${touchState.deltaX}px) rotate(${rotation}deg)`;
@@ -247,29 +305,24 @@
 
                 const touchDuration = Date.now() - touchState.startTime;
 
-                // --- FIXED: Tap vs. Swipe Logic ---
                 if (touchDuration < 250 && Math.abs(touchState.deltaX) < 15) {
-                    // This is a TAP
                     const isTextArea = e.target.closest('.chinese-character, .pinyin, .english-translation, .thai-translation');
                     if (!isTextArea) {
                         setIsFlipped(prev => !prev);
                     }
                 } else {
-                    // This is a SWIPE
                     const swipeThreshold = window.innerWidth * 0.35;
                     if (Math.abs(touchState.deltaX) > swipeThreshold) {
                         onSwipe(touchState.deltaX > 0 ? 'right' : 'left', index);
                     }
                 }
                 
-                // Reset card style if not swiped away
                 cardRef.current.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)';
                 cardRef.current.style.transform = '';
             };
             
-            // --- FIXED: Pronunciation Click Handler ---
             const handlePronounce = (e, text, lang) => {
-                e.stopPropagation(); // Prevent card flip when clicking text
+                e.stopPropagation();
                 pronounceText(text, lang);
             };
 
@@ -288,7 +341,6 @@
                     onPointerUp: handlePointerUp,
                 },
                 React.createElement("div", { className: `card-container ${isFlipped ? 'flipped' : ''}` },
-                    // Front Face
                     React.createElement("div", { className: "card-face" },
                         React.createElement("div", { className: "card-content" },
                             React.createElement("div", { className: "chinese-character", onClick: (e) => handlePronounce(e, chineseChar, 'zh-CN') }, chineseChar),
@@ -296,7 +348,6 @@
                             React.createElement("div", { className: "emoji-display" }, card.emoji)
                         )
                     ),
-                    // Back Face
                     React.createElement("div", { className: "card-face card-back" },
                         React.createElement("div", { className: "card-content" },
                             React.createElement("div", { className: "english-translation", onClick: (e) => handlePronounce(e, englishTranslation, 'en-US') }, englishTranslation),
@@ -312,8 +363,8 @@
 
         const App = () => {
             const [currentPage, setCurrentPage] = useState('landing');
-            const [deck, setDeck] = useState([]); // The full, original deck
-            const [visibleCards, setVisibleCards] = useState([]); // The 2-3 cards currently in the DOM
+            const [deck, setDeck] = useState([]);
+            const [visibleCards, setVisibleCards] = useState([]);
             const [rememberedCards, setRememberedCards] = useState([]);
             const [forgottenCards, setForgottenCards] = useState([]);
             const [showErrorModal, setShowErrorModal] = useState(false);
@@ -326,7 +377,7 @@
                     const initialDeck = deckData.cards.map(card => ({ ...card, status: 'new', level: 0, key: Math.random() }));
                     const shuffledDeck = [...initialDeck].sort(() => Math.random() - 0.5);
                     setDeck(shuffledDeck);
-                    setVisibleCards(shuffledDeck.slice(0, 3)); // Load first 3 cards
+                    setVisibleCards(shuffledDeck.slice(0, 3));
                     setRememberedCards([]);
                     setForgottenCards([]);
                     setCurrentPage('flashcards');
@@ -336,21 +387,15 @@
                 }
             };
             
-            // --- REBUILT: Swipe and Card Management Logic ---
             const handleSwipe = useCallback((direction) => {
                 if (visibleCards.length === 0) return;
-
                 const swipedCard = visibleCards[0];
-                const newDeck = deck.slice(1); // Remove card from master deck
-                
+                const newDeck = deck.slice(1);
                 let nextRemembered = [...rememberedCards];
                 let nextForgotten = [...forgottenCards];
-
                 nextRemembered = removeCardFromListByFront(nextRemembered, swipedCard);
                 nextForgotten = removeCardFromListByFront(nextForgotten, swipedCard);
-                
                 let deckUpdate = [...newDeck];
-
                 if (direction === 'left') {
                     swipedCard.level = Math.max(0, swipedCard.level - 1);
                     nextForgotten.push(swipedCard);
@@ -360,17 +405,13 @@
                     swipedCard.level += 1;
                     nextRemembered.push(swipedCard);
                     if (swipedCard.level < 2) {
-                        deckUpdate.push(swipedCard); // Add to end for review
+                        deckUpdate.push(swipedCard);
                     }
                 }
-                
                 setDeck(deckUpdate);
                 setRememberedCards(nextRemembered);
                 setForgottenCards(nextForgotten);
-
-                // This triggers the animation: remove the top card, and add the next one from the deck
                 setVisibleCards(deckUpdate.slice(0, 3));
-
             }, [deck, visibleCards, rememberedCards, forgottenCards]);
 
             const resetApp = () => {
